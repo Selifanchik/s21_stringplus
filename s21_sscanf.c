@@ -40,6 +40,10 @@ int s21_isdigit(const char* symbol) {
     return (*symbol >= '0' && *symbol <= '9');
 }
 
+int s21_is_hex_digit(const char* symbol) {
+    return ((*symbol >= '0' && *symbol <= '9') || (*symbol >= 'A' && *symbol <= 'F') || (*symbol >= '0' && *symbol <= 'f'));
+}
+
 int get_number(char** ptr_str) {
     int result = 0;
     while (s21_isdigit(*ptr_str)) {
@@ -86,3 +90,35 @@ double s21_atof(char** ptr_str) {
     }
     return result;
 }
+
+// надо подумать может тоже подавать строку, но может и так оставить
+int oct_to_dec(int oct_num) {
+    int dec_num = 0;
+    int digit = 0;
+    int base = 8;
+    while (oct_num > 0) {
+        dec_num = dec_num + ((oct_num % 10) * (s21_pow(base, digit)));
+        digit++;
+        oct_num /= 10;
+    }
+    return dec_num;
+}
+// изменить условие до конца строки, будем подавать уже корректную строку
+int hex_to_dec(const char* hex_num) {
+    int dec_num = 0;
+    int digit = 0;
+    int base = 16;
+    while (s21_is_hex_digit(hex_num)) {
+        if (s21_isdigit(hex_num)) {
+            digit = *hex_num - '0';
+        } else if (*hex_num >= 'A' && *hex_num <= 'F') {
+            digit = *hex_num - 'A' + 10;
+        } else {
+            digit = *hex_num - 'a' + 10;
+        }
+        dec_num = dec_num * base + digit;
+        hex_num++;
+    }
+    return dec_num;
+}
+

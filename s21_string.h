@@ -17,8 +17,12 @@ typedef struct {
 void *s21_memchr(const void *str, int c, s21_size_t n);
 int sscanf(const char* str, const char* format, ...);
 int s21_isdigit(const char* symbol);
+int s21_is_hex_digit(const char* symbol);
 int get_number(char** ptr_str);
 int parse_format(char* ptr_format, FormatSpecifier* token);
 int s21_atoi(char** ptr_str);
 double s21_atof(char** ptr_str);
+int oct_to_dec(int num);
+int s21_pow(int num, int digit);
+int hex_to_dec(const char* hex_num);
 #endif
