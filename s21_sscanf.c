@@ -1,5 +1,6 @@
 #include "s21_string.h"
 #include <stdio.h>
+#include <string.h>
 
 int s21_sscanf(const char* str, const char* format, ...) {
     va_list arg;
@@ -8,7 +9,8 @@ int s21_sscanf(const char* str, const char* format, ...) {
 }
 
 int parse_format(char* ptr_format, FormatSpecifier* token) {
-    const char id_spec[] = "cdieEfgGosuxXpn%";
+    const char specifiers[] = "cdieEfgGosuxXpn%";
+    const char lengths[] = "lLh";
     int error = 0;
     if (*ptr_format == '*')  {
         token->suppress = 1;
@@ -17,14 +19,16 @@ int parse_format(char* ptr_format, FormatSpecifier* token) {
     if (s21_isdigit(ptr_format)) {
         token->width = get_number(&ptr_format);
     }
-    // можно заменить потом на функцию поиска символа strchr
-    if (*ptr_format == 'l' || *ptr_format == 'h' || *ptr_format == 'L') {
+    // заменить strchr на s21_strchr
+    char* ptr_length = strchr(lengths, *ptr_format);
+    if (ptr_length != S21_NULL) {
         token->length = *ptr_format;
         ptr_format++;
     }
-    //  можно заменить потом на функцию поиска символа strchr
-    if (*ptr_format == 'd') {
-        token->specifier = *ptr_format;
+    // заменить strchr на s21_strchr
+    char* ptr_specifier = strchr(specifiers, *ptr_format);
+    if (ptr_specifier != S21_NULL) {
+        token->specifier = *ptr_specifier;
         ptr_format++;
     } else {
         error = 1;
