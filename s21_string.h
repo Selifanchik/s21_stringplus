@@ -6,5 +6,6 @@ typedef unsigned long s21_size_t;
 #define S21_NULL ((void *)0)
 
 void *s21_memchr(const void *str, int c, s21_size_t n);
+int s21_sprintf(char *str, const char *format, ...);
 
 #endif
