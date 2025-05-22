@@ -37,22 +37,48 @@ int s21_isdigit(const char* symbol) {
 }
 
 int get_number(char** ptr_str) {
-    int number = 0;
+    int result = 0;
     while (s21_isdigit(*ptr_str)) {
-        number = number * 10 + (**ptr_str - '0');
+        result = result * 10 + (**ptr_str - '0');
         (*ptr_str)++;
     }
-    return number;
+    return result;
 }
 
 int s21_atoi(char** ptr_str) {
-    int number = 0;
+    int result = 0;
     int sign = 1;
     while (**ptr_str == ' ') (*ptr_str)++;
     if (**ptr_str == '-') {
         sign = -1;
     }
     if (**ptr_str == '-' || **ptr_str == '+') (*ptr_str)++;
-    number = sign * get_number(ptr_str);
-    return number;
+    result = sign * get_number(ptr_str);
+    return result;
+}
+
+double s21_atof(char** ptr_str) {
+    double result = 0.0;
+    double number = 0.0;
+    double fraction = 1.0;
+    double sign = 1.0;
+    while (**ptr_str == ' ') (*ptr_str)++;
+    if (**ptr_str == '-') {
+        sign = -1.0;
+    }
+    if (**ptr_str == '-' || **ptr_str == '+') (*ptr_str)++;
+    while (s21_isdigit(*ptr_str)) {
+        number = number * 10.0 + (**ptr_str - '0');
+        (*ptr_str)++;
+    }
+    if (**ptr_str == '.') {
+        (*ptr_str)++;
+        while (s21_isdigit(*ptr_str)) {
+            number = number * 10.0 + (**ptr_str - '0');
+            fraction *= 10.0;
+            (*ptr_str)++;
+        }
+        result = sign * (number / fraction);
+    }
+    return result;
 }

@@ -20,4 +20,5 @@ int s21_isdigit(const char* symbol);
 int get_number(char** ptr_str);
 int parse_format(char* ptr_format, FormatSpecifier* token);
 int s21_atoi(char** ptr_str);
+double s21_atof(char** ptr_str);
 #endif
