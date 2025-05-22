@@ -7,40 +7,52 @@ int s21_sscanf(const char* str, const char* format, ...) {
     return 0;
 }
 
-void parse_format(char* ptr_format, FormatSpecifier* token) {
+int parse_format(char* ptr_format, FormatSpecifier* token) {
+    const char id_spec[] = "cdieEfgGosuxXpn%";
+    int error = 0;
     if (*ptr_format == '*')  {
         token->suppress = 1;
         ptr_format++;
     }
-    // подумать как отдать отдельной функции чтобы сразу несколько чисел распарсить и превратить в число
     if (s21_isdigit(ptr_format)) {
-        token->width = s21_atoi(&ptr_format);
+        token->width = get_number(&ptr_format);
     }
-    // запихнуть l, h, L в массив или структуру
+    // можно заменить потом на функцию поиска символа strchr
     if (*ptr_format == 'l' || *ptr_format == 'h' || *ptr_format == 'L') {
         token->length = *ptr_format;
         ptr_format++;
     }
-    // запихнуть спецификаторы в структуру или массив чтоб не писать каждый раз
+    //  можно заменить потом на функцию поиска символа strchr
     if (*ptr_format == 'd') {
         token->specifier = *ptr_format;
         ptr_format++;
     } else {
-        printf("%s\n", ptr_format);
-        printf("unknown format\n");
+        error = 1;
     }
+    return error;
 }
 
 int s21_isdigit(const char* symbol) {
     return (*symbol >= '0' && *symbol <= '9');
 }
 
-int s21_atoi(char** ptr_str) {
+int get_number(char** ptr_str) {
     int number = 0;
     while (s21_isdigit(*ptr_str)) {
-        number *= 10;
-        number += (**ptr_str - '0');
+        number = number * 10 + (**ptr_str - '0');
         (*ptr_str)++;
     }
+    return number;
+}
+
+int s21_atoi(char** ptr_str) {
+    int number = 0;
+    int sign = 1;
+    while (**ptr_str == ' ') (*ptr_str)++;
+    if (**ptr_str == '-') {
+        sign = -1;
+    }
+    if (**ptr_str == '-' || **ptr_str == '+') (*ptr_str)++;
+    number = sign * get_number(ptr_str);
     return number;
 }
