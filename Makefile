@@ -3,7 +3,7 @@ CFLAGS = -std=c11 -Wall -Wextra -Werror -pedantic
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 CHECK_LIBS = -lcheck -lm -lsubunit
 
-SRC = s21_memchr.c
+SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c
 OBJ = $(SRC:.c=.o)
 NAME = s21_string.a
 
@@ -19,7 +19,7 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test: $(NAME)
-	$(CC) $(CFLAGS) $(GCOV_FLAGS) -I. tests/test_main.c tests/test_memchr.c $(NAME) -o $(TEST_BIN) $(CHECK_LIBS) -lm -lsubunit
+	$(CC) $(CFLAGS) $(GCOV_FLAGS) -I. tests/test_main.c tests/test_memchr.c tests/test_memcmp.c tests/test_memcpy.c tests/test_memset.c $(NAME) -o $(TEST_BIN) $(CHECK_LIBS) -lm -lsubunit
 	./$(TEST_BIN)
 
 gcov_report: test
