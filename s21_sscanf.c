@@ -8,7 +8,35 @@ int s21_sscanf(const char* str, const char* format, ...) {
     return 0;
 }
 
-int parse_format(char* ptr_format, FormatSpecifier* token) {
+void parse_format(const char* ptr_format, FormatSpecifier* token) {
+    // заменить на s21_strchr
+    const char* ptr_specifier = strchr(ptr_format, '%');
+    if (ptr_specifier != S21_NULL) {
+        s21_size_t length_sep = ptr_specifier - ptr_format;
+        char* separation = (char*)calloc(length_sep + 1, sizeof(char));
+        // заменить на s21_strncpy
+        strncpy(separation, ptr_format, length_sep);
+        // сверяем в ptr_str есть ли этот разделитель и если все ок
+        // отдаем парсить спецификатор от которого нам нужна структура
+        //по которой парсим строку дальше
+        parse_specifier(++ptr_specifier, token);
+    }
+}
+
+int parse_str(const char** ptr_str, const char* ptr_separation) {
+    int flag_end = 0;
+    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
+    for (; *ptr_separation && !flag_end; ) {
+        if (**ptr_str != *ptr_separation) flag_end = 1;
+        else {
+            (*ptr_str)++;
+            ptr_separation++;
+        }
+    }
+    return flag_end;
+}
+
+int parse_specifier(char* ptr_format, FormatSpecifier* token) {
     const char specifiers[] = "cdieEfgGosuxXpn%";
     const char lengths[] = "lLh";
     int error = 0;
@@ -95,11 +123,9 @@ double s21_atof(char** ptr_str) {
 // тогда можно объединить две функции добавив аргумент base
 int oct_to_dec(int oct_num) {
     int dec_num = 0;
-    int digit = 0;
     int base = 8;
     while (oct_num > 0) {
-        dec_num = dec_num + ((oct_num % 10) * (s21_pow(base, digit)));
-        digit++;
+        dec_num = dec_num * base + (oct_num % 10);
         oct_num /= 10;
     }
     return dec_num;
@@ -123,3 +149,11 @@ int hex_to_dec(const char* hex_num) {
     return dec_num;
 }
 
+int s21_isspace(int symbol) {
+    int space_arr[] = {9, 10, 11, 12, 13, 32};
+    int result = 0;
+    for (int i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
+        if (symbol == space_arr[i]) result = 1;
+    }
+    return result;
+}
