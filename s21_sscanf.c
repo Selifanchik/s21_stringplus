@@ -8,22 +8,74 @@ int s21_sscanf(const char* str, const char* format, ...) {
     return 0;
 }
 
-void parse_format(const char* ptr_format, FormatSpecifier* token) {
+void parse_format(const char* ptr_str, const char* ptr_format, FormatSpecifier* token) {
+    const char* start_str = ptr_str;
     // заменить на s21_strchr
     const char* ptr_specifier = strchr(ptr_format, '%');
     if (ptr_specifier != S21_NULL) {
-        s21_size_t length_sep = ptr_specifier - ptr_format;
-        char* separation = (char*)calloc(length_sep + 1, sizeof(char));
-        // заменить на s21_strncpy
-        strncpy(separation, ptr_format, length_sep);
-        // сверяем в ptr_str есть ли этот разделитель и если все ок
+        char* separation = parse_format_sep(ptr_format, ptr_specifier);
+        if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(++ptr_specifier, token)) {
+            parse_value(&ptr_str, token);
+        }
         // отдаем парсить спецификатор от которого нам нужна структура
-        //по которой парсим строку дальше
-        parse_specifier(++ptr_specifier, token);
+        // parse_specifier(++ptr_specifier, token);
+        // а потом парсим строку по спецификатору
+        
+        printf("separation = %s\n", ptr_str);
     }
 }
 
-int parse_str(const char** ptr_str, const char* ptr_separation) {
+void parse_value(const char** ptr_str, FormatSpecifier* token, ...) {
+    switch (token->specifier) {
+        case 'd':
+            if (!token->suppress && token == 'l') {
+                
+            }
+            break;
+        case 'c':
+            break;
+        case 'i':
+            break;
+        case 'e':
+            break;
+        case 'E':
+            break;
+        case 'f':
+            break;
+        case 'g':
+            break;
+        case 'G':
+            break;
+        case 'o':
+            break;
+        case 's':
+            break;
+        case 'u':
+            break;
+        case 'x':
+        case 'X':
+            break;
+        case 'p':
+            break;
+        case 'n':
+            break;
+        case '%':
+            break;
+        default:
+            break;
+    }
+    return;
+}
+
+char* parse_format_sep(const char* start_format, const char* ptr_specifier) {
+    s21_size_t length_sep = ptr_specifier - start_format;
+    char* separation = (char*)calloc(length_sep + 1, sizeof(char));
+    // заменить на s21_strncpy
+    strncpy(separation, start_format, length_sep);
+    return separation;
+}
+
+int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
     int flag_end = 0;
     while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
     for (; *ptr_separation && !flag_end; ) {
