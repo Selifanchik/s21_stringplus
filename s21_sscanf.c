@@ -5,32 +5,27 @@
 int s21_sscanf(const char* str, const char* format, ...) {
     va_list arg;
     FormatSpecifier token = {};
-    return 0;
-}
-
-void parse_format(const char* ptr_str, const char* ptr_format, FormatSpecifier* token) {
-    const char* start_str = ptr_str;
-    // заменить на s21_strchr
+    const char* ptr_str = str;
+    const char* ptr_format = format;
     const char* ptr_specifier = strchr(ptr_format, '%');
-    if (ptr_specifier != S21_NULL) {
+    if (ptr_specifier) {
         char* separation = parse_format_sep(ptr_format, ptr_specifier);
-        if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(++ptr_specifier, token)) {
-            parse_value(&ptr_str, token);
+        if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(++ptr_specifier, &token)) {
+
         }
         // отдаем парсить спецификатор от которого нам нужна структура
         // parse_specifier(++ptr_specifier, token);
         // а потом парсим строку по спецификатору
-        
+        free(separation);
         printf("separation = %s\n", ptr_str);
     }
+    return 0;
 }
 
-void parse_value(const char** ptr_str, FormatSpecifier* token, ...) {
+
+void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     switch (token->specifier) {
         case 'd':
-            if (!token->suppress && token == 'l') {
-                
-            }
             break;
         case 'c':
             break;
@@ -137,10 +132,12 @@ int s21_atoi(char** ptr_str) {
     int result = 0;
     int sign = 1;
     while (**ptr_str == ' ') (*ptr_str)++;
-    if (**ptr_str == '-') {
-        sign = -1;
+    if (**ptr_str == '-' || **ptr_str == '+') {
+        if (**ptr_str == '-') {
+            sign = -1;
+        }
+        (*ptr_str)++;
     }
-    if (**ptr_str == '-' || **ptr_str == '+') (*ptr_str)++;
     result = sign * get_number(ptr_str);
     return result;
 }
@@ -209,3 +206,4 @@ int s21_isspace(int symbol) {
     }
     return result;
 }
+

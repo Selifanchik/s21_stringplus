@@ -28,8 +28,7 @@ double s21_atof(char** ptr_str);
 int oct_to_dec(int num);
 int hex_to_dec(const char* hex_num);
 int s21_isspace(int symbol);
-void parse_format(const char* ptr_str, const char* ptr_format, FormatSpecifier* token);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
-void parse_value(const char** ptr_str, FormatSpecifier* token, ...);
+void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args);
 #endif
