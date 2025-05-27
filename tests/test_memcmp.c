@@ -15,17 +15,17 @@ END_TEST
 
 // Отличающися байт больше в строке1
 START_TEST(test_memcmp_first_more) {
-  char str1[] = "hello world";
-  char str2[] = "hello worla";
-  ck_assert_int_eq(s21_memcmp(str1, str2, 12), memcmp(str1, str2, 12));
+  char str1[] = "abc";
+  char str2[] = "aba";
+  ck_assert_int_eq(s21_memcmp(str1, str2, 4), memcmp(str1, str2, 4));
 }
 END_TEST
 
 // Отличающися байт больше в строке2
 START_TEST(test_memcmp_first_less) {
-  char str1[] = "hello worla";
-  char str2[] = "hello world";
-  ck_assert_int_eq(s21_memcmp(str1, str2, 12), memcmp(str1, str2, 12));
+  char str1[] = "aba";
+  char str2[] = "abc";
+  ck_assert_int_eq(s21_memcmp(str1, str2, 4), memcmp(str1, str2, 4));
 }
 END_TEST
 

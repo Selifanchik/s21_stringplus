@@ -56,8 +56,8 @@ START_TEST(test_memset_unsigned_conversion) {
   char str1[3] = "AB";
   char str2[3] = "AB";
 
-  s21_memset(str1, 255, 2);
-  memset(str2, 255, 2);
+  s21_memset(str1, 5555, 2);
+  memset(str2, 5555, 2);
 
   ck_assert_mem_eq(str1, str2, 3);
 }
