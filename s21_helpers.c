@@ -21,6 +21,45 @@ long get_number(const char** ptr_str) {
     return result;
 }
 
+int s21_isspace(int symbol) {
+    int space_arr[] = {9, 10, 11, 12, 13, 32};
+    int result = 0;
+    for (int i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
+        if (symbol == space_arr[i]) result = 1;
+    }
+    return result;
+}
+
+// add width
+// rename struct Callback
+long base_to_dec(const char** num, Callback cb, int width) {
+    long dec_num = 0;
+    int digit = 0;
+    while (cb.is_digit(*num) && (width == -1 || width > 0)) {
+        digit = cb.to_digit(*num);
+        dec_num = dec_num * cb.base + digit;
+        if (width > 0) width--;
+        (*num)++;
+    }
+    return dec_num;
+}
+
+int to_oct_dec(const char* num) {
+    return (*num - '0');
+}
+
+int to_hex(const char* hex_num) {
+    int digit = 0;
+    if (s21_is_dec_digit(hex_num)) {
+        digit = *hex_num - '0';
+    } else if (*hex_num >= 'A' && *hex_num <= 'F') {
+        digit = *hex_num - 'A' + 10;
+    } else {
+        digit = *hex_num - 'a' + 10;
+    }
+    return digit;
+}
+
 double s21_atof(char** ptr_str) {
     double result = 0.0;
     double number = 0.0;
@@ -45,46 +84,4 @@ double s21_atof(char** ptr_str) {
         result = sign * (number / fraction);
     }
     return result;
-}
-
-
-
-int s21_isspace(int symbol) {
-    int space_arr[] = {9, 10, 11, 12, 13, 32};
-    int result = 0;
-    for (int i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
-        if (symbol == space_arr[i]) result = 1;
-    }
-    return result;
-}
-
-// add width
-// rename struct Callback
-long base_to_dec(const char** num, int base, Callback cb, int width) {
-    long dec_num = 0;
-    int digit = 0;
-    while (cb.is_digit(*num) && (width == -1 || width > 0)) {
-        digit = cb.to_digit(*num);
-        dec_num = dec_num * base + digit;
-        if (width > 0) width--;
-        (*num)++;
-    }
-    return dec_num;
-}
-
-
-int to_oct_dec(const char* num) {
-    return (*num - '0');
-}
-
-int to_hex(const char* hex_num) {
-    int digit = 0;
-    if (s21_is_dec_digit(hex_num)) {
-        digit = *hex_num - '0';
-    } else if (*hex_num >= 'A' && *hex_num <= 'F') {
-        digit = *hex_num - 'A' + 10;
-    } else {
-        digit = *hex_num - 'a' + 10;
-    }
-    return digit;
 }

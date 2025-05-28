@@ -17,6 +17,7 @@ typedef struct {
 typedef struct {
     int (*is_digit)(const char*);
     int (*to_digit)(const char*);
+    int base;
 } Callback;
 
 void *s21_memchr(const void *str, int c, s21_size_t n);
@@ -32,10 +33,11 @@ int s21_isspace(int symbol);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
 void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args);
-void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args);
+void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb);
 long s21_strtol(const char** ptr_str);
-long base_to_dec(const char** num, int base, Callback cb, int width);
+long base_to_dec(const char** num, Callback cb, int width);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
+int s21_is_oct_digit(const char* symbol);
 
 #endif
