@@ -10,7 +10,6 @@ typedef unsigned long s21_size_t;
 typedef struct {
     int suppress;
     int width;
-    int precision;
     char length;
     char specifier;
 } FormatSpecifier;
@@ -21,14 +20,15 @@ int s21_sscanf(const char* str, const char* format, ...);
 
 int s21_isdigit(const char* symbol);
 int s21_is_hex_digit(const char* symbol);
-int get_number(char** ptr_str);
-int parse_specifier(char* ptr_format, FormatSpecifier* token);
-int s21_atoi(char** ptr_str);
+long get_number(const char** ptr_str);
+int parse_specifier(const char* ptr_format, FormatSpecifier* token);
 double s21_atof(char** ptr_str);
-int oct_to_dec(int num);
-int hex_to_dec(const char* hex_num);
+long oct_to_dec(const char** oct_num);
+long hex_to_dec(const char** hex_num);
 int s21_isspace(int symbol);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
 void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args);
+void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args);
+long s21_strtol(const char** ptr_str);
 #endif

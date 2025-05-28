@@ -24,12 +24,17 @@ int s21_sscanf(const char* str, const char* format, ...) {
 
 
 void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    char tmp[12] = "-+123456789";
     switch (token->specifier) {
         case 'd':
+            handler_int(ptr_str, token, args);
             break;
         case 'c':
             break;
         case 'i':
+            if (strchr(tmp, **ptr_str)) {
+                handler_int(ptr_str, token, args);
+            }
             break;
         case 'e':
             break;
@@ -83,7 +88,7 @@ int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
     return flag_end;
 }
 
-int parse_specifier(char* ptr_format, FormatSpecifier* token) {
+int parse_specifier(const char* ptr_format, FormatSpecifier* token) {
     const char specifiers[] = "cdieEfgGosuxXpn%";
     const char lengths[] = "lLh";
     int error = 0;
@@ -92,7 +97,7 @@ int parse_specifier(char* ptr_format, FormatSpecifier* token) {
         ptr_format++;
     }
     if (s21_isdigit(ptr_format)) {
-        token->width = get_number(&ptr_format);
+        token->width = (int)get_number(&ptr_format);
     }
     // заменить strchr на s21_strchr
     char* ptr_length = strchr(lengths, *ptr_format);
@@ -119,26 +124,16 @@ int s21_is_hex_digit(const char* symbol) {
     return ((*symbol >= '0' && *symbol <= '9') || (*symbol >= 'A' && *symbol <= 'F') || (*symbol >= '0' && *symbol <= 'f'));
 }
 
-int get_number(char** ptr_str) {
-    int result = 0;
+int s21_is_oct_digit(const char* symbol) {
+    return (*symbol >= '0' && *symbol <= '7');
+}
+
+long get_number(const char** ptr_str) {
+    long result = 0;
     while (s21_isdigit(*ptr_str)) {
         result = result * 10 + (**ptr_str - '0');
         (*ptr_str)++;
     }
-    return result;
-}
-
-int s21_atoi(char** ptr_str) {
-    int result = 0;
-    int sign = 1;
-    while (**ptr_str == ' ') (*ptr_str)++;
-    if (**ptr_str == '-' || **ptr_str == '+') {
-        if (**ptr_str == '-') {
-            sign = -1;
-        }
-        (*ptr_str)++;
-    }
-    result = sign * get_number(ptr_str);
     return result;
 }
 
@@ -168,32 +163,35 @@ double s21_atof(char** ptr_str) {
     return result;
 }
 
+
 // надо подумать может тоже подавать строку, но может и так оставить, 
 // тогда можно объединить две функции добавив аргумент base
-int oct_to_dec(int oct_num) {
-    int dec_num = 0;
+long oct_to_dec(const char** oct_num) {
+    long dec_num = 0;
+    int digit = 0;
     int base = 8;
-    while (oct_num > 0) {
-        dec_num = dec_num * base + (oct_num % 10);
-        oct_num /= 10;
+    while (s21_is_oct_digit(*oct_num)) {
+        digit = **oct_num - '0';
+        dec_num = dec_num * base + digit;
+        (*oct_num)++;
     }
     return dec_num;
 }
 // изменить условие до конца строки, будем подавать уже корректную строку
-int hex_to_dec(const char* hex_num) {
-    int dec_num = 0;
+long hex_to_dec(const char** hex_num) {
+    long dec_num = 0;
     int digit = 0;
     int base = 16;
-    while (s21_is_hex_digit(hex_num)) {
-        if (s21_isdigit(hex_num)) {
-            digit = *hex_num - '0';
-        } else if (*hex_num >= 'A' && *hex_num <= 'F') {
-            digit = *hex_num - 'A' + 10;
+    while (s21_is_hex_digit(*hex_num)) {
+        if (s21_isdigit(*hex_num)) {
+            digit = **hex_num - '0';
+        } else if (**hex_num >= 'A' && **hex_num <= 'F') {
+            digit = **hex_num - 'A' + 10;
         } else {
-            digit = *hex_num - 'a' + 10;
+            digit = **hex_num - 'a' + 10;
         }
         dec_num = dec_num * base + digit;
-        hex_num++;
+        (*hex_num)++;
     }
     return dec_num;
 }
@@ -207,3 +205,32 @@ int s21_isspace(int symbol) {
     return result;
 }
 
+
+void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    long value = s21_strtol(ptr_str);
+    if (token->length == 'l') {
+        long* dest = va_arg(*args, long*);
+        *dest = (long)value;
+    } else if (token->length == 'h') {
+        short* dest = va_arg(*args, short*);
+        *dest = (short)value;
+    } else {
+        int* dest = va_arg(*args, int*);
+        *dest = (int)value;
+    }
+}
+
+long s21_strtol(const char** ptr_str) { //добавить ширину и возможно систему счисления (для целых чисел)
+    long result = 0;
+    long sign = 1;
+    while (**ptr_str == ' ') (*ptr_str)++;
+    if (**ptr_str == '-' || **ptr_str == '+') {
+        if (**ptr_str == '-') {
+            sign = -1;
+        }
+        (*ptr_str)++;
+    }
+    result = sign * get_number(ptr_str);
+    return result;
+
+}
