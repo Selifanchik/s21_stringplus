@@ -120,7 +120,7 @@ int parse_specifier(const char* ptr_format, FormatSpecifier* token) {
 
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     Callback cb = {s21_is_dec_digit, to_oct_dec};
-    long value = base_to_dec(ptr_str, 10, cb);
+    long value = base_to_dec(ptr_str, 10, cb, token->width);
     if (token->length == 'l') {
         long* dest = va_arg(*args, long*);
         *dest = (long)value;

@@ -34,7 +34,7 @@ char* parse_format_sep(const char* start_format, const char* ptr_specifier);
 void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args);
 long s21_strtol(const char** ptr_str);
-long base_to_dec(const char** num, int base, Callback cb);
+long base_to_dec(const char** num, int base, Callback cb, int width);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
 

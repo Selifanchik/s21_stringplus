@@ -59,12 +59,14 @@ int s21_isspace(int symbol) {
 }
 
 // add width
-long base_to_dec(const char** num, int base, Callback cb) {
+// rename struct Callback
+long base_to_dec(const char** num, int base, Callback cb, int width) {
     long dec_num = 0;
     int digit = 0;
-    while (cb.is_digit(*num)) {
+    while (cb.is_digit(*num) && (width == -1 || width > 0)) {
         digit = cb.to_digit(*num);
         dec_num = dec_num * base + digit;
+        if (width > 0) width--;
         (*num)++;
     }
     return dec_num;
