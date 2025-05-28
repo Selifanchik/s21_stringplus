@@ -96,7 +96,7 @@ int parse_specifier(const char* ptr_format, FormatSpecifier* token) {
         token->suppress = 1;
         ptr_format++;
     }
-    if (s21_isdigit(ptr_format)) {
+    if (s21_is_dec_digit(ptr_format)) {
         token->width = (int)get_number(&ptr_format);
     }
     // заменить strchr на s21_strchr
@@ -116,98 +116,11 @@ int parse_specifier(const char* ptr_format, FormatSpecifier* token) {
     return error;
 }
 
-int s21_isdigit(const char* symbol) {
-    return (*symbol >= '0' && *symbol <= '9');
-}
-
-int s21_is_hex_digit(const char* symbol) {
-    return ((*symbol >= '0' && *symbol <= '9') || (*symbol >= 'A' && *symbol <= 'F') || (*symbol >= '0' && *symbol <= 'f'));
-}
-
-int s21_is_oct_digit(const char* symbol) {
-    return (*symbol >= '0' && *symbol <= '7');
-}
-
-long get_number(const char** ptr_str) {
-    long result = 0;
-    while (s21_isdigit(*ptr_str)) {
-        result = result * 10 + (**ptr_str - '0');
-        (*ptr_str)++;
-    }
-    return result;
-}
-
-double s21_atof(char** ptr_str) {
-    double result = 0.0;
-    double number = 0.0;
-    double fraction = 1.0;
-    double sign = 1.0;
-    while (**ptr_str == ' ') (*ptr_str)++;
-    if (**ptr_str == '-') {
-        sign = -1.0;
-    }
-    if (**ptr_str == '-' || **ptr_str == '+') (*ptr_str)++;
-    while (s21_isdigit(*ptr_str)) {
-        number = number * 10.0 + (**ptr_str - '0');
-        (*ptr_str)++;
-    }
-    if (**ptr_str == '.') {
-        (*ptr_str)++;
-        while (s21_isdigit(*ptr_str)) {
-            number = number * 10.0 + (**ptr_str - '0');
-            fraction *= 10.0;
-            (*ptr_str)++;
-        }
-        result = sign * (number / fraction);
-    }
-    return result;
-}
-
-
-// надо подумать может тоже подавать строку, но может и так оставить, 
-// тогда можно объединить две функции добавив аргумент base
-long oct_to_dec(const char** oct_num) {
-    long dec_num = 0;
-    int digit = 0;
-    int base = 8;
-    while (s21_is_oct_digit(*oct_num)) {
-        digit = **oct_num - '0';
-        dec_num = dec_num * base + digit;
-        (*oct_num)++;
-    }
-    return dec_num;
-}
-// изменить условие до конца строки, будем подавать уже корректную строку
-long hex_to_dec(const char** hex_num) {
-    long dec_num = 0;
-    int digit = 0;
-    int base = 16;
-    while (s21_is_hex_digit(*hex_num)) {
-        if (s21_isdigit(*hex_num)) {
-            digit = **hex_num - '0';
-        } else if (**hex_num >= 'A' && **hex_num <= 'F') {
-            digit = **hex_num - 'A' + 10;
-        } else {
-            digit = **hex_num - 'a' + 10;
-        }
-        dec_num = dec_num * base + digit;
-        (*hex_num)++;
-    }
-    return dec_num;
-}
-
-int s21_isspace(int symbol) {
-    int space_arr[] = {9, 10, 11, 12, 13, 32};
-    int result = 0;
-    for (int i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
-        if (symbol == space_arr[i]) result = 1;
-    }
-    return result;
-}
 
 
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args) {
-    long value = s21_strtol(ptr_str);
+    Callback cb = {s21_is_dec_digit, to_oct_dec};
+    long value = base_to_dec(ptr_str, 10, cb);
     if (token->length == 'l') {
         long* dest = va_arg(*args, long*);
         *dest = (long)value;
