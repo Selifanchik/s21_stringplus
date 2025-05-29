@@ -7,14 +7,20 @@ int s21_sscanf(const char* str, const char* format, ...) {
     va_start(arg, format);
     FormatSpecifier token = {};
     token.width = -1;
+    int flag_end = 0;
     const char* ptr_str = str;
     const char* ptr_format = format;
-    const char* ptr_specifier = strchr(ptr_format, '%');
-    if (ptr_specifier) {
+    const char* ptr_specifier;
+    while ((ptr_specifier = strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
         char* separation = parse_format_sep(ptr_format, ptr_specifier);
-        if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(++ptr_specifier, &token)) {
+        printf("ptr_str = %s\n", ptr_str);
+        printf("ptr_spec = %s\n", ptr_specifier);
+        ptr_specifier++;
+        if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
             parse_value(&ptr_str, &token, &arg);
-        }
+            ptr_format = ptr_specifier;
+            printf("ptr_format_after = %s\n", ptr_format);
+        } else flag_end = 1;
         free(separation);
     }
     va_end(arg);
@@ -119,29 +125,29 @@ int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
     return flag_end;
 }
 
-int parse_specifier(const char* ptr_format, FormatSpecifier* token) {
+int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     const char specifiers[] = "cdieEfgGosuxXpn%";
     const char lengths[] = "lLh";
     int error = 0;
-    if (*ptr_format == '*')  {
+    if (**ptr_format == '*')  {
         token->suppress = 1;
-        ptr_format++;
+        (*ptr_format)++;
     }
-    if (s21_is_dec_digit(ptr_format)) {
+    if (s21_is_dec_digit(*ptr_format)) {
         Callback cb = {s21_is_dec_digit, to_oct_dec, 10};
-        token->width = (int)base_to_dec(&ptr_format, cb, -1);
+        token->width = (int)base_to_dec(ptr_format, cb, -1);
     }
     // заменить strchr на s21_strchr
-    char* ptr_length = strchr(lengths, *ptr_format);
+    char* ptr_length = strchr(lengths, **ptr_format);
     if (ptr_length != S21_NULL) {
-        token->length = *ptr_format;
-        ptr_format++;
+        token->length = **ptr_format;
+        (*ptr_format)++;
     }
     // заменить strchr на s21_strchr
-    char* ptr_specifier = strchr(specifiers, *ptr_format);
+    char* ptr_specifier = strchr(specifiers, **ptr_format);
     if (ptr_specifier != S21_NULL) {
         token->specifier = *ptr_specifier;
-        ptr_format++;
+        (*ptr_format)++;
     } else {
         error = 1;
     }
@@ -177,19 +183,4 @@ void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list*
         unsigned int* dest = va_arg(*args, unsigned int*);
         *dest = (unsigned int)value;
     }
-}
-
-long s21_strtol(const char** ptr_str) { //добавить ширину и возможно систему счисления (для целых чисел)
-    long result = 0;
-    long sign = 1;
-    while (**ptr_str == ' ') (*ptr_str)++;
-    if (**ptr_str == '-' || **ptr_str == '+') {
-        if (**ptr_str == '-') {
-            sign = -1;
-        }
-        (*ptr_str)++;
-    }
-    result = sign * get_number(ptr_str);
-    return result;
-
 }

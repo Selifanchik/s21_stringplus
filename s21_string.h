@@ -27,19 +27,22 @@ int s21_sscanf(const char* str, const char* format, ...);
 int s21_is_dec_digit(const char* symbol);
 int s21_is_hex_digit(const char* symbol);
 long get_number(const char** ptr_str);
-int parse_specifier(const char* ptr_format, FormatSpecifier* token);
+int parse_specifier(const char** ptr_format, FormatSpecifier* token);
 double s21_atof(char** ptr_str);
 int s21_isspace(int symbol);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
 void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb);
-long s21_strtol(const char** ptr_str);
 long base_to_dec(const char** num, Callback cb, int width);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
 int s21_is_oct_digit(const char* symbol);
 int is_sign(const char** ptr_str, int* width);
-handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb);
+void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb);
+
+const char *ltrim(const char *src, const char *trim_chars);
+const char *rtrim(const char *src, const char *trim_chars);
+void *trim(const char *src, const char *trim_chars);
 
 #endif
