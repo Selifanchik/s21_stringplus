@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>//потом убрать и использовать только наши функ.(в коде много оригинальных ЗАМЕНИТЬ!!!)
 
+//для lc, ls
+#include <wchar.h>
+#include <locale.h>
+
 typedef struct{
     int minus;
     int plus;
@@ -35,6 +39,8 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr
 int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr);
 
 void specificator_c(flags flag, va_list *arg, char* buf);
+void specificator_s(flags flag, va_list *arg, char* buf);
+
 void specificator_n(va_list *arg, char* buf);
 void specificator_p(va_list *arg, char* buf, flags flag);
 
@@ -174,12 +180,10 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
 
 
         case 's': 
-            //specificator_s();
-            //printf("%s", va_arg(arg, const char*));
+            //specificator_s(flag, arg, buf);
             break;
         case 'c': 
-            specificator_c(flag, arg, buf);//не доделан
-            //printf("%c", va_arg(arg, int));
+            specificator_c(flag, arg, buf);
             break;
 
 
@@ -219,31 +223,77 @@ void specificator_p(va_list *arg, char* buf, flags flag){
 }
 
 void specificator_c(flags flag, va_list *arg, char* buf){
-    int value;
+    char* string = malloc(MB_CUR_MAX + 1);
     if(flag.l){
-        value = va_arg(*arg, wchar_t);
+        wchar_t value = va_arg(*arg, wchar_t);
+        int len = wcrtomb(string, value, NULL);
+        string[len] = '\0';
     }
     else{
-        value = va_arg(*arg, int);
+        int value_int = va_arg(*arg, int);
+        string[0] = value_int;
+        string[1] = '\0';
     }
-    char* string = malloc(2);
-    string[0] = value;
-    string[1] = '\0';
+
     if(flag.width >= 2){
-        int raznica = flag.width - 1;
-        string = realloc(string, raznica + 2);//подумать если вдруг будет NULL
+        int dlina = strlen(string);
+        int raznica = flag.width - dlina;
+        string = realloc(string, dlina + raznica + 1);
         if(flag.minus){
-            memset(string + 1, ' ', raznica);//
+            memset(string + dlina, ' ', raznica);
         }
         else{
+            char* tmp_mas = malloc(dlina);
+            strcpy(tmp_mas, string);
             memset(string, ' ', raznica);
-            string[raznica] = value;
+            string[raznica] = '\0';
+            strcat(string, tmp_mas);
+            free(tmp_mas);
+        }
+        string[dlina + raznica + 1] = '\0';
+    }
+    strcat(buf, string);
+    free(string);
+}
+
+/*void specificator_s(flags flag, va_list *arg, char* buf){
+    char* string = malloc(2);//границу поставить другую
+    if(flag.l){
+        wchar_t* value = va_arg(*arg, wchar_t*);//правильно ли?
+        wcrtomb(string, value, NULL);
+        //добавить \0
+    }
+    else{
+        string = va_arg(*arg, const char*);
+    }
+
+    int dlina = strlen(string);
+    if(flag.istochnost){
+        if(flag.tochnost < dlina){
+            string[flag.tochnost] = '\0';
+        }
+    }
+
+    int dlina = strlen(string);
+    if(flag.width && dlina < flag.width){
+        int raznica = flag.width - dlina;
+        string = realloc(string, raznica + 1);//подумать если вдруг будет NULL
+        if(flag.minus){
+            memset(string + dlina, ' ', raznica);//
+        }
+        else{
+            int count = dlina - 1;
+            while(count >= 0){
+                string[count + raznica] = string[count];
+                count--;
+            }
+            memset(string, ' ', raznica);
         }
         string[raznica + 1] = '\0';
     }
     strcat(buf, string);
     free(string);
-}
+}*/
 
 void specificator_uxXo(flags flag, va_list *arg, char *buf, char chr){
     unsigned long value;
@@ -364,7 +414,7 @@ void specificator_di(flags flag, va_list *arg, char *buf){
     free(string);
 }
 
-char* number_di_to_string(long number, flags flag){//не очень хорошо с unsighned long пересмотреть работа
+char* number_di_to_string(long number, flags flag){
     long tmp_number = number;
     if(tmp_number < 0) tmp_number = tmp_number * -1;
     char mas_for_number[20];
@@ -466,13 +516,14 @@ char* rabota_width(flags flag, char* string, int dlina){
 }
 
 int main(){
+    setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
     char buf1[1024], buf2[1024];
-    //char a = 'f';
+    //char ch = 'f';
+    wchar_t ch = L'г';
+    //int a;
 
-    int a;
-
-    sprintf(buf1, "!%-15p!", &a);
-    s21_sprintf(buf2, "!%-15p!", &a);
+    sprintf(buf1, "!%3lc!", ch);
+    s21_sprintf(buf2, "!%3lc!", ch);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
