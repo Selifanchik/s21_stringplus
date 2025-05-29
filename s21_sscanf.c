@@ -17,7 +17,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
         separation = parse_format_sep(ptr_format, ptr_specifier);
         ptr_specifier++;
         if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
-            parse_value(&ptr_str, &token, &arg);
+            parse_value(str, &ptr_str, &token, &arg);
             ptr_format = ptr_specifier;
         } else flag_end = 1;
         free(separation);
@@ -26,7 +26,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
     return 0;
 }
 
-void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args) {
     Callback cb = {};
     switch (token->specifier) {
         case 'd':
@@ -94,6 +94,7 @@ void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args) {
         case 'p':
             break;
         case 'n':
+            handler_n(str, *ptr_str, args);
             break;
         case '%':
             break;
@@ -176,13 +177,19 @@ void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Ca
 void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
     long value = base_to_dec(ptr_str, cb, token->width);
     if (token->length == 'l') {
-        unsigned long* dest = va_arg(*args,unsigned long*);
+        unsigned long* dest = va_arg(*args, unsigned long*);
         *dest = (unsigned long)value;
     } else if (token->length == 'h') {
-        unsigned short* dest = va_arg(*args,unsigned short*);
+        unsigned short* dest = va_arg(*args, unsigned short*);
         *dest = (unsigned short)value;
     } else {
         unsigned int* dest = va_arg(*args, unsigned int*);
         *dest = (unsigned int)value;
     }
+}
+
+void handler_n(const char* start_str, const char* ptr_str, va_list* args) {
+    int value = ptr_str - start_str;
+    int* dest = va_arg(*args, int*);
+    *dest = (int)value;
 }
