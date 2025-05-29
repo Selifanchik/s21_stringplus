@@ -34,9 +34,9 @@ void specificator_uxXo(flags flag, va_list *arg, char *buf, char chr);
 char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr);
 int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr);
 
-char* dec_to_oct(unsigned long number, flags flag);
-
-char* dec_to_hex(unsigned long number, flags flag, char chr);
+void specificator_c(flags flag, va_list *arg, char* buf);
+void specificator_n(va_list *arg, char* buf);
+void specificator_p(va_list *arg, char* buf, flags flag);
 
 int s21_sprintf(char *str, const char *format, ...){
     flags flag = {0};
@@ -171,31 +171,79 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
         case 'o': 
             specificator_uxXo(flag, arg, buf, chr);
             break;
+
+
         case 's': 
             //specificator_s();
             //printf("%s", va_arg(arg, const char*));
             break;
         case 'c': 
-            //specificator_c();
+            specificator_c(flag, arg, buf);//не доделан
             //printf("%c", va_arg(arg, int));
             break;
+
+
         case 'f': 
             //printf("%f", va_arg(arg, double));
             break;
+
+        case 'n': 
+            specificator_n(arg, buf);
+            break;
+        case 'p': 
+            specificator_p(arg, buf, flag);
+            break;
+
         //default:
             //printf("%c", format[i]);
     }
 }
 
-/*void specificator_c(){
-    long value;
+void specificator_n(va_list *arg, char* buf){
+    int dlina = strlen(buf);
+    int *ptr = va_arg(*arg, int*);
+    *ptr = dlina;
+}
+
+void specificator_p(va_list *arg, char* buf, flags flag){
+    void *ptr = va_arg(*arg, void*);
+    unsigned long number = (unsigned long)ptr;
+    flag.reshetka = 1;
+    char* string = number_uxXo_to_string(number, flag, 16, 'x');
+    int dlina = (int)strlen(string); //поменять на size_t нашу
+    if(dlina < flag.width){
+        string = rabota_width(flag, string, dlina);
+    }
+    strcat(buf, string);
+    free(string);
+}
+
+void specificator_c(flags flag, va_list *arg, char* buf){
+    int value;
     if(flag.l){
-        value = va_arg(*arg, long);
+        value = va_arg(*arg, wchar_t);
     }
     else{
         value = va_arg(*arg, int);
     }
-}*/
+    char* string = malloc(2);
+    string[0] = value;
+    string[1] = '\0';
+    if(flag.width >= 2){
+        int raznica = flag.width - 1;
+        string = realloc(string, raznica + 2);//подумать если вдруг будет NULL
+        if(flag.minus){
+            memset(string + 1, ' ', raznica);//
+        }
+        else{
+            memset(string, ' ', raznica);
+            string[raznica] = value;
+        }
+        string[raznica + 1] = '\0';
+    }
+    strcat(buf, string);
+    free(string);
+}
 
 void specificator_uxXo(flags flag, va_list *arg, char *buf, char chr){
     unsigned long value;
@@ -419,13 +467,16 @@ char* rabota_width(flags flag, char* string, int dlina){
 
 int main(){
     char buf1[1024], buf2[1024];
-    unsigned int a = 0;
-    sprintf(buf1, "!%04.0o!", a);
-    s21_sprintf(buf2, "!%04.0o!", a);
+    //char a = 'f';
+
+    int a;
+
+    sprintf(buf1, "!%-15p!", &a);
+    s21_sprintf(buf2, "!%-15p!", &a);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
+    //printf("%d,%d\n", a, b);
     printf("%d", strcmp(buf1, buf2));
-
     return 0;
 }
