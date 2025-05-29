@@ -3,11 +3,11 @@ CFLAGS = -std=c11 -Wall -Wextra -Werror -pedantic
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 CHECK_LIBS = -lcheck -lm -lsubunit
 
-SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c s21_strncat.c s21_strchr.c s21_strncmp.c s21_strncpy.c s21_strcspn.c s21_strlen.c s21_strpbrk.c s21_strrchr.c s21_strstr.c
+SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c s21_strncat.c s21_strchr.c s21_strncmp.c s21_strncpy.c s21_strcspn.c s21_strerror.c s21_strlen.c s21_strpbrk.c s21_strrchr.c s21_strstr.c
 OBJ = $(SRC:.c=.o)
 NAME = s21_string.a
 
-TEST_SRC = tests/test_main.c tests/test_memchr.c
+TEST_SRC = $(wildcard tests/*.c)
 TEST_BIN = test_app
 
 all: $(NAME)
@@ -19,8 +19,15 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test: $(NAME)
-	$(CC) $(CFLAGS) $(GCOV_FLAGS) -I. tests/test_main.c tests/test_memchr.c tests/test_memcmp.c tests/test_memcpy.c tests/test_memset.c tests/test_strncat.c tests/test_strchr.c tests/test_strncmp.c tests/test_strncpy.c tests/test_strcspn.c tests/test_strlen.c tests/test_strpbrk.c tests/test_strrchr.c tests/test_strstr.c $(NAME) -o $(TEST_BIN) $(CHECK_LIBS) -lm -lsubunit
+	$(CC) $(CFLAGS) $(GCOV_FLAGS) -I. $(TEST_SRC) $(NAME) -o $(TEST_BIN) $(CHECK_LIBS)
 	./$(TEST_BIN)
+
+valgrind: $(NAME)
+	$(CC) $(CFLAGS) -I. $(TEST_SRC) $(NAME) -o $(TEST_BIN) $(CHECK_LIBS)
+	valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes ./$(TEST_BIN)
+
+valgrind_suite:
+	CK_RUN_SUITE=s21_strncmp valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes ./$(TEST_BIN)
 
 gcov_report: test
 	lcov --capture --directory . --output-file coverage.info

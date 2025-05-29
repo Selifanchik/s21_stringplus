@@ -9,7 +9,15 @@
 START_TEST(test_memcmp_equal) {
   char str1[] = "hello world";
   char str2[] = "hello world";
-  ck_assert_int_eq(s21_memcmp(str1, str2, 12), memcmp(str1, str2, 12));
+  int my_cmp = s21_memcmp(str1, str2, 12);
+  int original_cmp = memcmp(str1, str2, 12);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 
@@ -17,7 +25,16 @@ END_TEST
 START_TEST(test_memcmp_first_more) {
   char str1[] = "abc";
   char str2[] = "aba";
-  ck_assert_int_eq(s21_memcmp(str1, str2, 4), memcmp(str1, str2, 4));
+
+    int my_cmp = s21_memcmp(str1, str2, 4);
+  int original_cmp = memcmp(str1, str2, 4);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 
@@ -25,7 +42,15 @@ END_TEST
 START_TEST(test_memcmp_first_less) {
   char str1[] = "aba";
   char str2[] = "abc";
-  ck_assert_int_eq(s21_memcmp(str1, str2, 4), memcmp(str1, str2, 4));
+    int my_cmp = s21_memcmp(str1, str2, 4);
+  int original_cmp = memcmp(str1, str2, 4);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 
@@ -33,7 +58,15 @@ END_TEST
 START_TEST(test_memcmp_diff_first_byte) {
   char str1[] = "abc";
   char str2[] = "xbc";
-  ck_assert_int_eq(s21_memcmp(str1, str2, 3), memcmp(str1, str2, 3));
+    int my_cmp = s21_memcmp(str1, str2, 3);
+  int original_cmp = memcmp(str1, str2, 3);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 
@@ -41,7 +74,15 @@ END_TEST
 START_TEST(test_memcmp_partial_equal) {
   char str1[] = "abcdef";
   char str2[] = "abcxyz";
-  ck_assert_int_eq(s21_memcmp(str1, str2, 3), memcmp(str1, str2, 3));
+    int my_cmp = s21_memcmp(str1, str2, 3);
+  int original_cmp = memcmp(str1, str2, 3);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 
@@ -49,10 +90,15 @@ END_TEST
 START_TEST(test_memcmp_zero_length) {
   char str1[] = "abcdef";
   char str2[] = "abcxyz";
-  // int my_result = s21_memcmp(str1, str2, 3);
-  // int original_result = memcmp(str1, str2, 3);
-  // printf("s21_memcmp = %d, memcmp = %d\n", my_result, original_result);
-  ck_assert_int_eq(s21_memcmp(str1, str2, 0), memcmp(str1, str2, 0));
+    int my_cmp = s21_memcmp(str1, str2, 0);
+  int original_cmp = memcmp(str1, str2, 0);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 
@@ -60,15 +106,31 @@ END_TEST
 START_TEST(test_memcmp_with_null_bytes) {
   char str1[] = {'a', '\0', 'c'};
   char str2[] = {'a', '\0', 'd'};
-  ck_assert_int_eq(s21_memcmp(str1, str2, 3), memcmp(str1, str2, 3));
+    int my_cmp = s21_memcmp(str1, str2, 3);
+  int original_cmp = memcmp(str1, str2, 3);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 
 // Массив байтов с нулем, не строка
 START_TEST(test_memcmp_with_unsigned_char) {
-  unsigned char u1[] = {0xFF, 0x00, 0x7F};
-  unsigned char u2[] = {0xFE, 0x00, 0x7F};
-  ck_assert_int_eq(s21_memcmp(u1, u2, 3), memcmp(u1, u2, 3));
+  unsigned char str1[] = {0xFF, 0x00, 0x7F};
+  unsigned char str2[] = {0xFE, 0x00, 0x7F};
+    int my_cmp = s21_memcmp(str1, str2, 3);
+  int original_cmp = memcmp(str1, str2, 3);
+
+if (my_cmp < 0)
+  ck_assert_int_lt(original_cmp, 0);
+else if (my_cmp > 0)
+  ck_assert_int_gt(original_cmp, 0);
+else
+  ck_assert_int_eq(original_cmp, 0);
 }
 END_TEST
 

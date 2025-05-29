@@ -10,7 +10,7 @@ Suite *strchr_suite(void);
 Suite *strncmp_suite(void);
 Suite *strncpy_suite(void);
 Suite *strcspn_suite(void);
-
+Suite *strerror_suite(void);
 Suite *strlen_suite(void);
 Suite *strpbrk_suite(void);
 Suite *strrchr_suite(void);
@@ -28,7 +28,7 @@ int main(void) {
   srunner_add_suite(sr, strncmp_suite());
   srunner_add_suite(sr, strncpy_suite());
   srunner_add_suite(sr, strcspn_suite());
-
+  srunner_add_suite(sr, strerror_suite());
   srunner_add_suite(sr, strlen_suite());
   srunner_add_suite(sr, strpbrk_suite());
   srunner_add_suite(sr, strrchr_suite());
