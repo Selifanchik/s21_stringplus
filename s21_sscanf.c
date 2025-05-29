@@ -12,7 +12,6 @@ int s21_sscanf(const char* str, const char* format, ...) {
     const char* ptr_specifier = strchr(ptr_format, '%');
     if (ptr_specifier) {
         char* separation = parse_format_sep(ptr_format, ptr_specifier);
-        //printf("separation = %s\n", separation);
         if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(++ptr_specifier, &token)) {
             parse_value(&ptr_str, &token, &arg);
         }
@@ -37,17 +36,20 @@ void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args) {
                 cb.base = 16;
                 cb.is_digit = s21_is_hex_digit;
                 cb.to_digit = to_hex;
+                handler_unsigned_int(ptr_str, token, args, cb);
             } else if (**ptr_str == '0') {
                 (*ptr_str)++;
                 cb.base = 8;
                 cb.is_digit = s21_is_oct_digit;
                 cb.to_digit = to_oct_dec;
+                handler_unsigned_int(ptr_str, token, args, cb);
             } else {
                 cb.base = 10;
                 cb.is_digit = s21_is_dec_digit;
                 cb.to_digit = to_oct_dec;
+                token->specifier = 'd';
+                handler_int(ptr_str, token, args, cb);
             }
-            handler_int(ptr_str, token, args, cb);
             break;
         case 'e':
             break;
@@ -64,7 +66,7 @@ void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args) {
             cb.base = 8;
             cb.is_digit = s21_is_oct_digit;
             cb.to_digit = to_oct_dec;
-            handler_int(ptr_str, token, args, cb);
+            handler_unsigned_int(ptr_str, token, args, cb);
             break;
         case 'c':
             break;
@@ -82,7 +84,7 @@ void parse_value(const char** ptr_str, FormatSpecifier* token, va_list* args) {
             cb.base = 16;
             cb.is_digit = s21_is_hex_digit;
             cb.to_digit = to_hex;
-            handler_int(ptr_str, token, args, cb);
+            handler_unsigned_int(ptr_str, token, args, cb);
             break;
         case 'p':
             break;
@@ -114,8 +116,6 @@ int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
             ptr_separation++;
         }
     }
-    printf("flag_end = %d\n", flag_end);
-    printf("%s\n", *ptr_str);
     return flag_end;
 }
 
@@ -145,20 +145,13 @@ int parse_specifier(const char* ptr_format, FormatSpecifier* token) {
     } else {
         error = 1;
     }
-    printf("error = %d\n", error);
     return error;
 }
 
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
     int sign = 1;
-    if ((**ptr_str == '-' || **ptr_str == '+') && (token->width == -1 || token->width > 1)) {
-        if (**ptr_str == '-') {
-            sign = -1;
-        }
-        (*ptr_str)++;
-        if (token->width > 1) ((token->width)++);
-    }
-    long value = base_to_dec(ptr_str, cb, token->width);
+    sign = is_sign(ptr_str, &(token->width));
+    long value = sign * base_to_dec(ptr_str, cb, token->width);
     if (token->length == 'l') {
         long* dest = va_arg(*args, long*);
         *dest = (long)value;
@@ -168,6 +161,21 @@ void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Ca
     } else {
         int* dest = va_arg(*args, int*);
         *dest = (int)value;
+    }
+}
+
+
+void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
+    long value = base_to_dec(ptr_str, cb, token->width);
+    if (token->length == 'l') {
+        unsigned long* dest = va_arg(*args,unsigned long*);
+        *dest = (unsigned long)value;
+    } else if (token->length == 'h') {
+        unsigned short* dest = va_arg(*args,unsigned short*);
+        *dest = (unsigned short)value;
+    } else {
+        unsigned int* dest = va_arg(*args, unsigned int*);
+        *dest = (unsigned int)value;
     }
 }
 

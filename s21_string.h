@@ -39,5 +39,7 @@ long base_to_dec(const char** num, Callback cb, int width);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
 int s21_is_oct_digit(const char* symbol);
+int is_sign(const char** ptr_str, int* width);
+handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb);
 
 #endif
