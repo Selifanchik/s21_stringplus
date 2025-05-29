@@ -10,16 +10,15 @@ int s21_sscanf(const char* str, const char* format, ...) {
     int flag_end = 0;
     const char* ptr_str = str;
     const char* ptr_format = format;
-    const char* ptr_specifier;
+    const char* ptr_specifier = ptr_format;
+    char* separation = S21_NULL;
+    int count = 0;
     while ((ptr_specifier = strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
-        char* separation = parse_format_sep(ptr_format, ptr_specifier);
-        printf("ptr_str = %s\n", ptr_str);
-        printf("ptr_spec = %s\n", ptr_specifier);
+        separation = parse_format_sep(ptr_format, ptr_specifier);
         ptr_specifier++;
         if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
             parse_value(&ptr_str, &token, &arg);
             ptr_format = ptr_specifier;
-            printf("ptr_format_after = %s\n", ptr_format);
         } else flag_end = 1;
         free(separation);
     }
@@ -109,6 +108,8 @@ char* parse_format_sep(const char* start_format, const char* ptr_specifier) {
     char* separation = (char*)calloc(length_sep + 1, sizeof(char));
     // заменить на s21_strncpy
     strncpy(separation, start_format, length_sep);
+    // char my_space[] = {9, 10, 11, 12, 13, 32, 0};
+    // separation = trim(separation, my_space);
     return separation;
 }
 
@@ -122,6 +123,8 @@ int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
             ptr_separation++;
         }
     }
+    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
+    printf("sepsep =%s\n", *ptr_str);
     return flag_end;
 }
 
