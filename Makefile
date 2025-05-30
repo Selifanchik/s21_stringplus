@@ -3,7 +3,7 @@ CFLAGS = -std=c11 -Wall -Wextra -Werror -pedantic
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 CHECK_LIBS = -lcheck -lm -lsubunit
 
-SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c s21_strncat.c s21_strchr.c s21_strncmp.c s21_strncpy.c s21_strcspn.c s21_strerror.c s21_strlen.c s21_strpbrk.c s21_strrchr.c s21_strstr.c
+SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c s21_strncat.c s21_strchr.c s21_strncmp.c s21_strncpy.c s21_strcspn.c s21_strerror.c s21_strlen.c s21_strpbrk.c s21_strrchr.c s21_strstr.c s21_strtok.c
 OBJ = $(SRC:.c=.o)
 NAME = s21_string.a
 

@@ -15,6 +15,7 @@ Suite *strlen_suite(void);
 Suite *strpbrk_suite(void);
 Suite *strrchr_suite(void);
 Suite *strstr_suite(void);
+Suite *strtok_suite(void);
 
 int main(void) {
   int number_failed = 0;
@@ -33,6 +34,7 @@ int main(void) {
   srunner_add_suite(sr, strpbrk_suite());
   srunner_add_suite(sr, strrchr_suite());
   srunner_add_suite(sr, strstr_suite());
+  srunner_add_suite(sr, strtok_suite());
 
   srunner_run_all(sr, CK_VERBOSE);
   number_failed = srunner_ntests_failed(sr);
