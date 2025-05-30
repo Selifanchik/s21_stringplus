@@ -1,44 +1,81 @@
+# Компилятор и флаги
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -Werror -pedantic
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 CHECK_LIBS = -lcheck -lm -lsubunit
 
-SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c s21_strncat.c s21_strchr.c s21_strncmp.c s21_strncpy.c s21_strcspn.c s21_strerror.c s21_strlen.c s21_strpbrk.c s21_strrchr.c s21_strstr.c s21_strtok.c
+# Включение флагов покрытия при необходимости
+GCOV ?= 0
+ifeq ($(GCOV), 1)
+    CFLAGS += $(GCOV_FLAGS)
+endif
+
+# Файлы библиотеки
+SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c \
+      s21_strncat.c s21_strchr.c s21_strncmp.c s21_strncpy.c \
+      s21_strcspn.c s21_strerror.c s21_strlen.c s21_strpbrk.c \
+      s21_strrchr.c s21_strstr.c s21_strtok.c
+
 OBJ = $(SRC:.c=.o)
 NAME = s21_string.a
 
-TEST_SRC = $(wildcard tests/*.c)
+# Тестовые файлы
+TEST_DIR = tests
+TEST_SRC = $(wildcard $(TEST_DIR)/*.c)
+TEST_OBJ = $(TEST_SRC:.c=.o)
 TEST_BIN = test_app
 
-all: $(NAME)
+# ===== Цель: all (полная сборка, запуск и отчёт покрытия) =====
+all: re gcov_report
 
-$(NAME): $(OBJ)
+# ===== Цель: полная пересборка без покрытия =====
+re: fclean s21_string.a test_build
+
+# ===== Цель: сборка библиотеки без покрытия =====
+s21_string.a: $(OBJ)
 	ar rcs $(NAME) $(OBJ)
 
+# ===== Цель: сборка тестового приложения без покрытия =====
+test_build: $(TEST_BIN)
+
+# ===== Цель: запуск тестов (предполагается, что собраны) =====
+test: test_build
+	./$(TEST_BIN)
+
+# ===== Цель: сборка с покрытием (пересборка библиотеки и тестов с флагами покрытия) =====
+coverage_build:
+	$(MAKE) clean
+	$(MAKE) GCOV=1 s21_string.a
+	$(MAKE) GCOV=1 test_build
+
+# ===== Цель: генерация отчёта покрытия, зависит от сборки с покрытием и запуска тестов =====
+gcov_report: coverage_build
+	./$(TEST_BIN)
+	@echo "Capturing coverage data for library source files..."
+	lcov --capture --directory . --output-file coverage.info --rc branch_coverage=1
+	@echo "Removing test sources from coverage data..."
+	lcov --remove coverage.info '$(TEST_DIR)/*' --output-file coverage_filtered.info --rc branch_coverage=1
+	@echo "Generating HTML report..."
+	genhtml coverage_filtered.info --output-directory coverage --rc branch_coverage=1
+	@echo "HTML report generated in ./coverage/index.html"
+
+# ===== Сборка тестового приложения =====
+$(TEST_BIN): $(TEST_OBJ) s21_string.a
+	$(CC) $(CFLAGS) -I. $(TEST_OBJ) $(NAME) -o $(TEST_BIN) $(CHECK_LIBS)
+
+# Компиляция объектных файлов библиотеки
 %.o: %.c s21_string.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-test: $(NAME)
-	$(CC) $(CFLAGS) $(GCOV_FLAGS) -I. $(TEST_SRC) $(NAME) -o $(TEST_BIN) $(CHECK_LIBS)
-	./$(TEST_BIN)
+# Компиляция объектных файлов тестов
+$(TEST_DIR)/%.o: $(TEST_DIR)/%.c s21_string.h
+	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-valgrind: $(NAME)
-	$(CC) $(CFLAGS) -I. $(TEST_SRC) $(NAME) -o $(TEST_BIN) $(CHECK_LIBS)
-	valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes ./$(TEST_BIN)
-
-valgrind_suite:
-	CK_RUN_SUITE=s21_strncmp valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes ./$(TEST_BIN)
-
-gcov_report: test
-	lcov --capture --directory . --output-file coverage.info
-	genhtml coverage.info --output-directory coverage
-	@echo "HTML report generated in ./coverage/index.html"
-
+# ===== Очистка =====
 clean:
-	rm -f *.o *.gcno *.gcda *.info $(TEST_BIN) coverage.info
+	find . \( -name "*.o" -o -name "*.gcno" -o -name "*.gcda" \) -delete
+	rm -f *.info $(TEST_BIN)
 	rm -rf coverage
 
 fclean: clean
 	rm -f $(NAME)
-
-re: fclean all
