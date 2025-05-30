@@ -1,11 +1,12 @@
 #include "s21_string.h"
+#include <stdio.h>
 
 int s21_is_dec_digit(const char* symbol) {
     return (*symbol >= '0' && *symbol <= '9');
 }
 
 int s21_is_hex_digit(const char* symbol) {
-    return ((*symbol >= '0' && *symbol <= '9') || (*symbol >= 'A' && *symbol <= 'F') || (*symbol >= '0' && *symbol <= 'f'));
+    return ((*symbol >= '0' && *symbol <= '9') || (*symbol >= 'A' && *symbol <= 'F') || (*symbol >= 'a' && *symbol <= 'f'));
 }
 
 int s21_is_oct_digit(const char* symbol) {
