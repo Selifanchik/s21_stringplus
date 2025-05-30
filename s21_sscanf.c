@@ -95,7 +95,7 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
         case 'x':
         case 'X':
             while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
-            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'x')) (*ptr_str) += 2;
+            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
             cb.base = 16;
             cb.is_digit = s21_is_hex_digit;
             cb.to_digit = to_hex;
@@ -134,7 +134,6 @@ int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
             ptr_separation++;
         }
     }
-    // while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
     return flag_end;
 }
 
@@ -186,6 +185,7 @@ void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Ca
 
 
 void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
+    printf("str =%s\n", *ptr_str);
     long value = base_to_dec(ptr_str, cb, token->width);
     if (!token->suppress) {
         if (token->length == 'l') {
@@ -195,8 +195,8 @@ void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list*
             unsigned short* dest = va_arg(*args, unsigned short*);
             *dest = (unsigned short)value;
         } else {
-            unsigned int* dest = va_arg(*args, unsigned int*);
-            *dest = (unsigned int)value;
+            unsigned* dest = va_arg(*args, unsigned*);
+            *dest = (unsigned)value;
         }
     }
 }
