@@ -7,6 +7,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
     va_start(arg, format);
     FormatSpecifier token;
     init_token(&token);
+    int read_count = 0;
     int flag_end = 0;
     const char* ptr_str = str;
     const char* ptr_format = format;
@@ -15,13 +16,15 @@ int s21_sscanf(const char* str, const char* format, ...) {
     int count = 0;
     while ((ptr_specifier = strchr(ptr_format, '%')) != S21_NULL && !flag_end) {
         separation = parse_format_sep(ptr_format, ptr_specifier);
-        ptr_specifier++;
-        if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
-            parse_value(str, &ptr_str, &token, &arg);
-            ptr_format = ptr_specifier;
-        } else flag_end = 1;
-        free(separation);
-        init_token(&token);
+        if (*(ptr_specifier + 1)) { 
+            ptr_specifier++;
+            if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
+                parse_value(str, &ptr_str, &token, &arg);
+                ptr_format = ptr_specifier;
+            } else flag_end = 1;
+            free(separation);
+            init_token(&token);
+        }
     }
     va_end(arg);
     return 0;
@@ -68,7 +71,7 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
         case 'G':
             break;
         case 'o':
-            (*ptr_str)++;
+            if (**ptr_str == '0') (*ptr_str)++;
             cb.base = 8;
             cb.is_digit = s21_is_oct_digit;
             cb.to_digit = to_oct_dec;
@@ -87,7 +90,7 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
             break;
         case 'x':
         case 'X':
-            (*ptr_str) += 2;
+            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'x')) (*ptr_str) += 2;
             cb.base = 16;
             cb.is_digit = s21_is_hex_digit;
             cb.to_digit = to_hex;
