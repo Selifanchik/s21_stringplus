@@ -34,24 +34,26 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
     Callback cb = {};
     switch (token->specifier) {
         case 'd':
+            while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
             cb.base = 10;
             cb.is_digit = s21_is_dec_digit;
             cb.to_digit = to_oct_dec;
             handler_int(ptr_str, token, args, cb);
             break;
         case 'i':
-            if (**ptr_str == '0' && *(*ptr_str + 1) == 'x') {
+            while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
+            if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
                 (*ptr_str) += 2;
                 cb.base = 16;
                 cb.is_digit = s21_is_hex_digit;
                 cb.to_digit = to_hex;
-                handler_unsigned_int(ptr_str, token, args, cb);
+                handler_int(ptr_str, token, args, cb);
             } else if (**ptr_str == '0') {
                 (*ptr_str)++;
                 cb.base = 8;
                 cb.is_digit = s21_is_oct_digit;
                 cb.to_digit = to_oct_dec;
-                handler_unsigned_int(ptr_str, token, args, cb);
+                handler_int(ptr_str, token, args, cb);
             } else {
                 cb.base = 10;
                 cb.is_digit = s21_is_dec_digit;
@@ -71,6 +73,7 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
         case 'G':
             break;
         case 'o':
+            while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
             if (**ptr_str == '0') (*ptr_str)++;
             cb.base = 8;
             cb.is_digit = s21_is_oct_digit;
@@ -83,6 +86,7 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
         case 's':
             break;
         case 'u':
+            while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
             cb.base = 10;
             cb.is_digit = s21_is_dec_digit;
             cb.to_digit = to_oct_dec;
@@ -90,6 +94,7 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
             break;
         case 'x':
         case 'X':
+            while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
             if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'x')) (*ptr_str) += 2;
             cb.base = 16;
             cb.is_digit = s21_is_hex_digit;
@@ -163,9 +168,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
 }
 
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
-    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
     int sign = 1;
-    sign = is_sign(ptr_str, &(token->width));
     long value = sign * base_to_dec(ptr_str, cb, token->width);
     if (!token->suppress) {
         if (token->length == 'l') {
@@ -183,7 +186,6 @@ void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Ca
 
 
 void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
-    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
     long value = base_to_dec(ptr_str, cb, token->width);
     if (!token->suppress) {
         if (token->length == 'l') {
