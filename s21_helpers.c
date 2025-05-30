@@ -97,3 +97,10 @@ int is_sign(const char** ptr_str, int* width) {
     }
     return sign;
 }
+
+void init_token(FormatSpecifier* token) {
+    token->length = 0;
+    token->specifier = 0;
+    token->suppress = 0;
+    token->width = -1;
+}
