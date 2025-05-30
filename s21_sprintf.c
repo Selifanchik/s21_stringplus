@@ -40,6 +40,7 @@ int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr);
 
 void specificator_c(flags flag, va_list *arg, char* buf);
 void specificator_s(flags flag, va_list *arg, char* buf);
+int tochnost_ls(wchar_t* value, flags flag);
 
 void specificator_n(va_list *arg, char* buf);
 void specificator_p(va_list *arg, char* buf, flags flag);
@@ -177,20 +178,27 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
         case 'o': 
             specificator_uxXo(flag, arg, buf, chr);
             break;
-
-
         case 's': 
-            //specificator_s(flag, arg, buf);
+            specificator_s(flag, arg, buf);
             break;
         case 'c': 
             specificator_c(flag, arg, buf);
             break;
-
-
         case 'f': 
             //printf("%f", va_arg(arg, double));
             break;
-
+        case 'e': 
+            //printf("%f", va_arg(arg, double));
+            break;
+        case 'E': 
+            //printf("%f", va_arg(arg, double));
+            break;
+        case 'g': 
+            //printf("%f", va_arg(arg, double));
+            break;
+        case 'G': 
+            //printf("%f", va_arg(arg, double));
+            break;
         case 'n': 
             specificator_n(arg, buf);
             break;
@@ -256,44 +264,67 @@ void specificator_c(flags flag, va_list *arg, char* buf){
     free(string);
 }
 
-/*void specificator_s(flags flag, va_list *arg, char* buf){
-    char* string = malloc(2);//границу поставить другую
+void specificator_s(flags flag, va_list *arg, char* buf){
+    char* string = NULL;
     if(flag.l){
-        wchar_t* value = va_arg(*arg, wchar_t*);//правильно ли?
-        wcrtomb(string, value, NULL);
-        //добавить \0
+        wchar_t* value = va_arg(*arg, wchar_t*);
+        int len = wcstombs(NULL, value, 0);
+        if(flag.istochnost && flag.tochnost < len){
+            len = tochnost_ls(value, flag);
+        }
+        string = malloc(len + 1);
+        wcstombs(string, value, len);
+        string[len] = '\0';
     }
     else{
-        string = va_arg(*arg, const char*);
+        const char* tmp = va_arg(*arg, const char*);
+        string = malloc(strlen(tmp) + 1);
+        strcpy(string, tmp);
+        string[strlen(tmp)] = '\0';
     }
 
     int dlina = strlen(string);
-    if(flag.istochnost){
+    if(flag.istochnost && !flag.l){
         if(flag.tochnost < dlina){
             string[flag.tochnost] = '\0';
         }
     }
 
-    int dlina = strlen(string);
+    dlina = strlen(string);
     if(flag.width && dlina < flag.width){
         int raznica = flag.width - dlina;
-        string = realloc(string, raznica + 1);//подумать если вдруг будет NULL
+        string = realloc(string, dlina + raznica + 1);
         if(flag.minus){
             memset(string + dlina, ' ', raznica);//
         }
         else{
-            int count = dlina - 1;
-            while(count >= 0){
-                string[count + raznica] = string[count];
-                count--;
-            }
+            char* tmp_mas = malloc(dlina);
+            strcpy(tmp_mas, string);
             memset(string, ' ', raznica);
+            string[raznica] = '\0';
+            strcat(string, tmp_mas);
+            free(tmp_mas);
         }
-        string[raznica + 1] = '\0';
+        string[dlina + raznica] = '\0';
     }
     strcat(buf, string);
     free(string);
-}*/
+}
+
+int tochnost_ls(wchar_t* value, flags flag){
+    char* string = malloc(MB_CUR_MAX);
+    int dlina = 0;
+    int i = 0;
+    while(value[i] != '\0'){
+        int len = wcrtomb(string, value[i], NULL);
+        if(dlina + len > flag.tochnost){
+            break;
+        }
+        dlina += len;
+        i++;
+    }
+    return dlina;
+}
 
 void specificator_uxXo(flags flag, va_list *arg, char *buf, char chr){
     unsigned long value;
@@ -518,12 +549,14 @@ char* rabota_width(flags flag, char* string, int dlina){
 int main(){
     setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
     char buf1[1024], buf2[1024];
-    //char ch = 'f';
-    wchar_t ch = L'г';
+    //char ch[5] = "asdf";
+    //wchar_t ch = L'г';
+    wchar_t *str = L"開при";
+    
     //int a;
 
-    sprintf(buf1, "!%3lc!", ch);
-    s21_sprintf(buf2, "!%3lc!", ch);
+    sprintf(buf1, "!%-6.5ls!", str);
+    s21_sprintf(buf2, "!%-6.5ls!", str);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
