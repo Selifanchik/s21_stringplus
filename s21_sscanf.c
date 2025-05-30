@@ -74,6 +74,7 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
             handler_unsigned_int(ptr_str, token, args, cb);
             break;
         case 'c':
+            handler_c(ptr_str, token, args);
             break;
         case 's':
             break;
@@ -124,7 +125,7 @@ int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
             ptr_separation++;
         }
     }
-    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
+    // while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
     return flag_end;
 }
 
@@ -158,6 +159,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
 }
 
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
+    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
     int sign = 1;
     sign = is_sign(ptr_str, &(token->width));
     long value = sign * base_to_dec(ptr_str, cb, token->width);
@@ -175,6 +177,7 @@ void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Ca
 
 
 void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
+    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
     long value = base_to_dec(ptr_str, cb, token->width);
     if (token->length == 'l') {
         unsigned long* dest = va_arg(*args, unsigned long*);
@@ -192,4 +195,51 @@ void handler_n(const char* start_str, const char* ptr_str, va_list* args) {
     int value = ptr_str - start_str;
     int* dest = va_arg(*args, int*);
     *dest = (int)value;
+}
+
+// void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+//     if (token->width == -1) {
+//         char value;
+//         if (**ptr_str) {
+//             value = **ptr_str;
+//             (*ptr_str)++;
+//         }
+//         char* dest = va_arg(*args, char*);
+//         *dest = value;
+//     } else {
+//         char* ptr_char = (char*)calloc(token->width + 1, sizeof(char));
+//         for (int i = 0; i < token->width; i++) {
+//             if (**ptr_str) {
+//                 *(ptr_char + i) = *(*ptr_str);
+//                 (*ptr_str)++;
+//             }
+//         } 
+//         char** dest = va_arg(*args, char**);
+//         *dest = ptr_char;
+//     }
+// }
+
+void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    //пока так но надо подумать как сделать со *
+    char* dest = va_arg(*args, char*);
+    if (token->width == -1) {
+        char value = '\0';
+        if (**ptr_str) {
+            value = **ptr_str;
+            (*ptr_str)++;
+        }
+        char* dest = va_arg(*args, char*);
+        *dest = value;
+    } else {
+        int i = 0;
+        for (i = 0; i < token->width; i++) {
+            if (**ptr_str) {
+                *(dest + i) = *(*ptr_str);
+                (*ptr_str)++;
+            } else {
+                break; //заменить на что то другое возможно что будет отслеживать ошибку
+            }
+        }
+        dest[i] = '\0';
+    }
 }
