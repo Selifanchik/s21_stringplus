@@ -42,7 +42,9 @@ int is_sign(const char** ptr_str, int* width);
 void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb);
 void handler_n(const char* start_str, const char* ptr_str, va_list* args);
 void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
+void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void init_token(FormatSpecifier* token);
+void skip_space(const char** ptr_str);
 
 const char *ltrim(const char *src, const char *trim_chars);
 const char *rtrim(const char *src, const char *trim_chars);

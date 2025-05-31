@@ -105,3 +105,7 @@ void init_token(FormatSpecifier* token) {
     token->suppress = 0;
     token->width = -1;
 }
+
+void skip_space(const char** ptr_str) {
+    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
+}
