@@ -47,6 +47,10 @@ void specificator_n(va_list *arg, char* buf);
 void specificator_p(va_list *arg, char* buf, flags flag);
 
 void specificator_f(flags flag, va_list *arg, char *buf);
+int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right);
+void specificator_eE(flags flag, va_list *arg, char *buf, char chr);
+void rabota_mantisa(char* string, char chr, int mantis);
+
 
 int s21_sprintf(char *str, const char *format, ...){
     flags flag = {0};
@@ -191,10 +195,10 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
             specificator_f(flag, arg, buf);
             break;
         case 'e': 
-            //printf("%f", va_arg(arg, double));
+            specificator_eE(flag, arg, buf, chr);
             break;
         case 'E': 
-            //printf("%f", va_arg(arg, double));
+            specificator_eE(flag, arg, buf, chr);
             break;
         case 'g': 
             //printf("%f", va_arg(arg, double));
@@ -214,7 +218,7 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
     }
 }
 
-void specificator_f(flags flag, va_list *arg, char *buf){//плохо с нулями, плюс еще раз все проверить.
+void specificator_eE(flags flag, va_list *arg, char *buf, char chr){
     char mas_for_left[64];
     char mas_for_right[64];
     long double number;
@@ -224,6 +228,88 @@ void specificator_f(flags flag, va_list *arg, char *buf){//плохо с нул�
     else{
         number = va_arg(*arg, double);
     }
+
+    int znak = 1;
+    if(number < 0){
+        number = number * -1;
+        znak = -1;
+    }
+
+    long left_part;
+    int mantis = 0;
+    while(1){
+        left_part = number;
+        if(left_part == 0){
+            number = number * 10.0;
+            mantis--;
+        }
+        else if(left_part > 9){
+            number = number / 10.0;
+            mantis++;
+        }
+        else{
+            break;
+        }
+    }
+
+    int dlina = float_to_string(number, mas_for_left, flag, mas_for_right);
+    char* string = zapolnenie_mas_result(dlina, znak, flag, mas_for_left);
+    rabota_mantisa(string, chr, mantis);
+    
+    dlina = (int)strlen(string); //поменять на size_t нашу
+    if(dlina < flag.width){
+        flag.istochnost = 0;
+        string = rabota_width(flag, string, dlina);
+    }
+    strcat(buf, string);
+    free(string);
+}
+
+void rabota_mantisa(char* string, char chr, int mantis){
+    int dlina = strlen(string);
+    string = realloc(string, dlina + 6);
+    string[dlina++] = chr == 'e' ? 'e' : 'E';
+    string[dlina++] = mantis < 0 ? '-' : '+';
+    if(mantis < 0) mantis = mantis * -1;
+    if(mantis < 9){
+        string[dlina++] = '0';
+        string[dlina++] = '0' + mantis;
+        string[dlina] = '\0';
+    }
+    else{
+        string[dlina] = '\0';
+        char mas_for_mantis[5];
+        int index_mantis = 0;
+        int dlina_mantis = long_to_string(mas_for_mantis, &index_mantis, mantis);
+        strcat(string, mas_for_mantis);
+        string[dlina + dlina_mantis] = '\0';
+    }
+}
+
+void specificator_f(flags flag, va_list *arg, char *buf){
+    char mas_for_left[64];
+    char mas_for_right[64];
+    long double number;
+    if(flag.L){
+        number = va_arg(*arg, long double);
+    }
+    else{
+        number = va_arg(*arg, double);
+    }
+    long left_part = number;
+    int dlina = float_to_string(number, mas_for_left, flag, mas_for_right);
+    char* string = zapolnenie_mas_result(dlina, left_part, flag, mas_for_left);
+    dlina = (int)strlen(string); //поменять на size_t нашу
+    if(dlina < flag.width){
+        flag.istochnost = 0;
+        string = rabota_width(flag, string, dlina);
+    }
+    strcat(buf, string);
+    free(string);
+}
+
+int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right){
+    if(number < 0) number = number * -1;
     long left_part = number;
     int index_left = 0;
     int dlina = long_to_string(mas_for_left, &index_left, left_part);
@@ -242,25 +328,34 @@ void specificator_f(flags flag, va_list *arg, char *buf){//плохо с нул�
         }
 
         number = (number - left_part) * pow(10, flag.tochnost);
-        long right_part = number;
-        int sled = (number - right_part) * 10;
-        if(sled >= 5){
-            right_part++;
+
+        long tmp_number = number;
+        int dlina_number = 0;
+        while(tmp_number > 0){
+            tmp_number /= 10;
+            dlina_number++;
         }
-        int index_right = 0;
-        int dlina_right = long_to_string(mas_for_right, &index_right, right_part);
-        strcat(mas_for_left, mas_for_right);
-        dlina += dlina_right;
-        mas_for_left[dlina] = '\0';
+        if(dlina_number != flag.tochnost){
+            for(int i = 0; i < flag.tochnost - dlina_number; i++){
+                mas_for_left[dlina++] = '0';
+            }
+            mas_for_left[dlina] = '\0';
+        }
+
+        if(dlina_number != 0){
+            long right_part = number;
+            int sled = (number - right_part) * 10;
+            if(sled >= 5){
+                right_part++;
+            }
+            int index_right = 0;
+            int dlina_right = long_to_string(mas_for_right, &index_right, right_part);
+            strcat(mas_for_left, mas_for_right);
+            dlina += dlina_right;
+            mas_for_left[dlina] = '\0';
+        }
     }
-    char* string = zapolnenie_mas_result(dlina, left_part, flag, mas_for_left);
-    dlina = (int)strlen(string); //поменять на size_t нашу
-    if(dlina < flag.width){
-        flag.istochnost = 0;
-        string = rabota_width(flag, string, dlina);
-    }
-    strcat(buf, string);
-    free(string);
+    return dlina;
 }
 
 void specificator_n(va_list *arg, char* buf){
@@ -604,11 +699,11 @@ int main(){
     //char ch[5] = "asdf";
     //wchar_t ch = L'г';
     //wchar_t *str = L"開при";
-    float a = 12.000000067;
+    float a = -6.000000;
     //int a;
 
-    sprintf(buf1, "!%+0#10.0f!", a);
-    s21_sprintf(buf2, "!%+0#10.0f!", a);
+    sprintf(buf1, "!%10f!", a);
+    s21_sprintf(buf2, "!%10f!", a);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
@@ -616,7 +711,7 @@ int main(){
     printf("%d", strcmp(buf1, buf2));
     
     /*char buf[64];
-    sprintf(buf, "!%f!", 1.12345649);
+    sprintf(buf, "!%.0e!", 1.345);
     printf("%s\n", buf);*/
 
     return 0;
