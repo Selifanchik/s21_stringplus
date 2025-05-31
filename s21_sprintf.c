@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>//потом убрать и использовать только наши функ.(в коде много оригинальных ЗАМЕНИТЬ!!!)
 
+#include <math.h>
+
 //для lc, ls
 #include <wchar.h>
 #include <locale.h>
@@ -33,7 +35,6 @@ int rabota_tochnost(flags flag, int number, int dlina, char* mas_for_number, int
 char* zapolnenie_mas_result(int dlina, long number, flags flag, char* mas_for_number);
 char* rabota_width(flags flag, char* string, int dlina);
 
-
 void specificator_uxXo(flags flag, va_list *arg, char *buf, char chr);
 char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr);
 int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr);
@@ -44,6 +45,8 @@ int tochnost_ls(wchar_t* value, flags flag);
 
 void specificator_n(va_list *arg, char* buf);
 void specificator_p(va_list *arg, char* buf, flags flag);
+
+void specificator_f(flags flag, va_list *arg, char *buf);
 
 int s21_sprintf(char *str, const char *format, ...){
     flags flag = {0};
@@ -185,7 +188,7 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
             specificator_c(flag, arg, buf);
             break;
         case 'f': 
-            //printf("%f", va_arg(arg, double));
+            specificator_f(flag, arg, buf);
             break;
         case 'e': 
             //printf("%f", va_arg(arg, double));
@@ -209,6 +212,55 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
         //default:
             //printf("%c", format[i]);
     }
+}
+
+void specificator_f(flags flag, va_list *arg, char *buf){//плохо с нулями, плюс еще раз все проверить.
+    char mas_for_left[64];
+    char mas_for_right[64];
+    long double number;
+    if(flag.L){
+        number = va_arg(*arg, long double);
+    }
+    else{
+        number = va_arg(*arg, double);
+    }
+    long left_part = number;
+    int index_left = 0;
+    int dlina = long_to_string(mas_for_left, &index_left, left_part);
+    if(flag.istochnost && !flag.tochnost){
+        if(flag.reshetka){
+            mas_for_left[dlina++] = '.';
+            mas_for_left[dlina] = '\0';
+        }
+    }
+    else{
+        mas_for_left[dlina++] = '.';
+        mas_for_left[dlina] = '\0';
+
+        if(!flag.istochnost){
+            flag.tochnost = 6;
+        }
+
+        number = (number - left_part) * pow(10, flag.tochnost);
+        long right_part = number;
+        int sled = (number - right_part) * 10;
+        if(sled >= 5){
+            right_part++;
+        }
+        int index_right = 0;
+        int dlina_right = long_to_string(mas_for_right, &index_right, right_part);
+        strcat(mas_for_left, mas_for_right);
+        dlina += dlina_right;
+        mas_for_left[dlina] = '\0';
+    }
+    char* string = zapolnenie_mas_result(dlina, left_part, flag, mas_for_left);
+    dlina = (int)strlen(string); //поменять на size_t нашу
+    if(dlina < flag.width){
+        flag.istochnost = 0;
+        string = rabota_width(flag, string, dlina);
+    }
+    strcat(buf, string);
+    free(string);
 }
 
 void specificator_n(va_list *arg, char* buf){
@@ -533,7 +585,7 @@ char* rabota_width(flags flag, char* string, int dlina){
     }
     else{
         int znak = 0;
-        if(strchr("+-", string[0]) && flag.zero && !flag.istochnost){
+        if(strchr("+- ", string[0]) && flag.zero && !flag.istochnost){
             znak++;
         }
         int count = dlina - 1;
@@ -551,16 +603,21 @@ int main(){
     char buf1[1024], buf2[1024];
     //char ch[5] = "asdf";
     //wchar_t ch = L'г';
-    wchar_t *str = L"開при";
-    
+    //wchar_t *str = L"開при";
+    float a = 12.000000067;
     //int a;
 
-    sprintf(buf1, "!%-6.5ls!", str);
-    s21_sprintf(buf2, "!%-6.5ls!", str);
+    sprintf(buf1, "!%+0#10.0f!", a);
+    s21_sprintf(buf2, "!%+0#10.0f!", a);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
     //printf("%d,%d\n", a, b);
     printf("%d", strcmp(buf1, buf2));
+    
+    /*char buf[64];
+    sprintf(buf, "!%f!", 1.12345649);
+    printf("%s\n", buf);*/
+
     return 0;
 }
