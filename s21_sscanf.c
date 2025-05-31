@@ -13,7 +13,6 @@ int s21_sscanf(const char* str, const char* format, ...) {
     const char* ptr_format = format;
     const char* ptr_specifier = ptr_format;
     char* separation = S21_NULL;
-    int count = 0;
     while ((ptr_specifier = strchr(ptr_format, '%')) != S21_NULL && !flag_end) {
         separation = parse_format_sep(ptr_format, ptr_specifier);
         if (*(ptr_specifier + 1)) { 
@@ -21,13 +20,14 @@ int s21_sscanf(const char* str, const char* format, ...) {
             if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
                 parse_value(str, &ptr_str, &token, &arg);
                 ptr_format = ptr_specifier;
+                read_count++;
             } else flag_end = 1;
             free(separation);
             init_token(&token);
         }
     }
     va_end(arg);
-    return 0;
+    return read_count;
 }
 
 void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args) {
@@ -214,7 +214,7 @@ void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     if (token->width == -1) token->width = 1;
     //пока так но надо подумать как сделать с длиной
     char* dest;
-    if (token->suppress) dest = va_arg(*args, char*);
+    if (!token->suppress) dest = va_arg(*args, char*);
     int i = 0;
     for (i = 0; i < token->width; i++) {
         if (**ptr_str) {
@@ -224,7 +224,7 @@ void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
             break; //заменить на что то другое возможно что будет отслеживать ошибку
         }
     }
-    if (token->width > 1) *(dest + i) = '\0';
+    if (token->width > 1 && !token->suppress) *(dest + i) = '\0';
 }
 
 void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
