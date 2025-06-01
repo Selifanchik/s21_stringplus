@@ -114,7 +114,16 @@ void init_parse_float(ParseFloat* number) {
     number->sign_float = 1;
     number->int_part = 0;
     number->fract_part = 0;
+    number->order_fract = 0;
     number->exp_part = 0;
     number->sign_exp = 1;
     number->order_exp = 0;
+}
+
+long double pow10(int order) {
+    long double result = 1.0;
+    for (int i = 0; i < order; i++) {
+        result *= 10.;
+    }
+    return result;
 }

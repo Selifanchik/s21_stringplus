@@ -241,7 +241,7 @@ void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     *(dest + i) = '\0';
 }
 
-void handler_feEgG(const char** ptr_str, FormatSpecifier* token) {
+void parse_float(const char** ptr_str, FormatSpecifier* token) {
     ParseFloat number; 
     Callback cb;
     cb.is_digit = s21_is_dec_digit;
@@ -253,13 +253,14 @@ void handler_feEgG(const char** ptr_str, FormatSpecifier* token) {
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
         number.int_part = base_to_dec(ptr_str, cb, &(token->width));
-        printf("%s\n", *ptr_str);
         flag_digit = 1;
     }
     if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1))) {
         (*ptr_str)++;
+        const char* start_fract = *ptr_str;
         if (s21_is_dec_digit(*ptr_str)) {
             number.fract_part = base_to_dec(ptr_str, cb, &(token->width));
+            number.order_fract = *ptr_str - start_fract;
             flag_digit = 1;
         }
     }
@@ -275,6 +276,23 @@ void handler_feEgG(const char** ptr_str, FormatSpecifier* token) {
             number.order_exp = base_to_dec(ptr_str, cb, &(token->width));
         }
     }
-    printf("sign =%d\nint =%ld\nfract =%d\nexp_par =%d\nsign_exp=%d\norder_exp =%d\n", number.sign_float, number.int_part, number.fract_part, number.exp_part, number.sign_exp, number.order_exp);
-    printf("%s\n", *ptr_str);
+    handler_fegEG(ptr_str, token, &number);
+}
+
+// вычисления перенести в отдельную переменную добавить ширину и занести в переменные типа
+// пересмотреть функции всех типов
+void handler_fegEG(const char** ptr_str, FormatSpecifier* token, ParseFloat* number) {
+    long double result = 0;
+    long double fraction = 1.0;
+    for (int i = 0; i < number->order_fract; i++) {
+        fraction = pow10(number->order_fract);
+    }
+    result = (long double)number->int_part + ((long double)number->fract_part / fraction);
+    if (number->exp_part) {
+        long double exp = pow10(number->order_exp);
+        if (number->sign_exp > 0) {
+            result *= exp;
+        } else result /= exp;
+    }
+    printf("result     =%Lf\n", result);
 }
