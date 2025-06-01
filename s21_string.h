@@ -20,6 +20,15 @@ typedef struct {
     int base;
 } Callback;
 
+typedef struct {
+    int sign_float;
+    long int_part;
+    int fract_part;
+    int exp_part;
+    int sign_exp;
+    int order_exp;
+} ParseFloat;
+
 void *s21_memchr(const void *str, int c, s21_size_t n);
 int s21_sscanf(const char* str, const char* format, ...);
 
@@ -34,7 +43,7 @@ int parse_str_sep(const char** ptr_str, const char* ptr_separation);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
 void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb);
-long base_to_dec(const char** num, Callback cb, int width);
+long base_to_dec(const char** num, Callback cb, int* width);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
 int s21_is_oct_digit(const char* symbol);
@@ -43,7 +52,9 @@ void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list*
 void handler_n(const char* start_str, const char* ptr_str, va_list* args);
 void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
+void handler_feEgG(const char** ptr_str, FormatSpecifier* token);
 void init_token(FormatSpecifier* token);
+void init_parse_float(ParseFloat* number);
 void skip_space(const char** ptr_str);
 
 const char *ltrim(const char *src, const char *trim_chars);

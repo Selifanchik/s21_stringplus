@@ -15,7 +15,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
     char* separation = S21_NULL;
     while ((ptr_specifier = strchr(ptr_format, '%')) != S21_NULL && !flag_end) {
         separation = parse_format_sep(ptr_format, ptr_specifier);
-        if (*(ptr_specifier + 1)) { 
+        if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
             if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
                 parse_value(str, &ptr_str, &token, &arg);
@@ -120,10 +120,12 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
 char* parse_format_sep(const char* start_format, const char* ptr_specifier) {
     s21_size_t length_sep = ptr_specifier - start_format;
     char* separation = (char*)calloc(length_sep + 1, sizeof(char));
-    // заменить на s21_strncpy
-    strncpy(separation, start_format, length_sep);
-    char my_space[] = {9, 10, 11, 12, 13, 32, 0};
-    separation = trim(separation, my_space);
+    if (separation){
+        // заменить на s21_strncpy
+        strncpy(separation, start_format, length_sep);
+        char my_space[] = {9, 10, 11, 12, 13, 32, 0};
+        separation = trim(separation, my_space);
+    }
     return separation;
 }
 
@@ -150,7 +152,8 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     }
     if (s21_is_dec_digit(*ptr_format)) {
         Callback cb = {s21_is_dec_digit, to_oct_dec, 10};
-        token->width = (int)base_to_dec(ptr_format, cb, -1);
+        int width = -1;
+        token->width = (int)base_to_dec(ptr_format, cb, &width);
     }
     // заменить strchr на s21_strchr
     char* ptr_length = strchr(lengths, **ptr_format);
@@ -170,8 +173,8 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
 }
 
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
-    int sign = 1;
-    long value = sign * base_to_dec(ptr_str, cb, token->width);
+    int sign = is_sign(ptr_str, &(token->width));
+    long value = sign * base_to_dec(ptr_str, cb,&(token->width));
     if (!token->suppress) {
         if (token->length == 'l') {
             long* dest = va_arg(*args, long*);
@@ -188,8 +191,7 @@ void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Ca
 
 
 void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
-    printf("str =%s\n", *ptr_str);
-    long value = base_to_dec(ptr_str, cb, token->width);
+    long value = base_to_dec(ptr_str, cb, &(token->width));
     if (!token->suppress) {
         if (token->length == 'l') {
             unsigned long* dest = va_arg(*args, unsigned long*);
@@ -237,4 +239,42 @@ void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
         i++;
     } //обработку ошибок добавить и длину
     *(dest + i) = '\0';
+}
+
+void handler_feEgG(const char** ptr_str, FormatSpecifier* token) {
+    ParseFloat number; 
+    Callback cb;
+    cb.is_digit = s21_is_dec_digit;
+    cb.to_digit = to_oct_dec;
+    cb.base = 10;
+    init_parse_float(&number);
+    number.sign_float = is_sign(ptr_str, &(token->width));
+    char* temp = S21_NULL;
+    int flag_digit = 0;
+    if (s21_is_dec_digit(*ptr_str)) {
+        number.int_part = base_to_dec(ptr_str, cb, &(token->width));
+        printf("%s\n", *ptr_str);
+        flag_digit = 1;
+    }
+    if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1))) {
+        (*ptr_str)++;
+        if (s21_is_dec_digit(*ptr_str)) {
+            number.fract_part = base_to_dec(ptr_str, cb, &(token->width));
+            flag_digit = 1;
+        }
+    }
+    if (flag_digit && (**ptr_str == 'E' || **ptr_str == 'e')) {
+        if ((*(*ptr_str + 1) == '-' || *(*ptr_str + 1) == '+') && s21_is_dec_digit(*ptr_str + 2)) {
+            number.exp_part = 1;
+            number.sign_exp = is_sign(ptr_str, &(token->width));
+            *ptr_str += 2;
+            number.order_exp = base_to_dec(ptr_str, cb, &(token->width));
+        } else if (s21_is_dec_digit(*ptr_str + 1)) {
+            number.exp_part = 1;
+            (*ptr_str)++;
+            number.order_exp = base_to_dec(ptr_str, cb, &(token->width));
+        }
+    }
+    printf("sign =%d\nint =%ld\nfract =%d\nexp_par =%d\nsign_exp=%d\norder_exp =%d\n", number.sign_float, number.int_part, number.fract_part, number.exp_part, number.sign_exp, number.order_exp);
+    printf("%s\n", *ptr_str);
 }

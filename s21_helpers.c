@@ -33,13 +33,13 @@ int s21_isspace(int symbol) {
 
 // add width
 // rename struct Callback
-long base_to_dec(const char** num, Callback cb, int width) {
+long base_to_dec(const char** num, Callback cb, int* width) {
     long dec_num = 0;
     int digit = 0;
-    while (cb.is_digit(*num) && (width == -1 || width > 0)) {
+    while (cb.is_digit(*num) && (*width == -1 || *width > 0)) {
         digit = cb.to_digit(*num);
         dec_num = dec_num * cb.base + digit;
-        if (width > 0) width--;
+        if (*width > 0) (*width)--;
         (*num)++;
     }
     return dec_num;
@@ -108,4 +108,13 @@ void init_token(FormatSpecifier* token) {
 
 void skip_space(const char** ptr_str) {
     while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
+}
+
+void init_parse_float(ParseFloat* number) {
+    number->sign_float = 1;
+    number->int_part = 0;
+    number->fract_part = 0;
+    number->exp_part = 0;
+    number->sign_exp = 1;
+    number->order_exp = 0;
 }
