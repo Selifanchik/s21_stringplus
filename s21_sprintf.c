@@ -21,6 +21,7 @@ typedef struct{
     int h;
     int l;
     int L;
+    int isg;
 } flags;
 
 void parsing(const char *format, int *i, flags *flag, va_list *arg);
@@ -46,10 +47,13 @@ int tochnost_ls(wchar_t* value, flags flag);
 void specificator_n(va_list *arg, char* buf);
 void specificator_p(va_list *arg, char* buf, flags flag);
 
-void specificator_f(flags flag, va_list *arg, char *buf);
+void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr);
+char* specificator_feE(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr);
+char* specificator_gG(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr);
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right);
-void specificator_eE(flags flag, va_list *arg, char *buf, char chr);
 void rabota_mantisa(char* string, char chr, int mantis);
+int expanent(long double *number, long *left_part, int mantis);
+int dlina_number_func(long double number);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -58,8 +62,6 @@ int s21_sprintf(char *str, const char *format, ...){
     va_start(arg, format);   // получение адреса первого вариадического параметра (то есть ссылка на последний не варидлический)
     strcpy(str, "\0");
    
-    //%[флаги][ширина][.точность][длина]
-    //идем по форматной строке
     for(int i = 0; i < (int)strlen(format); i++){//заменить потом strlen на нашу //также использовать наш size_t
         if(format[i] != '%'){//пока не спецификатор просто печатаем
             char tmp[2] = {format[i], '\0'};
@@ -76,10 +78,6 @@ int s21_sprintf(char *str, const char *format, ...){
         memset(&flag, 0, sizeof(flags));//обнуление структуры //заменить потом на наш memset
 
         parsing(format, &i, &flag, &arg);
-
-        //печатаем для теста
-        //printf("flags:\n-:%d\n+:%d\n :%d\n#:%d\n0:%d\nwidth:%d\ntoch:%d\nh:%d\nl:%d\nL:%d\n", flag.minus, flag.plus, flag.space, flag.reshetka, flag.zero, flag.width, flag.tochnost, flag.h, flag.l, flag.L);
-        //printf("spec:%c\n", format[i]);
 
         define_specificator(format[i], flag, &arg, str);
 
@@ -192,19 +190,19 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
             specificator_c(flag, arg, buf);
             break;
         case 'f': 
-            specificator_f(flag, arg, buf);
+            specificator_feEgG(flag, arg, buf, chr);
             break;
         case 'e': 
-            specificator_eE(flag, arg, buf, chr);
+            specificator_feEgG(flag, arg, buf, chr);
             break;
         case 'E': 
-            specificator_eE(flag, arg, buf, chr);
+            specificator_feEgG(flag, arg, buf, chr);
             break;
         case 'g': 
-            //printf("%f", va_arg(arg, double));
+            specificator_feEgG(flag, arg, buf, chr);
             break;
         case 'G': 
-            //printf("%f", va_arg(arg, double));
+            specificator_feEgG(flag, arg, buf, chr);
             break;
         case 'n': 
             specificator_n(arg, buf);
@@ -218,7 +216,7 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
     }
 }
 
-void specificator_eE(flags flag, va_list *arg, char *buf, char chr){
+void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr){
     char mas_for_left[64];
     char mas_for_right[64];
     long double number;
@@ -228,41 +226,113 @@ void specificator_eE(flags flag, va_list *arg, char *buf, char chr){
     else{
         number = va_arg(*arg, double);
     }
-
-    int znak = 1;
-    if(number < 0){
-        number = number * -1;
-        znak = -1;
+    char* string;
+    if(chr == 'f'){
+        string = specificator_feE(flag, number, mas_for_left, mas_for_right, chr);
+    }
+    else if(chr == 'e' || chr == 'e'){
+        string = specificator_feE(flag, number, mas_for_left, mas_for_right, chr);
+    }
+    else{
+        string = specificator_gG(flag, number, mas_for_left, mas_for_right, chr);
     }
 
-    long left_part;
-    int mantis = 0;
-    while(1){
-        left_part = number;
-        if(left_part == 0){
-            number = number * 10.0;
-            mantis--;
-        }
-        else if(left_part > 9){
-            number = number / 10.0;
-            mantis++;
-        }
-        else{
-            break;
-        }
-    }
-
-    int dlina = float_to_string(number, mas_for_left, flag, mas_for_right);
-    char* string = zapolnenie_mas_result(dlina, znak, flag, mas_for_left);
-    rabota_mantisa(string, chr, mantis);
-    
-    dlina = (int)strlen(string); //поменять на size_t нашу
+    int dlina = (int)strlen(string); //поменять на size_t нашу
     if(dlina < flag.width){
         flag.istochnost = 0;
         string = rabota_width(flag, string, dlina);
     }
     strcat(buf, string);
     free(string);
+}
+
+char* specificator_gG(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr){
+    long double number_copy = number;
+    if(number < 0){
+        number = number * -1;
+    }
+    long left_part = number;
+    int mantis = 0;
+    mantis = expanent(&number, &left_part, mantis);
+    if(!flag.istochnost){
+        flag.istochnost = 1;
+        flag.tochnost = 6;
+    }
+    char* string;
+    if(mantis >= -4 && mantis < flag.tochnost){//f
+        chr = 'f';
+        flag.isg = 1;
+        long tmp_number = number_copy < 0 ? number_copy * -1 : number_copy;
+        int dlina_number = dlina_number_func(tmp_number);
+        if(flag.tochnost == 0){
+            flag.tochnost++;
+        }
+        flag.tochnost = flag.tochnost - dlina_number;
+        string = specificator_feE(flag, number_copy, mas_for_left, mas_for_right, chr);
+    }
+    else{//e
+        chr = chr == 'g' ? 'e' : 'E';
+        flag.isg = 1;
+        flag.tochnost = flag.tochnost - 1;
+        string = specificator_feE(flag, number_copy, mas_for_left, mas_for_right, chr);
+    }
+    return string;
+}
+
+int remove_0(char* string){
+    int dlina = strlen(string);
+    dlina--;
+    while(strchr("123456789", string[dlina]) == NULL){
+        dlina--;
+        if(string[dlina + 1] == '.'){
+            break;
+        }  
+    }
+    string[dlina + 1] = '\0';
+    dlina++;//
+    return dlina;
+}
+
+char* specificator_feE(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr){
+    int znak = 1;
+    if(number < 0){
+        number = number * -1;
+        znak = -1;
+    }
+
+    long left_part = number;
+    int mantis = 0;
+    if(chr == 'e' || chr == 'E'){
+        mantis = expanent(&number, &left_part, mantis);
+    }
+
+    int dlina = float_to_string(number, mas_for_left, flag, mas_for_right);
+    if(!flag.reshetka && flag.isg){
+        dlina = remove_0(mas_for_left);
+    }
+    char* string = zapolnenie_mas_result(dlina, znak, flag, mas_for_left);
+    if(chr == 'e' || chr == 'E'){
+        rabota_mantisa(string, chr, mantis);
+    }
+    return string;
+}
+
+int expanent(long double *number, long *left_part, int mantis){
+    while(1){
+        *left_part = *number;
+        if(*left_part == 0){
+            *number = *number * 10.0;
+            mantis--;
+        }
+        else if(*left_part > 9){
+            *number = *number / 10.0;
+            mantis++;
+        }
+        else{
+            break;
+        }
+    }
+    return mantis;
 }
 
 void rabota_mantisa(char* string, char chr, int mantis){
@@ -286,30 +356,8 @@ void rabota_mantisa(char* string, char chr, int mantis){
     }
 }
 
-void specificator_f(flags flag, va_list *arg, char *buf){
-    char mas_for_left[64];
-    char mas_for_right[64];
-    long double number;
-    if(flag.L){
-        number = va_arg(*arg, long double);
-    }
-    else{
-        number = va_arg(*arg, double);
-    }
-    long left_part = number;
-    int dlina = float_to_string(number, mas_for_left, flag, mas_for_right);
-    char* string = zapolnenie_mas_result(dlina, left_part, flag, mas_for_left);
-    dlina = (int)strlen(string); //поменять на size_t нашу
-    if(dlina < flag.width){
-        flag.istochnost = 0;
-        string = rabota_width(flag, string, dlina);
-    }
-    strcat(buf, string);
-    free(string);
-}
-
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right){
-    if(number < 0) number = number * -1;
+    if(number < 0) number = number * -1.0;
     long left_part = number;
     int index_left = 0;
     int dlina = long_to_string(mas_for_left, &index_left, left_part);
@@ -329,18 +377,19 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
 
         number = (number - left_part) * pow(10, flag.tochnost);
 
-        long tmp_number = number;
-        int dlina_number = 0;
-        while(tmp_number > 0){
-            tmp_number /= 10;
-            dlina_number++;
-        }
+        int dlina_number = dlina_number_func(number);
         if(dlina_number != flag.tochnost){
             for(int i = 0; i < flag.tochnost - dlina_number; i++){
                 mas_for_left[dlina++] = '0';
             }
             mas_for_left[dlina] = '\0';
+            //
+            if(flag.isg && left_part == 0){
+                number = number * pow(10, flag.tochnost - dlina_number);
+            }
         }
+        
+        dlina_number = dlina_number_func(number);
 
         if(dlina_number != 0){
             long right_part = number;
@@ -352,10 +401,25 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
             int dlina_right = long_to_string(mas_for_right, &index_right, right_part);
             strcat(mas_for_left, mas_for_right);
             dlina += dlina_right;
+            if(flag.isg && dlina_number != flag.tochnost){
+                for(int i = 0; i < flag.tochnost - dlina_number; i++){
+                    mas_for_left[dlina++] = '0';
+                }
+            }
             mas_for_left[dlina] = '\0';
         }
     }
     return dlina;
+}
+
+int dlina_number_func(long double number){
+    long tmp_number = number;
+    int dlina_number = 0;
+    while(tmp_number > 0){
+        tmp_number /= 10;
+        dlina_number++;
+    }
+    return dlina_number;
 }
 
 void specificator_n(va_list *arg, char* buf){
@@ -699,11 +763,11 @@ int main(){
     //char ch[5] = "asdf";
     //wchar_t ch = L'г';
     //wchar_t *str = L"開при";
-    float a = -6.000000;
-    //int a;
-
-    sprintf(buf1, "!%10f!", a);
-    s21_sprintf(buf2, "!%10f!", a);
+    //float a = -63.123456;
+    float a = -0.05540;
+    char str[32] = "!%-9.0f!";
+    sprintf(buf1, str, a);
+    s21_sprintf(buf2, str, a);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
