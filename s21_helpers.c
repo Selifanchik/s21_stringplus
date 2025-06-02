@@ -61,32 +61,6 @@ int to_hex(const char* hex_num) {
     return digit;
 }
 
-double s21_atof(char** ptr_str) {
-    double result = 0.0;
-    double number = 0.0;
-    double fraction = 1.0;
-    double sign = 1.0;
-    while (**ptr_str == ' ') (*ptr_str)++;
-    if (**ptr_str == '-') {
-        sign = -1.0;
-    }
-    if (**ptr_str == '-' || **ptr_str == '+') (*ptr_str)++;
-    while (s21_is_dec_digit(*ptr_str)) {
-        number = number * 10.0 + (**ptr_str - '0');
-        (*ptr_str)++;
-    }
-    if (**ptr_str == '.') {
-        (*ptr_str)++;
-        while (s21_is_dec_digit(*ptr_str)) {
-            number = number * 10.0 + (**ptr_str - '0');
-            fraction *= 10.0;
-            (*ptr_str)++;
-        }
-        result = sign * (number / fraction);
-    }
-    return result;
-}
-
 int is_sign(const char** ptr_str, int* width) {
     int sign = 1;
     if ((**ptr_str == '-' || **ptr_str == '+') && (*width == -1 || *width > 1)) {
@@ -126,4 +100,20 @@ long double pow10(int order) {
         result *= 10.;
     }
     return result;
+}
+
+long double to_float(ParseFloat float_value) {
+    long double value = 0;
+    long double fraction = 1.0;
+    for (int i = 0; i < float_value.order_fract; i++) {
+        fraction = pow10(float_value.order_fract);
+    }
+    value = (long double)float_value.int_part + ((long double)float_value.fract_part / fraction);
+    if (float_value.exp_part) {
+        long double exp = pow10(float_value.order_exp);
+        if (float_value.sign_exp > 0) {
+            value *= exp;
+        } else value /= exp;
+    }
+    return value;
 }

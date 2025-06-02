@@ -53,12 +53,12 @@ void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list*
 void handler_n(const char* start_str, const char* ptr_str, va_list* args);
 void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
-void handler_fegEG(const char** ptr_str, FormatSpecifier* token, ParseFloat* number);
-// void handler_feEgG(const char** ptr_str, FormatSpecifier* token);
+void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
 void skip_space(const char** ptr_str);
-void parse_float(const char** ptr_str, FormatSpecifier* token);
+void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value);
+long double to_float(ParseFloat float_value);
 long double pow10(int order);
 const char *ltrim(const char *src, const char *trim_chars);
 const char *rtrim(const char *src, const char *trim_chars);

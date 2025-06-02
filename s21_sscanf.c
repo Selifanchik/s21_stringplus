@@ -63,14 +63,12 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
             }
             break;
         case 'e':
-            break;
         case 'E':
-            break;
         case 'f':
-            break;
         case 'g':
-            break;
         case 'G':
+            skip_space(ptr_str);
+            handler_fegEG(ptr_str, token, args);
             break;
         case 'o':
             skip_space(ptr_str);
@@ -241,58 +239,59 @@ void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     *(dest + i) = '\0';
 }
 
-void parse_float(const char** ptr_str, FormatSpecifier* token) {
-    ParseFloat number; 
+void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
     Callback cb;
     cb.is_digit = s21_is_dec_digit;
     cb.to_digit = to_oct_dec;
     cb.base = 10;
-    init_parse_float(&number);
-    number.sign_float = is_sign(ptr_str, &(token->width));
+    init_parse_float(float_value);
+    float_value->sign_float = is_sign(ptr_str, &(token->width));
     char* temp = S21_NULL;
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
-        number.int_part = base_to_dec(ptr_str, cb, &(token->width));
+        float_value->int_part = base_to_dec(ptr_str, cb, &(token->width));
         flag_digit = 1;
     }
     if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1))) {
         (*ptr_str)++;
         const char* start_fract = *ptr_str;
         if (s21_is_dec_digit(*ptr_str)) {
-            number.fract_part = base_to_dec(ptr_str, cb, &(token->width));
-            number.order_fract = *ptr_str - start_fract;
+            float_value->fract_part = base_to_dec(ptr_str, cb, &(token->width));
+            float_value->order_fract = *ptr_str - start_fract;
             flag_digit = 1;
         }
     }
     if (flag_digit && (**ptr_str == 'E' || **ptr_str == 'e')) {
         if ((*(*ptr_str + 1) == '-' || *(*ptr_str + 1) == '+') && s21_is_dec_digit(*ptr_str + 2)) {
-            number.exp_part = 1;
-            number.sign_exp = is_sign(ptr_str, &(token->width));
+            float_value->exp_part = 1;
+            float_value->sign_exp = is_sign(ptr_str, &(token->width));
             *ptr_str += 2;
-            number.order_exp = base_to_dec(ptr_str, cb, &(token->width));
+            float_value->order_exp = base_to_dec(ptr_str, cb, &(token->width));
         } else if (s21_is_dec_digit(*ptr_str + 1)) {
-            number.exp_part = 1;
+            float_value->exp_part = 1;
             (*ptr_str)++;
-            number.order_exp = base_to_dec(ptr_str, cb, &(token->width));
+            float_value->order_exp = base_to_dec(ptr_str, cb, &(token->width));
         }
     }
-    handler_fegEG(ptr_str, token, &number);
 }
 
 // вычисления перенести в отдельную переменную добавить ширину и занести в переменные типа
 // пересмотреть функции всех типов
-void handler_fegEG(const char** ptr_str, FormatSpecifier* token, ParseFloat* number) {
-    long double result = 0;
-    long double fraction = 1.0;
-    for (int i = 0; i < number->order_fract; i++) {
-        fraction = pow10(number->order_fract);
+void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    ParseFloat float_value;
+    parse_float(ptr_str, token, &float_value);
+    if (!token->suppress) {
+        long double value = 0;
+        value = to_float(float_value);
+        if (token->length == 'l') {
+            double* dest = va_arg(*args, double*);
+            *dest = (double)value;
+        } else if (token->length == 'L') {
+            long double* dest = va_arg(*args, long double*);
+            *dest = (long double)value;
+        } else {
+            float* dest = va_arg(*args, float*);
+            *dest = (float)value;
+        }
     }
-    result = (long double)number->int_part + ((long double)number->fract_part / fraction);
-    if (number->exp_part) {
-        long double exp = pow10(number->order_exp);
-        if (number->sign_exp > 0) {
-            result *= exp;
-        } else result /= exp;
-    }
-    printf("result     =%Lf\n", result);
 }
