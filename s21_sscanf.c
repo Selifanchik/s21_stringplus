@@ -270,8 +270,8 @@ void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float
     if (flag_digit && (**ptr_str == 'E' || **ptr_str == 'e')) {
         if ((*(*ptr_str + 1) == '-' || *(*ptr_str + 1) == '+') && s21_is_dec_digit(*ptr_str + 2)) {
             float_value->exp_part = 1;
+            (*ptr_str)++;
             float_value->sign_exp = is_sign(ptr_str, &(token->width));
-            *ptr_str += 2;
             float_value->order_exp = base_to_dec(ptr_str, cb, &(token->width));
         } else if (s21_is_dec_digit(*ptr_str + 1)) {
             float_value->exp_part = 1;
