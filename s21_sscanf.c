@@ -111,6 +111,9 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
             handler_n(str, *ptr_str, args);
             break;
         case '%':
+            skip_space(ptr_str);
+            if (**ptr_str == '%') (*ptr_str)++;
+            // иначе закончить считывание
             break;
         default:
             break;
