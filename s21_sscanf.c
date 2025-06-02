@@ -103,6 +103,9 @@ void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, 
             handler_unsigned_int(ptr_str, token, args, cb);
             break;
         case 'p':
+            skip_space(ptr_str);
+            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
+            handler_p(ptr_str, token, args);
             break;
         case 'n':
             handler_n(str, *ptr_str, args);
@@ -293,5 +296,19 @@ void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) 
             float* dest = va_arg(*args, float*);
             *dest = (float)value;
         }
+    }
+}
+
+
+void handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    Callback cb;
+    cb.is_digit = s21_is_hex_digit;
+    cb.to_digit = to_hex;
+    cb.base = 16;
+
+    unsigned long value = base_to_dec(ptr_str, cb, &(token->width));
+    if (!token->suppress) {
+        void** dest = va_arg(*args, void**);
+        *dest = (void*)value;
     }
 }

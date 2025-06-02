@@ -54,6 +54,7 @@ void handler_n(const char* start_str, const char* ptr_str, va_list* args);
 void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args);
+void handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
 void skip_space(const char** ptr_str);
