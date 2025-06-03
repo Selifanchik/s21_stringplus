@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>//потом убрать и использовать только наши функ.(в коде много оригинальных ЗАМЕНИТЬ!!!)
+#include "s21_string.h"
 
 #include <math.h>
 
@@ -51,7 +52,7 @@ void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr);
 char* specificator_feE(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr);
 char* specificator_gG(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr);
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right);
-void rabota_mantisa(char* string, char chr, int mantis);
+char* rabota_mantisa(char* string, char chr, int mantis);
 int expanent(long double *number, long *left_part, int mantis);
 int dlina_number_func(long double number);
 
@@ -230,7 +231,7 @@ void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr){
     if(chr == 'f'){
         string = specificator_feE(flag, number, mas_for_left, mas_for_right, chr);
     }
-    else if(chr == 'e' || chr == 'e'){
+    else if(chr == 'e' || chr == 'E'){
         string = specificator_feE(flag, number, mas_for_left, mas_for_right, chr);
     }
     else{
@@ -312,7 +313,7 @@ char* specificator_feE(flags flag, long double number, char* mas_for_left, char*
     }
     char* string = zapolnenie_mas_result(dlina, znak, flag, mas_for_left);
     if(chr == 'e' || chr == 'E'){
-        rabota_mantisa(string, chr, mantis);
+        string = rabota_mantisa(string, chr, mantis);
     }
     return string;
 }
@@ -335,7 +336,7 @@ int expanent(long double *number, long *left_part, int mantis){
     return mantis;
 }
 
-void rabota_mantisa(char* string, char chr, int mantis){
+char* rabota_mantisa(char* string, char chr, int mantis){
     int dlina = strlen(string);
     string = realloc(string, dlina + 6);
     string[dlina++] = chr == 'e' ? 'e' : 'E';
@@ -354,6 +355,7 @@ void rabota_mantisa(char* string, char chr, int mantis){
         strcat(string, mas_for_mantis);
         string[dlina + dlina_mantis] = '\0';
     }
+    return string;
 }
 
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right){
@@ -764,8 +766,10 @@ int main(){
     //wchar_t ch = L'г';
     //wchar_t *str = L"開при";
     //float a = -63.123456;
-    float a = -0.05540;
-    char str[32] = "!%-9.0f!";
+    float a = 12345.6789;
+    char str[32] = "%.3E";
+    //float a = 0.005;
+    //char str[32] = "%.2g";
     sprintf(buf1, str, a);
     s21_sprintf(buf2, str, a);
 
@@ -774,9 +778,9 @@ int main(){
     //printf("%d,%d\n", a, b);
     printf("%d", strcmp(buf1, buf2));
     
-    /*char buf[64];
-    sprintf(buf, "!%.0e!", 1.345);
-    printf("%s\n", buf);*/
+    //char buf[64];
+    //sprintf(buf, "!%.0e!", 1.345);
+    //printf("%s\n", buf);
 
     return 0;
 }
