@@ -55,6 +55,7 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
 char* rabota_mantisa(char* string, char chr, int mantis);
 int expanent(long double *number, long *left_part, int mantis);
 int dlina_number_func(long double number);
+long double zero_before_number(flags flag, char* mas_for_left, long double number, int left_part, int* dlina, int dlina_number);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -380,15 +381,8 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
         number = (number - left_part) * pow(10, flag.tochnost);
 
         int dlina_number = dlina_number_func(number);
-        if(dlina_number != flag.tochnost){
-            for(int i = 0; i < flag.tochnost - dlina_number; i++){
-                mas_for_left[dlina++] = '0';
-            }
-            mas_for_left[dlina] = '\0';
-            //
-            if(flag.isg && left_part == 0){
-                number = number * pow(10, flag.tochnost - dlina_number);
-            }
+        if(dlina_number < flag.tochnost){
+            number = zero_before_number(flag, mas_for_left, number, left_part, &dlina,  dlina_number);
         }
         
         dlina_number = dlina_number_func(number);
@@ -412,6 +406,28 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
         }
     }
     return dlina;
+}
+
+long double zero_before_number(flags flag, char* mas_for_left, long double number, int left_part, int* dlina, int dlina_number){
+    for(int i = 0; i < flag.tochnost - dlina_number; i++){
+        mas_for_left[(*dlina)++] = '0';
+    }
+    mas_for_left[*dlina] = '\0';
+    if(flag.isg && left_part == 0){
+        int kolvo = 0;
+        left_part = number;
+        while(left_part == 0){
+            kolvo++;
+            number = number * 10;
+            left_part = number;
+        }
+        for(int i = 0; i < kolvo - 1; i++){
+            mas_for_left[(*dlina)++] = '0';
+        }
+        mas_for_left[*dlina] = '\0';
+        number = number * pow(10, flag.tochnost - 1);//
+    }
+    return number;
 }
 
 int dlina_number_func(long double number){
@@ -766,17 +782,26 @@ int main(){
     //wchar_t ch = L'г';
     //wchar_t *str = L"開при";
     //float a = -63.123456;
-    float a = 12345.6789;
-    char str[32] = "%.3E";
+    //CMP("%.4g", 0.000123456);
+    //CMP("%.2g", 0.001);
+    //CMP("%.2g", 0.0001);
+    //CMP("%.1g", 0.0001);
+    //CMP("%.3g", 0.0001);
+    //float a = 0.0001;
     //float a = 0.005;
     //char str[32] = "%.2g";
-    sprintf(buf1, str, a);
-    s21_sprintf(buf2, str, a);
+    char str[32] = "!%.2g!";
+    sprintf(buf1, str, 0.0001);
+    s21_sprintf(buf2, str, 0.0001);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
     //printf("%d,%d\n", a, b);
     printf("%d", strcmp(buf1, buf2));
+    //for (int i = 0; i < 20; i++) {
+    //    printf("buf1[%d] = %d\tbuf2[%d] = %d\n", i, buf1[i], i, buf2[i]);
+    //}
+
     
     //char buf[64];
     //sprintf(buf, "!%.0e!", 1.345);
