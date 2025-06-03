@@ -52,17 +52,25 @@ coverage_build:
 # ===== Цель: генерация отчёта покрытия, зависит от сборки с покрытием и запуска тестов =====
 gcov_report: coverage_build
 	./$(TEST_BIN)
-	@echo "Capturing coverage data for library source files..."
 	lcov --capture --directory . --output-file coverage.info --rc branch_coverage=1
-	@echo "Removing test sources from coverage data..."
 	lcov --remove coverage.info '$(TEST_DIR)/*' --output-file coverage_filtered.info --rc branch_coverage=1
-	@echo "Generating HTML report..."
 	genhtml coverage_filtered.info --output-directory coverage --rc branch_coverage=1
-	@echo "HTML report generated in ./coverage/index.html"
 
 # ===== Сборка тестового приложения =====
 $(TEST_BIN): $(TEST_OBJ) s21_string.a
 	$(CC) $(CFLAGS) -I. $(TEST_OBJ) $(NAME) -o $(TEST_BIN) $(CHECK_LIBS)
+
+cppcheck:
+	cppcheck --enable=all --inconclusive --std=c11 --quiet --force \
+  --suppress=missingIncludeSystem src/ $(TEST_DIR)/
+
+# ===== Цель: проверка на утечки памяти с помощью valgrind =====
+valgrind: test_build
+	valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)
+
+valgrind_suite: test_build
+	CK_RUN_SUITE=s21_strncmp valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)
+
 
 # Компиляция объектных файлов библиотеки
 %.o: %.c s21_string.h

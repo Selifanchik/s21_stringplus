@@ -20,6 +20,7 @@ Suite *to_upper_suite(void);
 Suite *to_lower_suite(void);
 Suite *insert_suite(void);
 Suite *trim_suite(void);
+Suite *sscanf_suite(void);
 
 int main(void) {
   int number_failed = 0;
@@ -43,6 +44,7 @@ int main(void) {
   srunner_add_suite(sr, to_lower_suite());
   srunner_add_suite(sr, insert_suite());
   srunner_add_suite(sr, trim_suite());
+  srunner_add_suite(sr, sscanf_suite());
 
   srunner_run_all(sr, CK_VERBOSE);
   number_failed = srunner_ntests_failed(sr);
