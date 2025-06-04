@@ -1,14 +1,14 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>//потом убрать и использовать только наши функ.(в коде много оригинальных ЗАМЕНИТЬ!!!)
 #include "s21_string.h"
-
-#include <math.h>
 
 //для lc, ls
 #include <wchar.h>
 #include <locale.h>
+
+//#include <string.h>//потом убрать и использовать только наши функ.(в коде много оригинальных ЗАМЕНИТЬ!!!)
+//#include <math.h>
 
 typedef struct{
     int minus;
@@ -56,28 +56,29 @@ char* rabota_mantisa(char* string, char chr, int mantis);
 int expanent(long double *number, long *left_part, int mantis);
 int dlina_number_func(long double number);
 long double zero_before_number(flags flag, char* mas_for_left, long double number, int left_part, int* dlina, int dlina_number);
+int my_pow(int number, int stepen);
 
 
 int s21_sprintf(char *str, const char *format, ...){
     flags flag = {0};
     va_list arg;             // указатель на параметр
     va_start(arg, format);   // получение адреса первого вариадического параметра (то есть ссылка на последний не варидлический)
-    strcpy(str, "\0");
-   
-    for(int i = 0; i < (int)strlen(format); i++){//заменить потом strlen на нашу //также использовать наш size_t
+    s21_strncpy(str, "\0", 1);
+    int dlina = s21_strlen(format);
+    for(int i = 0; i < dlina; i++){
         if(format[i] != '%'){//пока не спецификатор просто печатаем
             char tmp[2] = {format[i], '\0'};
-            strcat(str, tmp);
+            s21_strncat(str, tmp, s21_strlen(tmp));
             continue;
         }
         i++;
         if(format[i] == '%'){//если у нас "%%"" то просто печатаем и продолжаем
             char tmp[2] = {format[i], '\0'};
-            strcat(str, tmp);
+            s21_strncat(str, tmp, s21_strlen(tmp));
             continue;
         }
 
-        memset(&flag, 0, sizeof(flags));//обнуление структуры //заменить потом на наш memset
+        s21_memset(&flag, 0, sizeof(flags));//обнуление структуры
 
         parsing(format, &i, &flag, &arg);
 
@@ -90,13 +91,13 @@ int s21_sprintf(char *str, const char *format, ...){
 }
 
 void parsing(const char *format, int *i, flags *flag, va_list *arg){
-    while(format[*i] && !strchr("cdieEfgGosuxXpn", format[*i])){//добавить остальные спецификаторы   //пока не спецификатор идем посимвольно
+    while(format[*i] && !s21_strchr("cdieEfgGosuxXpn", format[*i])){//добавить остальные спецификаторы   //пока не спецификатор идем посимвольно
         
-        if(strchr("-+ #0", format[*i])){//заменить на наш
+        if(s21_strchr("-+ #0", format[*i])){
             pars_flags_dlina(format[*i], flag);
         }
 
-        else if(strchr("123456789*", format[*i])){//заменить на наш
+        else if(s21_strchr("123456789*", format[*i])){
             if(format[*i] == '*'){
                 flag->width = va_arg(*arg, int);
             }
@@ -119,7 +120,7 @@ void parsing(const char *format, int *i, flags *flag, va_list *arg){
             }
         }
 
-        if(strchr("lhL", format[*i])){//заменить на наш
+        if(s21_strchr("lhL", format[*i])){
             pars_flags_dlina(format[*i], flag);
         }
         
@@ -158,7 +159,7 @@ void pars_flags_dlina(char chr, flags *flag){
 
 int pars_width_tochnost(const char *format, int *i){
     int sum = 0;
-    while(strchr("0123456789", format[*i])){//заменить на наш
+    while(s21_strchr("0123456789", format[*i])){
         sum = sum * 10 + (format[*i] - '0');
         (*i)++;
     }
@@ -239,12 +240,12 @@ void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr){
         string = specificator_gG(flag, number, mas_for_left, mas_for_right, chr);
     }
 
-    int dlina = (int)strlen(string); //поменять на size_t нашу
+    int dlina = s21_strlen(string);
     if(dlina < flag.width){
         flag.istochnost = 0;
         string = rabota_width(flag, string, dlina);
     }
-    strcat(buf, string);
+    s21_strncat(buf, string, s21_strlen(string));
     free(string);
 }
 
@@ -282,9 +283,9 @@ char* specificator_gG(flags flag, long double number, char* mas_for_left, char* 
 }
 
 int remove_0(char* string){
-    int dlina = strlen(string);
+    int dlina = s21_strlen(string);
     dlina--;
-    while(strchr("123456789", string[dlina]) == NULL){
+    while(s21_strchr("123456789", string[dlina]) == S21_NULL){
         dlina--;
         if(string[dlina + 1] == '.'){
             break;
@@ -338,7 +339,7 @@ int expanent(long double *number, long *left_part, int mantis){
 }
 
 char* rabota_mantisa(char* string, char chr, int mantis){
-    int dlina = strlen(string);
+    int dlina = s21_strlen(string);
     string = realloc(string, dlina + 6);
     string[dlina++] = chr == 'e' ? 'e' : 'E';
     string[dlina++] = mantis < 0 ? '-' : '+';
@@ -353,10 +354,18 @@ char* rabota_mantisa(char* string, char chr, int mantis){
         char mas_for_mantis[5];
         int index_mantis = 0;
         int dlina_mantis = long_to_string(mas_for_mantis, &index_mantis, mantis);
-        strcat(string, mas_for_mantis);
+        s21_strncat(string, mas_for_mantis, s21_strlen(mas_for_mantis));
         string[dlina + dlina_mantis] = '\0';
     }
     return string;
+}
+
+int my_pow(int number, int stepen){
+    int result = 1;
+    for(int i = 0; i < stepen; i++){
+        result *= number;
+    }
+    return result;
 }
 
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right){
@@ -378,7 +387,7 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
             flag.tochnost = 6;
         }
 
-        number = (number - left_part) * pow(10, flag.tochnost);
+        number = (number - left_part) * my_pow(10, flag.tochnost);
 
         int dlina_number = dlina_number_func(number);
         if(dlina_number < flag.tochnost){
@@ -395,7 +404,7 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
             }
             int index_right = 0;
             int dlina_right = long_to_string(mas_for_right, &index_right, right_part);
-            strcat(mas_for_left, mas_for_right);
+            s21_strncat(mas_for_left, mas_for_right, s21_strlen(mas_for_right));
             dlina += dlina_right;
             if(flag.isg && dlina_number != flag.tochnost){
                 for(int i = 0; i < flag.tochnost - dlina_number; i++){
@@ -425,7 +434,7 @@ long double zero_before_number(flags flag, char* mas_for_left, long double numbe
             mas_for_left[(*dlina)++] = '0';
         }
         mas_for_left[*dlina] = '\0';
-        number = number * pow(10, flag.tochnost - 1);//
+        number = number * my_pow(10, flag.tochnost - 1);//
     }
     return number;
 }
@@ -441,7 +450,7 @@ int dlina_number_func(long double number){
 }
 
 void specificator_n(va_list *arg, char* buf){
-    int dlina = strlen(buf);
+    int dlina = s21_strlen(buf);
     int *ptr = va_arg(*arg, int*);
     *ptr = dlina;
 }
@@ -451,11 +460,11 @@ void specificator_p(va_list *arg, char* buf, flags flag){
     unsigned long number = (unsigned long)ptr;
     flag.reshetka = 1;
     char* string = number_uxXo_to_string(number, flag, 16, 'x');
-    int dlina = (int)strlen(string); //поменять на size_t нашу
+    int dlina = s21_strlen(string);
     if(dlina < flag.width){
         string = rabota_width(flag, string, dlina);
     }
-    strcat(buf, string);
+    s21_strncat(buf, string, s21_strlen(string));
     free(string);
 }
 
@@ -463,7 +472,7 @@ void specificator_c(flags flag, va_list *arg, char* buf){
     char* string = malloc(MB_CUR_MAX + 1);
     if(flag.l){
         wchar_t value = va_arg(*arg, wchar_t);
-        int len = wcrtomb(string, value, NULL);
+        int len = wcrtomb(string, value, S21_NULL);
         string[len] = '\0';
     }
     else{
@@ -473,31 +482,31 @@ void specificator_c(flags flag, va_list *arg, char* buf){
     }
 
     if(flag.width >= 2){
-        int dlina = strlen(string);
+        int dlina = s21_strlen(string);
         int raznica = flag.width - dlina;
         string = realloc(string, dlina + raznica + 1);
         if(flag.minus){
-            memset(string + dlina, ' ', raznica);
+            s21_memset(string + dlina, ' ', raznica);
         }
         else{
             char* tmp_mas = malloc(dlina);
-            strcpy(tmp_mas, string);
-            memset(string, ' ', raznica);
+            s21_strncpy(tmp_mas, string, s21_strlen(string));
+            s21_memset(string, ' ', raznica);
             string[raznica] = '\0';
-            strcat(string, tmp_mas);
+            s21_strncat(string, tmp_mas, s21_strlen(tmp_mas));
             free(tmp_mas);
         }
         string[dlina + raznica + 1] = '\0';
     }
-    strcat(buf, string);
+    s21_strncat(buf, string, s21_strlen(string));
     free(string);
 }
 
 void specificator_s(flags flag, va_list *arg, char* buf){
-    char* string = NULL;
+    char* string = S21_NULL;
     if(flag.l){
         wchar_t* value = va_arg(*arg, wchar_t*);
-        int len = wcstombs(NULL, value, 0);
+        int len = wcstombs(S21_NULL, value, 0);
         if(flag.istochnost && flag.tochnost < len){
             len = tochnost_ls(value, flag);
         }
@@ -507,36 +516,36 @@ void specificator_s(flags flag, va_list *arg, char* buf){
     }
     else{
         const char* tmp = va_arg(*arg, const char*);
-        string = malloc(strlen(tmp) + 1);
-        strcpy(string, tmp);
-        string[strlen(tmp)] = '\0';
+        string = malloc(s21_strlen(tmp) + 1);
+        s21_strncpy(string, tmp, s21_strlen(tmp));
+        string[s21_strlen(tmp)] = '\0';
     }
 
-    int dlina = strlen(string);
+    int dlina = s21_strlen(string);
     if(flag.istochnost && !flag.l){
         if(flag.tochnost < dlina){
             string[flag.tochnost] = '\0';
         }
     }
 
-    dlina = strlen(string);
+    dlina = s21_strlen(string);
     if(flag.width && dlina < flag.width){
         int raznica = flag.width - dlina;
         string = realloc(string, dlina + raznica + 1);
         if(flag.minus){
-            memset(string + dlina, ' ', raznica);//
+            s21_memset(string + dlina, ' ', raznica);//
         }
         else{
             char* tmp_mas = malloc(dlina);
-            strcpy(tmp_mas, string);
-            memset(string, ' ', raznica);
+            s21_strncpy(tmp_mas, string, s21_strlen(string));
+            s21_memset(string, ' ', raznica);
             string[raznica] = '\0';
-            strcat(string, tmp_mas);
+            s21_strncat(string, tmp_mas, s21_strlen(tmp_mas));
             free(tmp_mas);
         }
         string[dlina + raznica] = '\0';
     }
-    strcat(buf, string);
+    s21_strncat(buf, string, s21_strlen(string));
     free(string);
 }
 
@@ -545,7 +554,7 @@ int tochnost_ls(wchar_t* value, flags flag){
     int dlina = 0;
     int i = 0;
     while(value[i] != '\0'){
-        int len = wcrtomb(string, value[i], NULL);
+        int len = wcrtomb(string, value[i], S21_NULL);
         if(dlina + len > flag.tochnost){
             break;
         }
@@ -577,11 +586,11 @@ void specificator_uxXo(flags flag, va_list *arg, char *buf, char chr){
         string = number_uxXo_to_string(value, flag, 10, chr);
     }
 
-    int dlina = (int)strlen(string); //поменять на size_t нашу
+    int dlina = s21_strlen(string);
     if(dlina < flag.width){
         string = rabota_width(flag, string, dlina);
     }
-    strcat(buf, string);
+    s21_strncat(buf, string, s21_strlen(string));
     free(string);
 }
 
@@ -603,7 +612,7 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr
 
     mas_for_number[index] = '\0';
 
-    int dlina = strlen(mas_for_number);
+    int dlina = s21_strlen(mas_for_number);
 
     for(int i = 0; i < index / 2; i++){
         int tmp1 = mas_for_number[i];
@@ -666,11 +675,11 @@ void specificator_di(flags flag, va_list *arg, char *buf){
         value = va_arg(*arg, int);
     }
     char* string = number_di_to_string(value, flag);
-    int dlina = (int)strlen(string); //поменять на size_t нашу
+    int dlina = s21_strlen(string); 
     if(dlina < flag.width){
         string = rabota_width(flag, string, dlina);
     }
-    strcat(buf, string);
+    s21_strncat(buf, string, s21_strlen(string));
     free(string);
 }
 
@@ -698,7 +707,7 @@ int long_to_string(char* mas_for_number, int *index, long number){
         (*index)++;
     } while(number != 0);
     mas_for_number[*index] = '\0';
-    int dlina = strlen(mas_for_number);//поменять на наш size_t
+    int dlina = s21_strlen(mas_for_number);
 
     for(int i = 0; i < *index / 2; i++){
         int tmp1 = mas_for_number[i];
@@ -711,8 +720,8 @@ int long_to_string(char* mas_for_number, int *index, long number){
 
 int rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number, int index){
     if(flag.istochnost && !flag.tochnost && zero){
-        strcpy(mas_for_number, "\0");
-        dlina = strlen(mas_for_number);
+        s21_strncpy(mas_for_number, "\0", 1);
+        dlina = s21_strlen(mas_for_number);
     }
     else if(flag.istochnost && dlina < flag.tochnost){
         int count = dlina - 1;
@@ -726,7 +735,7 @@ int rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number, int i
         }
 
         mas_for_number[index + raznica] = '\0';
-        dlina = strlen(mas_for_number);
+        dlina = s21_strlen(mas_for_number);
     }
     return dlina;
 }
@@ -756,13 +765,13 @@ char* zapolnenie_mas_result(int dlina, long number, flags flag, char* mas_for_nu
 
 char* rabota_width(flags flag, char* string, int dlina){
     int raznica = flag.width - dlina;
-    string = realloc(string, dlina + raznica + 1);//подумать если вдруг будет NULL
+    string = realloc(string, dlina + raznica + 1);//подумать если вдруг будет S21_NULL
     if(flag.minus){
-        memset(string + dlina, ' ', raznica);//
+        s21_memset(string + dlina, ' ', raznica);//
     }
     else{
         int znak = 0;
-        if(strchr("+- ", string[0]) && flag.zero && !flag.istochnost){
+        if(s21_strchr("+- ", string[0]) && flag.zero && !flag.istochnost){
             znak++;
         }
         int count = dlina - 1;
@@ -770,42 +779,42 @@ char* rabota_width(flags flag, char* string, int dlina){
             string[count + raznica] = string[count];
             count--;
         }
-        memset(string + znak, (flag.zero && !flag.istochnost) ? '0' : ' ', raznica);
+        s21_memset(string + znak, (flag.zero && !flag.istochnost) ? '0' : ' ', raznica);
     }
     return string;
 }
 
-// int main(){
-//     setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
-//     char buf1[1024], buf2[1024];
-//     //char ch[5] = "asdf";
-//     //wchar_t ch = L'г';
-//     //wchar_t *str = L"開при";
-//     //float a = -63.123456;
-//     //CMP("%.4g", 0.000123456);
-//     //CMP("%.2g", 0.001);
-//     //CMP("%.2g", 0.0001);
-//     //CMP("%.1g", 0.0001);
-//     //CMP("%.3g", 0.0001);
-//     //float a = 0.0001;
-//     //float a = 0.005;
-//     //char str[32] = "%.2g";
-//     char str[32] = "!%.2g!";
-//     sprintf(buf1, str, 0.0001);
-//     s21_sprintf(buf2, str, 0.0001);
+/*int main(){
+    setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
+    char buf1[1024], buf2[1024];
+    //char ch[5] = "asdf";
+    //wchar_t ch = L'г';
+    //wchar_t *str = L"開при";
+    //float a = -63.123456;
+    //CMP("%.4g", 0.000123456);
+    //CMP("%.2g", 0.001);
+    //CMP("%.2g", 0.0001);
+    //CMP("%.1g", 0.0001);
+    //CMP("%.3g", 0.0001);
+    //float a = 0.0001;
+    //float a = 0.005;
+    //char str[32] = "%.2g";
+    char str[32] = "!%10.2g!";
+    sprintf(buf1, str, 0.0001);
+    s21_sprintf(buf2, str, 0.0001);
 
-//     printf("%s\n", buf1);
-//     printf("%s\n", buf2);
-//     //printf("%d,%d\n", a, b);
-//     printf("%d", strcmp(buf1, buf2));
-//     //for (int i = 0; i < 20; i++) {
-//     //    printf("buf1[%d] = %d\tbuf2[%d] = %d\n", i, buf1[i], i, buf2[i]);
-//     //}
+    printf("%s\n", buf1);
+    printf("%s\n", buf2);
+    //printf("%d,%d\n", a, b);
+    printf("%d", s21_strncmp(buf1, buf2, s21_strlen(buf1)));
+    //for (int i = 0; i < 20; i++) {
+    //    printf("buf1[%d] = %d\tbuf2[%d] = %d\n", i, buf1[i], i, buf2[i]);
+    //}
 
     
-//     //char buf[64];
-//     //sprintf(buf, "!%.0e!", 1.345);
-//     //printf("%s\n", buf);
+    //char buf[64];
+    //sprintf(buf, "!%.0e!", 1.345);
+    //printf("%s\n", buf);
 
-//     return 0;
-// }
+    return 0;
+}*/
