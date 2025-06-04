@@ -33,7 +33,7 @@ END_TEST
 
 // Символ находится в последнем байте
 START_TEST(test_memchr_last_byte) {
-  char str[] = "12345";
+  char *str = "12345";
   ck_assert_ptr_eq(s21_memchr(str, '5', 5), memchr(str, '5', 5));
 }
 END_TEST
@@ -52,6 +52,13 @@ START_TEST(test_memchr_empty_string) {
 }
 END_TEST
 
+// Поиск непечатных символов
+START_TEST(test_memchr_nonprinting_chars) {
+  char str[] = {0x01, 0x02};
+  ck_assert_ptr_eq(s21_memchr(str, 2, 2), memchr(str, 2, 2));
+}
+END_TEST
+
 Suite *memchr_suite(void) {
   Suite *s = suite_create("s21_memchr");
   TCase *tc = tcase_create("Core");
@@ -63,6 +70,7 @@ Suite *memchr_suite(void) {
   tcase_add_test(tc, test_memchr_last_byte);
   tcase_add_test(tc, test_memchr_repeated_chars);
   tcase_add_test(tc, test_memchr_empty_string);
+  tcase_add_test(tc, test_memchr_nonprinting_chars);
 
   suite_add_tcase(s, tc);
   return s;
