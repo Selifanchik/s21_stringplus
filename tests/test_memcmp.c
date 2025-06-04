@@ -3,7 +3,7 @@
 #include <string.h>
 // #include <stdint.h>
 
-#include "s21_string.h"
+#include "../s21_string.h"
 
 // Базовый случай: строки одинаковые
 START_TEST(test_memcmp_equal) {

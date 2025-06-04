@@ -1,8 +1,8 @@
 #include <check.h>
 #include <string.h>
 
-#include "s21_strerror.h"
-#include "s21_string.h"
+#include "../s21_strerror.h"
+#include "../s21_string.h"
 
 START_TEST(test_strerror_valid) {
   for (int i = 0; i < ERR_N; i++) {

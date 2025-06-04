@@ -1,7 +1,7 @@
 #include <check.h>
 #include <string.h>
 
-#include "s21_string.h"
+#include "../s21_string.h"
 
 // Базовый случай, копируем всю строку
 START_TEST(test_strncpy_basic) {

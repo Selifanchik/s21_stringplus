@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "s21_string.h"
+#include "../s21_string.h"
 
 // Базовый случай
 START_TEST(test_sscanf_basic) {

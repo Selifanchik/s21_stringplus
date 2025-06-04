@@ -16,7 +16,7 @@ SRC = s21_memchr.c s21_memcmp.c s21_memcpy.c s21_memset.c \
       s21_strcspn.c s21_strerror.c s21_strlen.c s21_strpbrk.c \
       s21_strrchr.c s21_strstr.c s21_strtok.c s21_to_upper.c \
 	  s21_to_lower.c s21_insert.c s21_trim.c s21_helpers.c \
-	  s21_sscanf.c
+	  s21_sscanf.c s21_sprintf.c
 
 OBJ = $(SRC:.c=.o)
 NAME = s21_string.a

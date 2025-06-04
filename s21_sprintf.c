@@ -775,37 +775,37 @@ char* rabota_width(flags flag, char* string, int dlina){
     return string;
 }
 
-int main(){
-    setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
-    char buf1[1024], buf2[1024];
-    //char ch[5] = "asdf";
-    //wchar_t ch = L'г';
-    //wchar_t *str = L"開при";
-    //float a = -63.123456;
-    //CMP("%.4g", 0.000123456);
-    //CMP("%.2g", 0.001);
-    //CMP("%.2g", 0.0001);
-    //CMP("%.1g", 0.0001);
-    //CMP("%.3g", 0.0001);
-    //float a = 0.0001;
-    //float a = 0.005;
-    //char str[32] = "%.2g";
-    char str[32] = "!%.2g!";
-    sprintf(buf1, str, 0.0001);
-    s21_sprintf(buf2, str, 0.0001);
+// int main(){
+//     setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
+//     char buf1[1024], buf2[1024];
+//     //char ch[5] = "asdf";
+//     //wchar_t ch = L'г';
+//     //wchar_t *str = L"開при";
+//     //float a = -63.123456;
+//     //CMP("%.4g", 0.000123456);
+//     //CMP("%.2g", 0.001);
+//     //CMP("%.2g", 0.0001);
+//     //CMP("%.1g", 0.0001);
+//     //CMP("%.3g", 0.0001);
+//     //float a = 0.0001;
+//     //float a = 0.005;
+//     //char str[32] = "%.2g";
+//     char str[32] = "!%.2g!";
+//     sprintf(buf1, str, 0.0001);
+//     s21_sprintf(buf2, str, 0.0001);
 
-    printf("%s\n", buf1);
-    printf("%s\n", buf2);
-    //printf("%d,%d\n", a, b);
-    printf("%d", strcmp(buf1, buf2));
-    //for (int i = 0; i < 20; i++) {
-    //    printf("buf1[%d] = %d\tbuf2[%d] = %d\n", i, buf1[i], i, buf2[i]);
-    //}
+//     printf("%s\n", buf1);
+//     printf("%s\n", buf2);
+//     //printf("%d,%d\n", a, b);
+//     printf("%d", strcmp(buf1, buf2));
+//     //for (int i = 0; i < 20; i++) {
+//     //    printf("buf1[%d] = %d\tbuf2[%d] = %d\n", i, buf1[i], i, buf2[i]);
+//     //}
 
     
-    //char buf[64];
-    //sprintf(buf, "!%.0e!", 1.345);
-    //printf("%s\n", buf);
+//     //char buf[64];
+//     //sprintf(buf, "!%.0e!", 1.345);
+//     //printf("%s\n", buf);
 
-    return 0;
-}
+//     return 0;
+// }

@@ -1,7 +1,7 @@
 #include <check.h>
 #include <string.h>
 
-#include "s21_string.h"
+#include "../s21_string.h"
 
 // Базовый случай, строки равны
 START_TEST(test_strncmp_equal) {
