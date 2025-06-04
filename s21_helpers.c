@@ -25,7 +25,7 @@ long get_number(const char** ptr_str) {
 int s21_isspace(int symbol) {
     int space_arr[] = {9, 10, 11, 12, 13, 32};
     int result = 0;
-    for (int i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
+    for (s21_size_t i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
         if (symbol == space_arr[i]) result = 1;
     }
     return result;
@@ -94,7 +94,7 @@ void init_parse_float(ParseFloat* number) {
     number->order_exp = 0;
 }
 
-long double pow10(int order) {
+long double s21_pow10(int order) {
     long double result = 1.0;
     for (int i = 0; i < order; i++) {
         result *= 10.;
@@ -106,11 +106,11 @@ long double to_float(ParseFloat float_value) {
     long double value = 0;
     long double fraction = 1.0;
     for (int i = 0; i < float_value.order_fract; i++) {
-        fraction = pow10(float_value.order_fract);
+        fraction = s21_pow10(float_value.order_fract);
     }
     value = (long double)float_value.int_part + ((long double)float_value.fract_part / fraction);
     if (float_value.exp_part) {
-        long double exp = pow10(float_value.order_exp);
+        long double exp = s21_pow10(float_value.order_exp);
         if (float_value.sign_exp > 0) {
             value *= exp;
         } else value /= exp;

@@ -6,11 +6,12 @@
 
 // Базовый случай
 START_TEST(test_sscanf_basic) {
-  const char *str = "   Hello, world!   ";
-  char new_str[20];
-  const char *expected = "Hello,";
-  sscanf(str,"%s",new_str);
-  ck_assert_str_eq(new_str, expected);
+  const char *str = "   1Hello, world!   ";
+  int a;
+  int b;
+  sscanf(str,"%d",&a);
+  s21_sscanf(str,"%d",&b);
+  ck_assert_int_eq(a, b);
 }
 END_TEST
 

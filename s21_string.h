@@ -60,7 +60,7 @@ void init_parse_float(ParseFloat* number);
 void skip_space(const char** ptr_str);
 void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value);
 long double to_float(ParseFloat float_value);
-long double pow10(int order);
+long double s21_pow10(int order);
 const char *ltrim(const char *src, const char *trim_chars);
 const char *rtrim(const char *src, const char *trim_chars);
 void *trim(const char *src, const char *trim_chars);

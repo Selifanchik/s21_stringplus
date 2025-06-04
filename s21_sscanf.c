@@ -31,7 +31,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
 }
 
 void parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args) {
-    Callback cb = {};
+    Callback cb = {0};
     switch (token->specifier) {
         case 'd':
             skip_space(ptr_str);
@@ -128,7 +128,7 @@ char* parse_format_sep(const char* start_format, const char* ptr_specifier) {
         // заменить на s21_strncpy
         strncpy(separation, start_format, length_sep);
         char my_space[] = {9, 10, 11, 12, 13, 32, 0};
-        separation = trim(separation, my_space);
+        separation = s21_trim(separation, my_space);
     }
     return separation;
 }
@@ -252,7 +252,7 @@ void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float
     cb.base = 10;
     init_parse_float(float_value);
     float_value->sign_float = is_sign(ptr_str, &(token->width));
-    char* temp = S21_NULL;
+    //char* temp = S21_NULL;
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
         float_value->int_part = base_to_dec(ptr_str, cb, &(token->width));
