@@ -63,12 +63,12 @@ int to_hex(const char* hex_num) {
 
 int is_sign(const char** ptr_str, int* width) {
     int sign = 1;
-    if ((**ptr_str == '-' || **ptr_str == '+') && (*width == -1 || *width > 1)) {
+    if ((**ptr_str == '-' || **ptr_str == '+') && (*width == -1 || *width > 0)) {
         if (**ptr_str == '-') {
             sign = -1;
         }
         (*ptr_str)++;
-        if (*width > 1) ((*width)--);
+        if (*width > 0) ((*width)--);
     }
     return sign;
 }
