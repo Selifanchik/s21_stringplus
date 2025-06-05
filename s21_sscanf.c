@@ -13,7 +13,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
     const char* ptr_format = format;
     const char* ptr_specifier = ptr_format;
     char* separation = S21_NULL;
-    while ((ptr_specifier = strchr(ptr_format, '%')) != S21_NULL && !flag_end) {
+    while ((ptr_specifier = strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
         separation = parse_format_sep(ptr_format, ptr_specifier);
         if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
