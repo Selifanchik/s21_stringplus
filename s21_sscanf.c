@@ -157,7 +157,10 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     if (s21_is_dec_digit(*ptr_format)) {
         Callback cb = {s21_is_dec_digit, to_oct_dec, 10};
         int width = -1;
-        token->width = (int)base_to_dec(ptr_format, cb, &width);
+        unsigned long temp_width;
+        if (!base_to_dec(ptr_format, cb, &width, &temp_width)) {
+            token->width = (int)temp_width;
+        }
     }
     // заменить strchr на s21_strchr
     char* ptr_length = strchr(lengths, **ptr_format);
@@ -178,25 +181,25 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
 
 void handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
     int sign = is_sign(ptr_str, &(token->width));
-    long value = sign * base_to_dec(ptr_str, cb,&(token->width));
-    if (!token->suppress) {
+    unsigned long value = 0;
+    if (!token->suppress && !base_to_dec(ptr_str, cb, &(token->width), &value)) {
         if (token->length == 'l') {
             long* dest = va_arg(*args, long*);
-            *dest = (long)value;
+            *dest = (long)value * sign;
         } else if (token->length == 'h') {
             short* dest = va_arg(*args, short*);
-            *dest = (short)value;
+            *dest = (short)value * sign;
         } else {
             int* dest = va_arg(*args, int*);
-            *dest = (int)value;
+            *dest = (int)value * sign;
         }
     }
 }
 
 
 void handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback cb) {
-    long value = base_to_dec(ptr_str, cb, &(token->width));
-    if (!token->suppress) {
+    unsigned long value = 0;
+    if (!token->suppress && !base_to_dec(ptr_str, cb, &(token->width), &value)) {
         if (token->length == 'l') {
             unsigned long* dest = va_arg(*args, unsigned long*);
             *dest = (unsigned long)value;
@@ -255,16 +258,22 @@ void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float
     //char* temp = S21_NULL;
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
-        float_value->int_part = base_to_dec(ptr_str, cb, &(token->width));
-        flag_digit = 1;
+        unsigned long temp_int_part = 0;
+        if (!base_to_dec(ptr_str, cb, &(token->width), &temp_int_part)) {
+            float_value->int_part = (long)temp_int_part;
+            flag_digit = 1;
+        }
     }
     if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1))) {
         (*ptr_str)++;
         const char* start_fract = *ptr_str;
         if (s21_is_dec_digit(*ptr_str)) {
-            float_value->fract_part = base_to_dec(ptr_str, cb, &(token->width));
-            float_value->order_fract = *ptr_str - start_fract;
-            flag_digit = 1;
+            unsigned long temp_fract_part = 0;
+            if (!base_to_dec(ptr_str, cb, &(token->width), &temp_fract_part)) {
+                float_value->fract_part = (int)temp_fract_part;
+                float_value->order_fract = *ptr_str - start_fract;
+                flag_digit = 1;
+            }
         }
     }
     if (flag_digit && (**ptr_str == 'E' || **ptr_str == 'e')) {
@@ -272,11 +281,17 @@ void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float
             float_value->exp_part = 1;
             (*ptr_str)++;
             float_value->sign_exp = is_sign(ptr_str, &(token->width));
-            float_value->order_exp = base_to_dec(ptr_str, cb, &(token->width));
+            unsigned long temp_order_exp = 0;
+            if (!base_to_dec(ptr_str, cb, &(token->width), &temp_order_exp)) {
+                float_value->order_exp = (int)temp_order_exp;
+            }
         } else if (s21_is_dec_digit(*ptr_str + 1)) {
             float_value->exp_part = 1;
             (*ptr_str)++;
-            float_value->order_exp = base_to_dec(ptr_str, cb, &(token->width));
+            unsigned long temp_order_exp = 0;
+            if (!base_to_dec(ptr_str, cb, &(token->width), &temp_order_exp)) {
+                float_value->order_exp = (int)temp_order_exp;
+            }
         }
     }
 }
@@ -309,8 +324,8 @@ void handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     cb.to_digit = to_hex;
     cb.base = 16;
 
-    unsigned long value = base_to_dec(ptr_str, cb, &(token->width));
-    if (!token->suppress) {
+    unsigned long value = 0;
+    if (!token->suppress && !base_to_dec(ptr_str, cb, &(token->width), &value)) {
         void** dest = va_arg(*args, void**);
         *dest = (void*)value;
     }

@@ -33,16 +33,16 @@ int s21_isspace(int symbol) {
 
 // add width
 // rename struct Callback
-long base_to_dec(const char** num, Callback cb, int* width) {
-    long dec_num = 0;
-    int digit = 0;
-    while (cb.is_digit(*num) && (*width == -1 || *width > 0)) {
-        digit = cb.to_digit(*num);
-        dec_num = dec_num * cb.base + digit;
+int base_to_dec(const char** ptr_str, Callback cb, int* width, unsigned long* value) {
+    int flag_parse_error = 1;
+    while (cb.is_digit(*ptr_str) && (*width == -1 || *width > 0)) {
+        int digit = cb.to_digit(*ptr_str);
+        *value = *value * cb.base + digit;
         if (*width > 0) (*width)--;
-        (*num)++;
+        (*ptr_str)++;
+        flag_parse_error = 0;
     }
-    return dec_num;
+    return flag_parse_error;
 }
 
 int to_oct_dec(const char* num) {
