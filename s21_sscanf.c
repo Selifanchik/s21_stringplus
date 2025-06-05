@@ -1,6 +1,7 @@
 #include "s21_string.h"
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 
 int s21_sscanf(const char* str, const char* format, ...) {
     va_list arg;
@@ -79,7 +80,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             handler_unsigned_int(ptr_str, token, args, &cb);
             break;
         case 'c':
-            handler_c(ptr_str, token, args);
+            if (handler_c(ptr_str, token, args)) flag_error = 1;
             break;
         case 's':
             skip_space(ptr_str);
@@ -227,21 +228,31 @@ void handler_n(const char* start_str, const char* ptr_str, va_list* args) {
     *dest = (int)value;
 }
 
-void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    int flag_error = 1;
     if (token->width == -1) token->width = 1;
-    //пока так но надо подумать как сделать с длиной
-    char* dest;
-    if (!token->suppress) dest = va_arg(*args, char*);
+    wchar_t* dest_w = (wchar_t*)S21_NULL;
+    char* dest_c = (char*)S21_NULL;
+    if (!token->suppress) {
+        if (token->length == 'l') dest_w = va_arg(*args, wchar_t*);
+        else dest_c = va_arg(*args, char*);
+    }
     int i = 0;
     for (i = 0; i < token->width; i++) {
         if (**ptr_str) {
-            if (!token->suppress) *(dest + i) = *(*ptr_str);
+            if (!token->suppress) {
+                if (token->length == 'l') *(dest_w + i) = (wchar_t)(unsigned char)*(*ptr_str);
+                else *(dest_c + i) = *(*ptr_str);
+            }
             (*ptr_str)++;
-        } else {
-            break; //заменить на что то другое возможно что будет отслеживать ошибку
+            flag_error = 0;
         }
     }
-    if (token->width > 1 && !token->suppress) *(dest + i) = '\0';
+    if (token->width > 1 && !token->suppress) {
+        if (token->length == 'l') *(dest_w + i) = L'\0';
+        else *(dest_c + i) = '\0';
+    }
+    return flag_error;
 }
 
 void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {

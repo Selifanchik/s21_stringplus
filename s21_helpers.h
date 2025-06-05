@@ -42,7 +42,7 @@ int s21_is_oct_digit(const char* symbol);
 int is_sign(const char** ptr_str, int* width);
 int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const Callback* cb);
 void handler_n(const char* start_str, const char* ptr_str, va_list* args);
-void handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
+int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args);
