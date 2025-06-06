@@ -6,6 +6,7 @@
 //для lc, ls
 #include <wchar.h>
 #include <locale.h>
+#include <math.h>
 
 //#include <string.h>//потом убрать и использовать только наши функ.(в коде много оригинальных ЗАМЕНИТЬ!!!)
 //#include <math.h>
@@ -53,10 +54,11 @@ char* specificator_feE(flags flag, long double number, char* mas_for_left, char*
 char* specificator_gG(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr);
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right);
 char* rabota_mantisa(char* string, char chr, int mantis);
-int expanent(long double *number, long *left_part, int mantis);
+int expanent(long double *number, int mantis, flags flag);
 int dlina_number_func(long double number);
 long double zero_before_number(flags flag, char* mas_for_left, long double number, int left_part, int* dlina, int dlina_number);
-int my_pow(int number, int stepen);
+double my_pow(int number, int stepen);
+int remove_0(char* string);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -91,7 +93,7 @@ int s21_sprintf(char *str, const char *format, ...){
 }
 
 void parsing(const char *format, int *i, flags *flag, va_list *arg){
-    while(format[*i] && !s21_strchr("cdieEfgGosuxXpn", format[*i])){//добавить остальные спецификаторы   //пока не спецификатор идем посимвольно
+    while(!s21_strchr("cdieEfgGosuxXpn", format[*i])){//добавить остальные спецификаторы   //пока не спецификатор идем посимвольно
         
         if(s21_strchr("-+ #0", format[*i])){
             pars_flags_dlina(format[*i], flag);
@@ -213,9 +215,6 @@ void define_specificator(char chr, flags flag, va_list *arg, char* buf){
         case 'p': 
             specificator_p(arg, buf, flag);
             break;
-
-        //default:
-            //printf("%c", format[i]);
     }
 }
 
@@ -254,9 +253,8 @@ char* specificator_gG(flags flag, long double number, char* mas_for_left, char* 
     if(number < 0){
         number = number * -1;
     }
-    long left_part = number;
     int mantis = 0;
-    mantis = expanent(&number, &left_part, mantis);
+    mantis = expanent(&number, mantis, flag);
     if(!flag.istochnost){
         flag.istochnost = 1;
         flag.tochnost = 6;
@@ -303,13 +301,15 @@ char* specificator_feE(flags flag, long double number, char* mas_for_left, char*
         znak = -1;
     }
 
-    long left_part = number;
     int mantis = 0;
+
     if(chr == 'e' || chr == 'E'){
-        mantis = expanent(&number, &left_part, mantis);
+        mantis = expanent(&number, mantis, flag); 
+
     }
 
     int dlina = float_to_string(number, mas_for_left, flag, mas_for_right);
+    
     if(!flag.reshetka && flag.isg){
         dlina = remove_0(mas_for_left);
     }
@@ -320,19 +320,21 @@ char* specificator_feE(flags flag, long double number, char* mas_for_left, char*
     return string;
 }
 
-int expanent(long double *number, long *left_part, int mantis){
-    while(1){
-        *left_part = *number;
-        if(*left_part == 0){
-            *number = *number * 10.0;
-            mantis--;
-        }
-        else if(*left_part > 9){
-            *number = *number / 10.0;
+int expanent(long double *number, int mantis, flags flag){
+    if(*number != 0.0){
+        mantis = (int)floorl(log10l(*number));
+        *number = *number / powl(10.0L, mantis); 
+        
+        long double toch = pow(10.0, flag.istochnost ? flag.tochnost : 6);
+        *number = round(*number * toch) / toch;
+
+        if(*number >= 10.0L){
+            *number /= 10.0L;
             mantis++;
-        }
-        else{
-            break;
+        } 
+        else if(*number < 1.0L){
+            *number *= 10.0L;
+            mantis--;
         }
     }
     return mantis;
@@ -360,8 +362,8 @@ char* rabota_mantisa(char* string, char chr, int mantis){
     return string;
 }
 
-int my_pow(int number, int stepen){
-    int result = 1;
+double my_pow(int number, int stepen){
+    double result = 1;
     for(int i = 0; i < stepen; i++){
         result *= number;
     }
@@ -369,7 +371,7 @@ int my_pow(int number, int stepen){
 }
 
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right){
-    if(number < 0) number = number * -1.0;
+    //if(number < 0) number = number * -1.0;
     long left_part = number;
     int index_left = 0;
     int dlina = long_to_string(mas_for_left, &index_left, left_part);
@@ -386,7 +388,7 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
         if(!flag.istochnost){
             flag.tochnost = 6;
         }
-
+        
         number = (number - left_part) * my_pow(10, flag.tochnost);
 
         int dlina_number = dlina_number_func(number);
@@ -494,6 +496,7 @@ void specificator_c(flags flag, va_list *arg, char* buf){
             s21_memset(string, ' ', raznica);
             string[raznica] = '\0';
             s21_strncat(string, tmp_mas, s21_strlen(tmp_mas));
+            string[dlina + raznica] = '\0';
             free(tmp_mas);
         }
         string[dlina + raznica + 1] = '\0';
@@ -799,9 +802,18 @@ char* rabota_width(flags flag, char* string, int dlina){
     //float a = 0.0001;
     //float a = 0.005;
     //char str[32] = "%.2g";
-    char str[32] = "!%10.2g!";
-    sprintf(buf1, str, 0.0001);
-    s21_sprintf(buf2, str, 0.0001);
+    //000000000002
+    //sprintf(buf1, "%020.10e", -0.0000123);
+    //s21_sprintf(buf2, "%020.10e", -0.0000123);
+    sprintf(buf1, "%e", 999999.99);
+    s21_sprintf(buf2, "%e", 999999.99);
+
+
+
+
+    // char str[32] = "!%10.2g!";
+    // sprintf(buf1, str, 0.0001);
+    // s21_sprintf(buf2, str, 0.0001);
 
     printf("%s\n", buf1);
     printf("%s\n", buf2);
