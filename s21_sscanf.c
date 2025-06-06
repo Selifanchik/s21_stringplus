@@ -301,7 +301,7 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
         }
     }
     if (flag_digit) {
-        if (!is_valid_exponent(*ptr_str)) {
+        if (!is_valid_exponent(*ptr_str, token->width)) {
             float_value->exp_part = 1;
             (*ptr_str)++;
             float_value->sign_exp = is_sign(ptr_str, &(token->width));

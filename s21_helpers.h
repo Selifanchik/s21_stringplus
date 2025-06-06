@@ -52,5 +52,5 @@ void skip_space(const char** ptr_str);
 int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value);
 long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
-int is_valid_exponent(const char *ptr_str);
+int is_valid_exponent(const char *ptr_str, int width);
 #endif
