@@ -34,16 +34,15 @@ int s21_sscanf(const char* str, const char* format, ...) {
 int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
     Callback cb = {0};
+    if (token->specifier != 'c' && token->specifier != 'n') skip_space(ptr_str);
     switch (token->specifier) {
         case 'd':
-            skip_space(ptr_str);
             cb.base = 10;
             cb.is_digit = s21_is_dec_digit;
             cb.to_digit = to_oct_dec;
             if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;;
             break;
         case 'i':
-            skip_space(ptr_str);
             if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
                 (*ptr_str) += 2;
                 cb.base = 16;
@@ -68,11 +67,9 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
         case 'f':
         case 'g':
         case 'G':
-            skip_space(ptr_str);
             handler_fegEG(ptr_str, token, args);
             break;
         case 'o':
-            skip_space(ptr_str);
             if (**ptr_str == '0') (*ptr_str)++;
             cb.base = 8;
             cb.is_digit = s21_is_oct_digit;
@@ -83,11 +80,9 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             if (handler_c(ptr_str, token, args)) flag_error = 1;
             break;
         case 's':
-            skip_space(ptr_str);
             if (handler_s(ptr_str, token, args)) flag_error = 1;
             break;
         case 'u':
-            skip_space(ptr_str);
             cb.base = 10;
             cb.is_digit = s21_is_dec_digit;
             cb.to_digit = to_oct_dec;
@@ -95,7 +90,6 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             break;
         case 'x':
         case 'X':
-            skip_space(ptr_str);
             if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
             cb.base = 16;
             cb.is_digit = s21_is_hex_digit;
@@ -103,7 +97,6 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'p':
-            skip_space(ptr_str);
             if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
             if (handler_p(ptr_str, token, args)) flag_error = 1;
             break;
@@ -111,7 +104,6 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             handler_n(str, *ptr_str, args);
             break;
         case '%':
-            skip_space(ptr_str);
             if (**ptr_str == '%') (*ptr_str)++;
             // иначе закончить считывание
             break;
