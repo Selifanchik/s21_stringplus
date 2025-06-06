@@ -272,34 +272,19 @@ int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     return flag_error;
 }
 
-// void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
-//     char* dest;
-//     if (!token->suppress) dest = va_arg(*args, char*);
-//     int i = 0;
-//     while (**ptr_str && s21_isspace(**ptr_str)) {
-//         if(!token->suppress) {
-//             dest = va_arg(*args, char*);
-//             *dest = *(*ptr_str);
-//         }
-//         (*ptr_str)++;
-//         i++;
-//     } //обработку ошибок добавить и длину
-//     *(dest + i) = '\0';
-// }
-
-void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
+int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
+    int flag_error = 0;
     Callback cb;
     cb.is_digit = s21_is_dec_digit;
     cb.to_digit = to_oct_dec;
     cb.base = 10;
     init_parse_float(float_value);
     float_value->sign_float = is_sign(ptr_str, &(token->width));
-    //char* temp = S21_NULL;
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
         unsigned long temp_int_part = 0;
         if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_int_part)) {
-            float_value->int_part = (long)temp_int_part;
+            float_value->int_part = temp_int_part;
             flag_digit = 1;
         }
     }
@@ -309,14 +294,14 @@ void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float
         if (s21_is_dec_digit(*ptr_str)) {
             unsigned long temp_fract_part = 0;
             if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_fract_part)) {
-                float_value->fract_part = (int)temp_fract_part;
+                float_value->fract_part = temp_fract_part;
                 float_value->order_fract = *ptr_str - start_fract;
                 flag_digit = 1;
             }
         }
     }
-    if (flag_digit && (**ptr_str == 'E' || **ptr_str == 'e')) {
-        if ((*(*ptr_str + 1) == '-' || *(*ptr_str + 1) == '+') && s21_is_dec_digit(*ptr_str + 2)) {
+    if (flag_digit) {
+        if (!is_valid_exponent(*ptr_str)) {
             float_value->exp_part = 1;
             (*ptr_str)++;
             float_value->sign_exp = is_sign(ptr_str, &(token->width));
@@ -324,15 +309,9 @@ void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float
             if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_order_exp)) {
                 float_value->order_exp = (int)temp_order_exp;
             }
-        } else if (s21_is_dec_digit(*ptr_str + 1)) {
-            float_value->exp_part = 1;
-            (*ptr_str)++;
-            unsigned long temp_order_exp = 0;
-            if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_order_exp)) {
-                float_value->order_exp = (int)temp_order_exp;
-            }
         }
-    }
+    } else flag_error = 1;
+    return flag_error;
 }
 
 // вычисления перенести в отдельную переменную добавить ширину и занести в переменные типа

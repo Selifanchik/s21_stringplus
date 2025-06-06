@@ -31,7 +31,6 @@ int s21_isspace(int symbol) {
     return result;
 }
 
-// add width
 // rename struct Callback
 int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned long* value) {
     int flag_parse_error = 1;
@@ -116,4 +115,13 @@ long double to_float(ParseFloat float_value) {
         } else value /= exp;
     }
     return value;
+}
+
+int is_valid_exponent(const char *ptr_str, int width) {
+    int flag_error = 1;
+    int is_exp = (*ptr_str == 'E' || *ptr_str == 'e');
+    int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') && s21_is_dec_digit(ptr_str + 2) && width > 1;
+    int has_digit_only = s21_is_dec_digit(ptr_str + 1) && width > 0;
+    if (is_exp && (has_sign_and_digit || has_digit_only)) flag_error = 0;
+    return flag_error;
 }

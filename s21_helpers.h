@@ -18,8 +18,8 @@ typedef struct {
 
 typedef struct {
     int sign_float;
-    long int_part;
-    int fract_part;
+    unsigned long int_part;
+    unsigned long fract_part;
     int order_fract;
     int exp_part;
     int sign_exp;
@@ -49,7 +49,8 @@ int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args);
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
 void skip_space(const char** ptr_str);
-void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value);
+int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value);
 long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
+int is_valid_exponent(const char *ptr_str);
 #endif
