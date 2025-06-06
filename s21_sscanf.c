@@ -19,9 +19,8 @@ int s21_sscanf(const char* str, const char* format, ...) {
         if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
             if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
-                parse_value(str, &ptr_str, &token, &arg);
+                if (!parse_value(str, &ptr_str, &token, &arg)) read_count++;
                 ptr_format = ptr_specifier;
-                read_count++;
             } else flag_end = 1;
             free(separation);
             init_token(&token);
@@ -33,7 +32,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
 
 int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
-    Callback cb = {0};
+    Callback cb;
     if (token->specifier != 'c' && token->specifier != 'n') skip_space(ptr_str);
     switch (token->specifier) {
         case 'd':
@@ -149,19 +148,19 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     if (s21_is_dec_digit(*ptr_format)) {
         Callback cb = {s21_is_dec_digit, to_oct_dec, 10};
         int width = -1;
-        unsigned long temp_width;
+        unsigned long temp_width = 0;
         if (!base_to_dec(ptr_format, &cb, &width, &temp_width)) {
             token->width = (int)temp_width;
         }
     }
     // заменить strchr на s21_strchr
-    char* ptr_length = strchr(lengths, **ptr_format);
+    const char* ptr_length = strchr(lengths, **ptr_format);
     if (ptr_length != S21_NULL) {
         token->length = **ptr_format;
         (*ptr_format)++;
     }
     // заменить strchr на s21_strchr
-    char* ptr_specifier = strchr(specifiers, **ptr_format);
+    const char* ptr_specifier = strchr(specifiers, **ptr_format);
     if (ptr_specifier != S21_NULL) {
         token->specifier = *ptr_specifier;
         (*ptr_format)++;

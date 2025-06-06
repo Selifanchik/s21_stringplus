@@ -120,8 +120,8 @@ long double to_float(ParseFloat float_value) {
 int is_valid_exponent(const char *ptr_str, int width) {
     int flag_error = 1;
     int is_exp = (*ptr_str == 'E' || *ptr_str == 'e');
-    int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') && s21_is_dec_digit(ptr_str + 2) && width > 1;
-    int has_digit_only = s21_is_dec_digit(ptr_str + 1) && width > 0;
+    int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') && s21_is_dec_digit(ptr_str + 2) && (width > 1 || width == -1);
+    int has_digit_only = s21_is_dec_digit(ptr_str + 1) && (width > 0 || width == -1);
     if (is_exp && (has_sign_and_digit || has_digit_only)) flag_error = 0;
     return flag_error;
 }
