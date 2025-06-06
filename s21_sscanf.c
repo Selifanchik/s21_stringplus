@@ -77,22 +77,21 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             cb.base = 8;
             cb.is_digit = s21_is_oct_digit;
             cb.to_digit = to_oct_dec;
-            handler_unsigned_int(ptr_str, token, args, &cb);
+            if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'c':
             if (handler_c(ptr_str, token, args)) flag_error = 1;
             break;
         case 's':
             skip_space(ptr_str);
-            if (token->width > 0) handler_c(ptr_str, token, args);
-            else handler_s(ptr_str, token, args);
+            if (handler_s(ptr_str, token, args)) flag_error = 1;
             break;
         case 'u':
             skip_space(ptr_str);
             cb.base = 10;
             cb.is_digit = s21_is_dec_digit;
             cb.to_digit = to_oct_dec;
-            handler_unsigned_int(ptr_str, token, args, &cb);
+            if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'x':
         case 'X':
@@ -101,12 +100,12 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             cb.base = 16;
             cb.is_digit = s21_is_hex_digit;
             cb.to_digit = to_hex;
-            handler_unsigned_int(ptr_str, token, args, &cb);
+            if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'p':
             skip_space(ptr_str);
             if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
-            handler_p(ptr_str, token, args);
+            if (handler_p(ptr_str, token, args)) flag_error = 1;
             break;
         case 'n':
             handler_n(str, *ptr_str, args);
@@ -255,17 +254,46 @@ int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     return flag_error;
 }
 
-void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
-    char* dest;
-    if (!token->suppress) dest = va_arg(*args, char*);
+int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    int flag_error = 1;
+    wchar_t* dest_w = (wchar_t*)S21_NULL;
+    char* dest_c = (char*)S21_NULL;
+    if (!token->suppress) {
+        if (token->length == 'l') dest_w = va_arg(*args, wchar_t*);
+        else dest_c = va_arg(*args, char*);
+    }
     int i = 0;
-    while (**ptr_str && s21_isspace(**ptr_str)) {
-        if(!token->suppress) dest = va_arg(*args, char*);
-        (*ptr_str)++;
-        i++;
-    } //обработку ошибок добавить и длину
-    *(dest + i) = '\0';
+    for (i = 0; (i < token->width && token->width > 0) || (token->width == -1 && !s21_isspace(**ptr_str)); i++) {
+        if (**ptr_str) {
+            if (!token->suppress) {
+                if (token->length == 'l') *(dest_w + i) = (wchar_t)(unsigned char)*(*ptr_str);
+                else *(dest_c + i) = *(*ptr_str);
+            }
+            (*ptr_str)++;
+            flag_error = 0;
+        }
+    }
+    if (!token->suppress) {
+        if (token->length == 'l') *(dest_w + i) = L'\0';
+        else *(dest_c + i) = '\0';
+    }
+    return flag_error;
 }
+
+// void handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+//     char* dest;
+//     if (!token->suppress) dest = va_arg(*args, char*);
+//     int i = 0;
+//     while (**ptr_str && s21_isspace(**ptr_str)) {
+//         if(!token->suppress) {
+//             dest = va_arg(*args, char*);
+//             *dest = *(*ptr_str);
+//         }
+//         (*ptr_str)++;
+//         i++;
+//     } //обработку ошибок добавить и длину
+//     *(dest + i) = '\0';
+// }
 
 void parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
     Callback cb;
@@ -336,16 +364,19 @@ void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) 
     }
 }
 
-
-void handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    int flag_error = 0;
     Callback cb;
     cb.is_digit = s21_is_hex_digit;
     cb.to_digit = to_hex;
     cb.base = 16;
 
     unsigned long value = 0;
-    if (!token->suppress && !base_to_dec(ptr_str, &cb, &(token->width), &value)) {
-        void** dest = va_arg(*args, void**);
-        *dest = (void*)value;
-    }
+    if (!base_to_dec(ptr_str, &cb, &(token->width), &value)) {
+        if (!token->suppress) {
+            void** dest = va_arg(*args, void**);
+            *dest = (void*)value;
+        }
+    } else flag_error = 1;
+    return flag_error;
 }
