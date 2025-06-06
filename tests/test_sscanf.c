@@ -268,6 +268,20 @@ START_TEST(test_sscanf_i_octal) {
 }
 END_TEST
 
+// // Тест %i oc с +- и шириной и делителем
+// START_TEST(test_sscanf_i_octal_neg_pos_width_delim) {
+//  const char *str = "    -0377,    +0377,   +0377, +0377";
+//   int a, b, c=1, d=4;
+//   int e, f, g=1, h=4;
+//   sscanf(str, "%i, %i, %1i, %6i", &a, &b, &c, &d);
+//   s21_sscanf(str, "%i, %i, %1i, %6i", &e, &f, &g, &h);
+//   ck_assert_int_eq(a, e);
+//   ck_assert_int_eq(b, f);
+//   ck_assert_int_eq(c, g);
+//   ck_assert_int_eq(d, h);
+// }
+// END_TEST
+
 // Тест %i hex
 START_TEST(test_sscanf_i_hex) {
   const char *str = " 0x1A3F 0XFF   ";
@@ -292,6 +306,20 @@ START_TEST(test_sscanf_i_hex_uncorrect) {
 }
 END_TEST
 
+// // Тест %i hex с +- шириной делителем
+// START_TEST(test_sscanf_i_hex_neg_pos_width_delim) {
+//   const char *str = " -0x1A3F +0XFF,-0x1A3F,+0x1A3F ";
+//   int a, b, c=1, d=4;
+//   int e, f, g=1, h=4;
+//   sscanf(str, "%i %i,%6i, %8i", &a, &b, &c, &d);
+//   s21_sscanf(str, "%i %i,%6i, %8i", &e, &f, &g, &h);
+//   ck_assert_int_eq(a, e);
+//   ck_assert_int_eq(b, f);
+//   ck_assert_int_eq(c, g);
+//   ck_assert_int_eq(d, h);
+// }
+// END_TEST
+
 // Тест %e float
 START_TEST(test_sscanf_e_float) {
   const char *str = ".3e2 3e2 4e-3 1.234";
@@ -305,6 +333,21 @@ START_TEST(test_sscanf_e_float) {
   ck_assert_float_eq(d, h);
 }
 END_TEST
+
+// // Тест %e float +- delim width uncorrect
+// START_TEST(test_sscanf_e_float_neg_pos_width_delim) {
+//   const char *str = "\t+.3e2 -3e2: 0.0e0 \n1.234s 0.ee2";
+//   float a, b, c, d, u=1;
+//   float e, f, g, h, u1=1;
+//   sscanf(str, "%e %e: %e %5e %e", &a, &b, &c, &d, &u);
+//   s21_sscanf(str, "%e %e: %e %5e %e", &e, &f, &g, &h, &u1);
+//   ck_assert_float_eq(a, e);
+//   ck_assert_float_eq(b, f);
+//   ck_assert_float_eq(c, g);
+//   ck_assert_float_eq(d, h);
+//   ck_assert_float_eq(u, u1);
+// }
+// END_TEST
 
 // Тест %e double
 START_TEST(test_sscanf_e_double) {
@@ -422,10 +465,13 @@ Suite *sscanf_suite(void) {
   //tcase_add_test(tc_core, test_sscanf_char_with_spaces);
   tcase_add_test(tc_core, test_sscanf_i_dec);
   tcase_add_test(tc_core, test_sscanf_i_octal);
+  //tcase_add_test(tc_core, test_sscanf_i_octal_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_i_octal_uncorrect);
   tcase_add_test(tc_core, test_sscanf_i_hex);
   tcase_add_test(tc_core, test_sscanf_i_hex_uncorrect);
+  //tcase_add_test(tc_core, test_sscanf_i_hex_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_e_float);
+  //tcase_add_test(tc_core, test_sscanf_e_float_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_e_double);
   tcase_add_test(tc_core, test_sscanf_e_long_double);
   tcase_add_test(tc_core, test_sscanf_E_f_g_G);
