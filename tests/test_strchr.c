@@ -63,6 +63,19 @@ START_TEST(test_strchr_empty_string_null_char) {
 }
 END_TEST
 
+
+// Ищем спец символ
+START_TEST(test_strchr_spec_char) {
+  const char *str = " \nhgf";
+  char c = '\n';
+
+  char *res1 = s21_strchr(str, c);
+  char *res2 = strchr(str, c);
+
+  ck_assert_ptr_eq(res1, res2);
+}
+END_TEST
+
 Suite *strchr_suite(void) {
   Suite *s = suite_create("s21_strchr");
   TCase *tc_core = tcase_create("Core");
@@ -72,6 +85,7 @@ Suite *strchr_suite(void) {
   tcase_add_test(tc_core, test_strchr_null_char);
   tcase_add_test(tc_core, test_strchr_empty_string);
   tcase_add_test(tc_core, test_strchr_empty_string_null_char);
+  tcase_add_test(tc_core, test_strchr_spec_char);
 
   suite_add_tcase(s, tc_core);
   return s;

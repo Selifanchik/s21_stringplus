@@ -134,6 +134,38 @@ START_TEST(test_memcmp_with_unsigned_char) {
 }
 END_TEST
 
+// Массив байтов с нулем, не строка
+START_TEST(test_memcmp_empty_str) {
+  unsigned char str1[] = "";
+  unsigned char str2[] = "";
+  int my_cmp = s21_memcmp(str1, str2, 1);
+  int original_cmp = memcmp(str1, str2, 1);
+
+  if (my_cmp < 0)
+    ck_assert_int_lt(original_cmp, 0);
+  else if (my_cmp > 0)
+    ck_assert_int_gt(original_cmp, 0);
+  else
+    ck_assert_int_eq(original_cmp, 0);
+}
+END_TEST
+
+// Массив байтов с нулем, не строка
+START_TEST(test_memcmp_with_spec_char) {
+  unsigned char str1[] = " \n";
+  unsigned char str2[] = " \n";
+  int my_cmp = s21_memcmp(str1, str2, 3);
+  int original_cmp = memcmp(str1, str2, 3);
+
+  if (my_cmp < 0)
+    ck_assert_int_lt(original_cmp, 0);
+  else if (my_cmp > 0)
+    ck_assert_int_gt(original_cmp, 0);
+  else
+    ck_assert_int_eq(original_cmp, 0);
+}
+END_TEST
+
 Suite *memcmp_suite(void) {
   Suite *s = suite_create("s21_memcmp");
   TCase *tc = tcase_create("Core");
@@ -146,6 +178,8 @@ Suite *memcmp_suite(void) {
   tcase_add_test(tc, test_memcmp_zero_length);
   tcase_add_test(tc, test_memcmp_with_null_bytes);
   tcase_add_test(tc, test_memcmp_with_unsigned_char);
+  tcase_add_test(tc, test_memcmp_empty_str);
+  tcase_add_test(tc, test_memcmp_with_spec_char);
 
   suite_add_tcase(s, tc);
   return s;

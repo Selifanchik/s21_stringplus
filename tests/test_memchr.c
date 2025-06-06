@@ -59,6 +59,20 @@ START_TEST(test_memchr_nonprinting_chars) {
 }
 END_TEST
 
+// Поиск нуля по пустой строке
+START_TEST(test_memchr_found_null_empty_string) {
+  char str[] = "";
+  ck_assert_ptr_eq(s21_memchr(str, '\0', 1), memchr(str, '\0', 1));
+}
+END_TEST
+
+// Поиск пересекающиеся области
+START_TEST(test_memchr_found_overlaps) {
+  char str[] = "abcd";
+  ck_assert_ptr_eq(s21_memchr(str, *(str+1), 3), memchr(str, *(str+1), 3));
+}
+END_TEST
+
 Suite *memchr_suite(void) {
   Suite *s = suite_create("s21_memchr");
   TCase *tc = tcase_create("Core");
@@ -71,6 +85,8 @@ Suite *memchr_suite(void) {
   tcase_add_test(tc, test_memchr_repeated_chars);
   tcase_add_test(tc, test_memchr_empty_string);
   tcase_add_test(tc, test_memchr_nonprinting_chars);
+  tcase_add_test(tc, test_memchr_found_null_empty_string);
+  tcase_add_test(tc, test_memchr_found_overlaps);
 
   suite_add_tcase(s, tc);
   return s;

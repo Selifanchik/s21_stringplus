@@ -120,9 +120,9 @@
         "Attribute not found", "Bad message", "EMULTIHOP (Reserved)",          \
         "No message available on STREAM", "ENOLINK (Reserved)",                \
         "No STREAM resources", "Not a STREAM", "Protocol error",               \
-        "STREAM ioctl timeout", "No such policy registered",                   \
-        "State not recoverable", "Previous owner died",                        \
-        "Interface output queue is full", "Operation would block"              \
+        "STREAM ioctl timeout", "Operation not supported on socket",           \
+        "Policy not found", "State not recoverable", "Previous owner died",    \
+        "Interface output queue is full", "Capabilities insufficient"          \
   }
 
 #endif

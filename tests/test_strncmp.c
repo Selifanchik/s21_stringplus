@@ -99,6 +99,22 @@ START_TEST(test_strncmp_empty_strings) {
 }
 END_TEST
 
+//n больше строк
+START_TEST(test_strncmp_n_more_strings) {
+  const char *str2 = " \na";
+  const char *str1 = " \na";
+  int my_cmp = s21_strncmp(str1, str2, 6);
+  int original_cmp = strncmp(str1, str2, 6);
+
+  if (my_cmp < 0)
+    ck_assert_int_lt(original_cmp, 0);
+  else if (my_cmp > 0)
+    ck_assert_int_gt(original_cmp, 0);
+  else
+    ck_assert_int_eq(original_cmp, 0);
+}
+END_TEST
+
 Suite *strncmp_suite(void) {
   Suite *s = suite_create("s21_strncmp");
   TCase *tc_core = tcase_create("Core");
@@ -109,6 +125,7 @@ Suite *strncmp_suite(void) {
   tcase_add_test(tc_core, test_strncmp_partial_match);
   tcase_add_test(tc_core, test_strncmp_zero_length);
   tcase_add_test(tc_core, test_strncmp_empty_strings);
+  tcase_add_test(tc_core, test_strncmp_n_more_strings);
 
   suite_add_tcase(s, tc_core);
   return s;

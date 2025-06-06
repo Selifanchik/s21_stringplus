@@ -11,19 +11,16 @@ void *s21_to_lower(const char *str) {
 
   char *new_str = malloc(sizeof(char) * (len + 1));
 
-  if (new_str == S21_NULL) {
-    return S21_NULL;
-  }
-
-  for (s21_size_t i = 0; str[i] != '\0'; i++) {
-    if ((unsigned char)str[i] >= 'A' && (unsigned char)str[i] <= 'Z') {
-      new_str[i] = (unsigned char)str[i] + ('a' - 'A');
-    } else {
-      new_str[i] = (unsigned char)str[i];
+  if (new_str != S21_NULL) {
+    for (s21_size_t i = 0; str[i] != '\0'; i++) {
+      if ((unsigned char)str[i] >= 'A' && (unsigned char)str[i] <= 'Z') {
+        new_str[i] = (unsigned char)str[i] + ('a' - 'A');
+      } else {
+        new_str[i] = (unsigned char)str[i];
+      }
     }
+    new_str[len] = '\0';
   }
-
-  new_str[len] = '\0';
 
   return (void *)new_str;
 }

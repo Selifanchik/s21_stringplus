@@ -70,6 +70,28 @@ START_TEST(test_strncpy_zero_src) {
 }
 END_TEST
 
+// Копируемая строка пустая
+START_TEST(test_strncpy_spec_char) {
+  const char *src = "abcde \n\t";
+  char dest1[10];
+  char dest2[10];
+  s21_strncpy(dest1, src, 10);
+  strncpy(dest2, src, 10);
+  ck_assert_str_eq(dest1, dest2);
+}
+END_TEST
+
+// Перекрытые
+START_TEST(test_strncpy_overlap) {
+  const char *src = "abr";
+  char dest1[10] = "abcdef";
+  char dest2[10] = "abcdef";
+  s21_strncpy(dest1, src, 3);
+  strncpy(dest2, src, 3);
+  ck_assert_str_eq(dest1, dest2);
+}
+END_TEST
+
 Suite *strncpy_suite(void) {
   Suite *s = suite_create("s21_strncpy");
   TCase *tc_core = tcase_create("Core");
@@ -80,6 +102,8 @@ Suite *strncpy_suite(void) {
   tcase_add_test(tc_core, test_strncpy_no_null_terminator);
   // tcase_add_test(tc_core, test_strncpy_n_zero);
   tcase_add_test(tc_core, test_strncpy_zero_src);
+  tcase_add_test(tc_core, test_strncpy_spec_char);
+   tcase_add_test(tc_core, test_strncpy_overlap);
 
   suite_add_tcase(s, tc_core);
   return s;

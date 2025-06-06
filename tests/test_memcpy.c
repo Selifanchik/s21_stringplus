@@ -68,6 +68,32 @@ START_TEST(test_memcpy_zero_length) {
 }
 END_TEST
 
+//Пустая строка
+START_TEST(test_memcpy_empty_str) {
+  char src[] = "";
+  char dest[] = "123456";
+  char expected[] = "123456";
+
+  memcpy(expected, src, 1);
+  s21_memcpy(dest, src, 1);
+
+  ck_assert_str_eq(dest, expected);
+}
+END_TEST
+
+//Пустые строки
+START_TEST(test_memcpy_empty_strs) {
+  char src[] = "";
+  char dest[2];
+  char expected[2];
+
+  memcpy(expected, src, 1);
+  s21_memcpy(dest, src, 1);
+
+  ck_assert_str_eq(dest, expected);
+}
+END_TEST
+
 Suite *memcpy_suite(void) {
   Suite *s = suite_create("s21_memcpy");
   TCase *tc = tcase_create("Core");
@@ -77,6 +103,8 @@ Suite *memcpy_suite(void) {
   tcase_add_test(tc, test_memcpy_with_nulls);
   tcase_add_test(tc, test_memcpy_unsigned);
   tcase_add_test(tc, test_memcpy_zero_length);
+  tcase_add_test(tc, test_memcpy_empty_str);
+  tcase_add_test(tc, test_memcpy_empty_strs);
 
   suite_add_tcase(s, tc);
   return s;

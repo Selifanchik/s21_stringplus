@@ -13,6 +13,6 @@ char *s21_strchr(const char *str, int c) {
   if ((unsigned char)c == '\0') {
     result = (char *)str;
   }
-
+  
   return result;
 }
