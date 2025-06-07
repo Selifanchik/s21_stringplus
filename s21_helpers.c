@@ -130,17 +130,25 @@ int is_write_specifier(FormatSpecifier* token) {
     return !token->suppress && token->specifier != '%';
 }
 
-void parse_i(const char** ptr_str, Callback* cb) {
+int parse_i(const char** ptr_str, Callback* cb, int* width) {
+    int flag_error = 0;
     if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
-        (*ptr_str) += 2;
-        to_base16(cb);
+        if (*width > 1 || *width == -1) {
+            (*ptr_str) += 2;
+            if (*width > 1) (*width) -= 2;
+            to_base16(cb);
+        } else flag_error = 1;
     } else if (**ptr_str == '0') {
-        (*ptr_str)++;
-        to_base8(cb);
+        if (*width > 0 || *width == -1) {
+            (*ptr_str)++;
+            if (*width > 0) (*width)--;
+            to_base8(cb);
+        } else flag_error = 1;
     } else {
         to_base10(cb);
     }
-}
+    return flag_error;
+  }
 
 void to_base8(Callback* cb) {
     cb->is_digit = s21_is_oct_digit;

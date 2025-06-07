@@ -150,9 +150,9 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb) {
     int flag_error = 0;
     int sign = is_sign(ptr_str, &(token->width));
-    if (token->specifier == 'i') parse_i(ptr_str, cb);
+    if (token->specifier == 'i') flag_error = parse_i(ptr_str, cb, &(token->width));
     unsigned long value = 0;
-    if (!base_to_dec(ptr_str, cb, &(token->width), &value)) {
+    if (!flag_error && !base_to_dec(ptr_str, cb, &(token->width), &value)) {
         if (!token->suppress) {
             if (token->length == 'l') {
                 long* dest = va_arg(*args, long*);

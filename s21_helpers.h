@@ -54,7 +54,7 @@ long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
 int is_valid_exponent(const char *ptr_str, int width);
 int is_write_specifier(FormatSpecifier* token);
-void parse_i(const char** ptr_str, Callback* cb);
+int parse_i(const char** ptr_str, Callback* cb, int* width);
 void to_base8(Callback* cb);
 void to_base10(Callback* cb);
 void to_base16(Callback* cb);
