@@ -50,9 +50,16 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             handler_fegEG(ptr_str, token, args);
             break;
         case 'o':
-            if (**ptr_str == '0') (*ptr_str)++;
-            to_base8(&cb);
-            if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
+            if (**ptr_str == '0') {
+                if (token->width > 0 || token->width == -1) {
+                    (*ptr_str)++;
+                    if (token->width > 0) token->width--;
+                } else flag_error = 1;
+            }
+            if (!flag_error) {
+                to_base8(&cb);
+                if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
+            }
             break;
         case 'c':
             if (handler_c(ptr_str, token, args)) flag_error = 1;
@@ -66,9 +73,16 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             break;
         case 'x':
         case 'X':
-            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
-            to_base16(&cb);
-            if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
+            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) {
+                if (token->width > 1 || token->width == -1) {
+                    (*ptr_str) += 2;
+                    if (token->width > 1) token->width -= 2;
+                } else flag_error = 1;
+            }
+            if (!flag_error) {
+                to_base16(&cb);
+                if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
+            }
             break;
         case 'p':
             if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
