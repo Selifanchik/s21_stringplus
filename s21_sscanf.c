@@ -42,24 +42,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;;
             break;
         case 'i':
-            if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
-                (*ptr_str) += 2;
-                cb.base = 16;
-                cb.is_digit = s21_is_hex_digit;
-                cb.to_digit = to_hex;
                 if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;
-            } else if (**ptr_str == '0') {
-                (*ptr_str)++;
-                cb.base = 8;
-                cb.is_digit = s21_is_oct_digit;
-                cb.to_digit = to_oct_dec;
-                if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;
-            } else {
-                cb.base = 10;
-                cb.is_digit = s21_is_dec_digit;
-                cb.to_digit = to_oct_dec;
-                if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;
-            }
             break;
         case 'e':
         case 'E':
@@ -172,9 +155,10 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     return error;
 }
 
-int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const Callback* cb) {
+int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb) {
     int flag_error = 0;
     int sign = is_sign(ptr_str, &(token->width));
+    if (token->specifier == 'i') parse_i(ptr_str, cb);
     unsigned long value = 0;
     if (!base_to_dec(ptr_str, cb, &(token->width), &value)) {
         if (!token->suppress) {

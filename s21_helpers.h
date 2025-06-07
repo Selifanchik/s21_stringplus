@@ -34,7 +34,7 @@ int s21_isspace(int symbol);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
 int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args);
-int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const Callback* cb);
+int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb);
 int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned long* value);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
@@ -54,4 +54,5 @@ long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
 int is_valid_exponent(const char *ptr_str, int width);
 int is_write_specifier(FormatSpecifier* token);
+void parse_i(const char** ptr_str, Callback* cb);
 #endif

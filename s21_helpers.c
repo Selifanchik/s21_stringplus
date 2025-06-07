@@ -129,3 +129,21 @@ int is_valid_exponent(const char *ptr_str, int width) {
 int is_write_specifier(FormatSpecifier* token) {
     return !token->suppress && token->specifier != '%';
 }
+
+void parse_i(const char** ptr_str, Callback* cb) {
+    if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
+        (*ptr_str) += 2;
+        cb->base = 16;
+        cb->is_digit = s21_is_hex_digit;
+        cb->to_digit = to_hex;
+    } else if (**ptr_str == '0') {
+        (*ptr_str)++;
+        cb->base = 8;
+        cb->is_digit = s21_is_oct_digit;
+        cb->to_digit = to_oct_dec;
+    } else {
+        cb->base = 10;
+        cb->is_digit = s21_is_dec_digit;
+        cb->to_digit = to_oct_dec;
+    }
+}
