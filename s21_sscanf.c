@@ -272,16 +272,19 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
         unsigned long temp_int_part = 0;
+        printf("ширина перед целой=%d\n", token->width);
         if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_int_part)) {
             float_value->int_part = temp_int_part;
             flag_digit = 1;
         }
     }
-    if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1))) {
+    if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) && (token->width == -1 || token->width > 0)) {
         (*ptr_str)++;
+        if (token->width > 0) token->width--;
         const char* start_fract = *ptr_str;
         if (s21_is_dec_digit(*ptr_str)) {
             unsigned long temp_fract_part = 0;
+            printf("ширина перед дробной=%d\n", token->width);
             if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_fract_part)) {
                 float_value->fract_part = temp_fract_part;
                 float_value->order_fract = *ptr_str - start_fract;
