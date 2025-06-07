@@ -107,7 +107,7 @@ long double to_float(ParseFloat float_value) {
     for (int i = 0; i < float_value.order_fract; i++) {
         fraction = s21_pow10(float_value.order_fract);
     }
-    value = (long double)float_value.int_part + ((long double)float_value.fract_part / fraction);
+    value = (long double)((float_value.int_part + ((long double)float_value.fract_part / fraction)) * float_value.sign_float);
     if (float_value.exp_part) {
         long double exp = s21_pow10(float_value.order_exp);
         if (float_value.sign_exp > 0) {
