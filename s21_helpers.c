@@ -133,17 +133,30 @@ int is_write_specifier(FormatSpecifier* token) {
 void parse_i(const char** ptr_str, Callback* cb) {
     if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
         (*ptr_str) += 2;
-        cb->base = 16;
-        cb->is_digit = s21_is_hex_digit;
-        cb->to_digit = to_hex;
+        to_base16(cb);
     } else if (**ptr_str == '0') {
         (*ptr_str)++;
-        cb->base = 8;
-        cb->is_digit = s21_is_oct_digit;
-        cb->to_digit = to_oct_dec;
+        to_base8(cb);
     } else {
-        cb->base = 10;
-        cb->is_digit = s21_is_dec_digit;
-        cb->to_digit = to_oct_dec;
+        to_base10(cb);
     }
+}
+
+void to_base8(Callback* cb) {
+    cb->is_digit = s21_is_oct_digit;
+    cb->to_digit = to_oct_dec;
+    cb->base = 8;
+}
+
+void to_base10(Callback* cb) {
+    cb->is_digit = s21_is_dec_digit;
+    cb->to_digit = to_oct_dec;
+    cb->base = 10;
+}
+
+
+void to_base16(Callback* cb) {
+    cb->is_digit = s21_is_hex_digit;
+    cb->to_digit = to_hex;
+    cb->base = 16;
 }

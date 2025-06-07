@@ -36,13 +36,11 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
     if (token->specifier != 'c' && token->specifier != 'n') skip_space(ptr_str);
     switch (token->specifier) {
         case 'd':
-            cb.base = 10;
-            cb.is_digit = s21_is_dec_digit;
-            cb.to_digit = to_oct_dec;
+            to_base10(&cb);
             if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;;
             break;
         case 'i':
-                if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;
+            if (handler_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'e':
         case 'E':
@@ -53,9 +51,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             break;
         case 'o':
             if (**ptr_str == '0') (*ptr_str)++;
-            cb.base = 8;
-            cb.is_digit = s21_is_oct_digit;
-            cb.to_digit = to_oct_dec;
+            to_base8(&cb);
             if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'c':
@@ -65,17 +61,13 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             if (handler_s(ptr_str, token, args)) flag_error = 1;
             break;
         case 'u':
-            cb.base = 10;
-            cb.is_digit = s21_is_dec_digit;
-            cb.to_digit = to_oct_dec;
+            to_base10(&cb);
             if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'x':
         case 'X':
             if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
-            cb.base = 16;
-            cb.is_digit = s21_is_hex_digit;
-            cb.to_digit = to_hex;
+            to_base16(&cb);
             if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'p':
@@ -260,9 +252,7 @@ int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
 int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
     int flag_error = 0;
     Callback cb;
-    cb.is_digit = s21_is_dec_digit;
-    cb.to_digit = to_oct_dec;
-    cb.base = 10;
+    to_base10(&cb);
     init_parse_float(float_value);
     float_value->sign_float = is_sign(ptr_str, &(token->width));
     int flag_digit = 0;
@@ -323,10 +313,7 @@ void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) 
 int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
     Callback cb;
-    cb.is_digit = s21_is_hex_digit;
-    cb.to_digit = to_hex;
-    cb.base = 16;
-
+    to_base16(&cb);
     unsigned long value = 0;
     if (!base_to_dec(ptr_str, &cb, &(token->width), &value)) {
         if (!token->suppress) {
