@@ -47,7 +47,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
         case 'f':
         case 'g':
         case 'G':
-            handler_fegEG(ptr_str, token, args);
+            if (handler_fegEG(ptr_str, token, args)) flag_error = 1;
             break;
         case 'o':
             if (**ptr_str == '0') {
@@ -305,10 +305,11 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
 
 // вычисления перенести в отдельную переменную добавить ширину и занести в переменные типа
 // пересмотреть функции всех типов
-void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+    int flag_error = 0;
     ParseFloat float_value;
-    parse_float(ptr_str, token, &float_value);
-    if (!token->suppress) {
+    flag_error = parse_float(ptr_str, token, &float_value);
+    if (!flag_error && !token->suppress) {
         long double value = 0;
         value = to_float(float_value);
         if (token->length == 'l') {
@@ -322,6 +323,7 @@ void handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) 
             *dest = (float)value;
         }
     }
+    return flag_error;
 }
 
 int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
