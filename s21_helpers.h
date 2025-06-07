@@ -53,4 +53,5 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
 long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
 int is_valid_exponent(const char *ptr_str, int width);
+int is_write_specifier(FormatSpecifier* token);
 #endif

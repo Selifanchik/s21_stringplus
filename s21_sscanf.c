@@ -19,7 +19,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
         if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
             if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
-                if (!parse_value(str, &ptr_str, &token, &arg)) read_count++;
+                if (!parse_value(str, &ptr_str, &token, &arg) && is_write_specifier(&token)) read_count++;
                 ptr_format = ptr_specifier;
             } else flag_end = 1;
             free(separation);
@@ -104,6 +104,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             break;
         case '%':
             if (**ptr_str == '%') (*ptr_str)++;
+            else flag_error = 1;
             // иначе закончить считывание
             break;
         default:
@@ -118,20 +119,21 @@ char* parse_format_sep(const char* start_format, const char* ptr_specifier) {
     if (separation){
         // заменить на s21_strncpy
         strncpy(separation, start_format, length_sep);
-        char my_space[] = {9, 10, 11, 12, 13, 32, 0};
-        separation = (char*)s21_trim(separation, my_space);
     }
     return separation;
 }
 
-int parse_str_sep(const char** ptr_str, const char* ptr_separation) {
+int parse_str_sep(const char** ptr_str, const char* ptr_sep) {
     int flag_end = 0;
-    skip_space(ptr_str);
-    for (; *ptr_separation && !flag_end; ) {
-        if (**ptr_str != *ptr_separation) flag_end = 1;
+    while(*ptr_sep && !flag_end) {
+        if (s21_isspace(*ptr_sep)) {
+            skip_space(ptr_str);
+            ptr_sep++;
+        }
+        else if (**ptr_str != *ptr_sep) flag_end = 1;
         else {
             (*ptr_str)++;
-            ptr_separation++;
+            ptr_sep++;
         }
     }
     return flag_end;

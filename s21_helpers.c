@@ -125,3 +125,7 @@ int is_valid_exponent(const char *ptr_str, int width) {
     if (is_exp && (has_sign_and_digit || has_digit_only)) flag_error = 0;
     return flag_error;
 }
+
+int is_write_specifier(FormatSpecifier* token) {
+    return !token->suppress && token->specifier != '%';
+}
