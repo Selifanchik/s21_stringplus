@@ -192,9 +192,12 @@ int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* 
 }
 
 void handler_n(const char* start_str, const char* ptr_str, va_list* args) {
-    int value = ptr_str - start_str;
-    int* dest = va_arg(*args, int*);
-    *dest = (int)value;
+    if (*start_str || !*ptr_str)
+    {
+        int value = ptr_str - start_str;
+        int* dest = va_arg(*args, int*);
+        *dest = (int)value;
+    }
 }
 
 int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
