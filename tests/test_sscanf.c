@@ -334,20 +334,20 @@ START_TEST(test_sscanf_e_float) {
 }
 END_TEST
 
-// // Тест %e float +- delim width uncorrect
-// START_TEST(test_sscanf_e_float_neg_pos_width_delim) {
-//   const char *str = "\t+.3e2 -3e2: 0.0e0 \n1.234s 0.ee2";
-//   float a, b, c, d, u=1;
-//   float e, f, g, h, u1=1;
-//   sscanf(str, "%e %e: %e %5e %e", &a, &b, &c, &d, &u);
-//   s21_sscanf(str, "%e %e: %e %5e %e", &e, &f, &g, &h, &u1);
-//   ck_assert_float_eq(a, e);
-//   ck_assert_float_eq(b, f);
-//   ck_assert_float_eq(c, g);
-//   ck_assert_float_eq(d, h);
-//   ck_assert_float_eq(u, u1);
-// }
-// END_TEST
+// Тест %e float +- delim width uncorrect
+START_TEST(test_sscanf_e_float_neg_pos_width_delim) {
+  const char *str = "\t+.3e2 -3e2: 0.0e0 \n1.234s 0.ee2";
+  float a, b, c, d, u=1;
+  float e, f, g, h, u1=1;
+  sscanf(str, "%e %e: %e %5e %e", &a, &b, &c, &d, &u);
+  s21_sscanf(str, "%e %e: %e %5e %e", &e, &f, &g, &h, &u1);
+  ck_assert_float_eq(a, e);
+  ck_assert_float_eq(b, f);
+  ck_assert_float_eq(c, g);
+  ck_assert_float_eq(d, h);
+  ck_assert_float_eq(u, u1);
+}
+END_TEST
 
 // Тест %e double
 START_TEST(test_sscanf_e_double) {
@@ -428,16 +428,16 @@ START_TEST(test_sscanf_octal) {
 }
 END_TEST
 
-// // Тест %s
-// START_TEST(test_sscanf_str) {
-//   const char *str = "   1Hello, world! ";
-//   char a[20];
-//   char b[20];
-//   sscanf(str, "%s", a);
-//   s21_sscanf(str, "%s", b);
-//   ck_assert_str_eq(a, b);
-// }
-// END_TEST
+// Тест %s
+START_TEST(test_sscanf_str) {
+  const char *str = "   1Hello, world! ";
+  char a[20];
+  char b[20];
+  sscanf(str, "%s", a);
+  s21_sscanf(str, "%s", b);
+  ck_assert_str_eq(a, b);
+}
+END_TEST
 
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
@@ -471,11 +471,14 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_i_hex_uncorrect);
   tcase_add_test(tc_core, test_sscanf_i_hex_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_e_float);
-  // tcase_add_test(tc_core, test_sscanf_e_float_neg_pos_width_delim);
+  tcase_add_test(tc_core, test_sscanf_e_float_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_e_double);
   tcase_add_test(tc_core, test_sscanf_e_long_double);
   tcase_add_test(tc_core, test_sscanf_E_f_g_G);
   tcase_add_test(tc_core, test_sscanf_octal);
+  tcase_add_test(tc_core, test_sscanf_str);
+
+  
 
   suite_add_tcase(s, tc_core);
   return s;
