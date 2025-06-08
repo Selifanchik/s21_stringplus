@@ -246,7 +246,7 @@ int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
         else dest_c = va_arg(*args, char*);
     }
     int i = 0;
-    for (i = 0; (i < token->width && token->width > 0) || (token->width == -1 && !s21_isspace(**ptr_str)); i++) {
+    for (i = 0; ((i < token->width && token->width > 0) || token->width == -1) && !s21_isspace(**ptr_str); i++) {
         if (**ptr_str) {
             if (!token->suppress) {
                 if (token->length == 'l') *(dest_w + i) = (wchar_t)(unsigned char)*(*ptr_str);
