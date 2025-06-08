@@ -439,6 +439,52 @@ START_TEST(test_sscanf_str) {
 }
 END_TEST
 
+// Тест %p
+START_TEST(test_sscanf_p) {
+  void* ptr_sscanf = NULL;
+  void* ptr_s21_sscanf = S21_NULL;
+  const char *str = " ; 0xff6732";
+  int a;
+  sscanf(str, " ;%p", &ptr_sscanf);
+  s21_sscanf(str, " ;%p", &ptr_s21_sscanf);
+  ck_assert_str_eq(ptr_sscanf, ptr_s21_sscanf);
+}
+END_TEST
+
+START_TEST(test_sscanf_n) {
+  int n_sscanf;
+  int n_s21_sscanf;
+  const char *str = " ; 0xff6732";
+  int a;
+  sscanf(str, " ;%n", &n_sscanf);
+  s21_sscanf(str, " ;%n", &n_s21_sscanf);
+  ck_assert_str_eq(n_sscanf, n_s21_sscanf);
+}
+END_TEST
+
+START_TEST(test_sscanf_percent) {
+  int a;
+  int b;
+  const char *str = " %; 0xff6732";
+  int a;
+  sscanf(str, " %%;%n", &a);
+  s21_sscanf(str, " %%;%n", &b);
+  ck_assert_str_eq(a, a);
+}
+END_TEST
+
+START_TEST(test_sscanf_percent) {
+  int a;
+  int b;
+  const char *str = " %; 0xff6732";
+  int a;
+  sscanf(str, " %%;%n", &a);
+  s21_sscanf(str, " %%;%n", &b);
+  ck_assert_str_eq(a, a);
+}
+END_TEST
+
+
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
   TCase *tc_core = tcase_create("Core");
@@ -477,6 +523,9 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_E_f_g_G);
   tcase_add_test(tc_core, test_sscanf_octal);
   tcase_add_test(tc_core, test_sscanf_str);
+  tcase_add_test(tc_core, test_sscanf_p);
+  tcase_add_test(tc_core, test_sscanf_n);
+  tcase_add_test(tc_core, test_sscanf_percent);
 
   
 
