@@ -55,8 +55,6 @@ int s21_isspace(int symbol);
 int is_sign(const char** ptr_str, int* width);
 void skip_space(const char** ptr_str);
 
-long get_number(const char** ptr_str);
-
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
 

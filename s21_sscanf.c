@@ -47,16 +47,8 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             if (handler_fegEG(ptr_str, token, args)) flag_error = 1;
             break;
         case 'o':
-            if (**ptr_str == '0') {
-                if (token->width > 0 || token->width == -1) {
-                    (*ptr_str)++;
-                    if (token->width > 0) token->width--;
-                } else flag_error = 1;
-            }
-            if (!flag_error) {
-                to_base8(&cb);
-                if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
-            }
+            to_base8(&cb);
+            if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'c':
             if (handler_c(ptr_str, token, args)) flag_error = 1;

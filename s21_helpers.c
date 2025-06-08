@@ -12,15 +12,6 @@ int s21_is_oct_digit(const char* symbol) {
     return (*symbol >= '0' && *symbol <= '7');
 }
 
-long get_number(const char** ptr_str) {
-    long result = 0;
-    while (s21_is_dec_digit(*ptr_str)) {
-        result = result * 10 + (**ptr_str - '0');
-        (*ptr_str)++;
-    }
-    return result;
-}
-
 int s21_isspace(int symbol) {
     int space_arr[] = {9, 10, 11, 12, 13, 32};
     int result = 0;
@@ -138,11 +129,7 @@ int parse_i(const char** ptr_str, Callback* cb, int* width) {
             to_base16(cb);
         } else flag_error = 1;
     } else if (**ptr_str == '0') {
-        if (*width > 0 || *width == -1) {
-            (*ptr_str)++;
-            if (*width > 0) (*width)--;
-            to_base8(cb);
-        } else flag_error = 1;
+        to_base8(cb);
     } else {
         to_base10(cb);
     }
