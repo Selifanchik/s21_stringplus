@@ -16,8 +16,10 @@ int s21_sscanf(const char* str, const char* format, ...) {
         if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
             if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
-                if (!parse_value(str, &ptr_str, &token, &arg) && is_write_specifier(&token)) read_count++;
-                ptr_format = ptr_specifier;
+                if (!parse_value(str, &ptr_str, &token, &arg)) {
+                    ptr_format = ptr_specifier;
+                    if (is_write_specifier(&token)) read_count++;
+                } else flag_end = 1;
             } else flag_end = 1;
             free(separation);
             init_token(&token);
@@ -76,7 +78,6 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
         case '%':
             if (**ptr_str == '%') (*ptr_str)++;
             else flag_error = 1;
-            // иначе закончить считывание
             break;
     }
     return flag_error;
