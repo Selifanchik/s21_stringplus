@@ -62,19 +62,12 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             break;
         case 'x':
         case 'X':
-            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) {
-                if (token->width > 1 || token->width == -1) {
-                    (*ptr_str) += 2;
-                    if (token->width > 1) token->width -= 2;
-                } else flag_error = 1;
-            }
-            if (!flag_error) {
-                to_base16(&cb);
-                if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
-            }
+            is_prefix_base16(ptr_str, &(token->width));
+            to_base16(&cb);
+            if (handler_unsigned_int(ptr_str, token, args, &cb)) flag_error = 1;
             break;
         case 'p':
-            if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) (*ptr_str) += 2;
+            is_prefix_base16(ptr_str, &(token->width));
             if (handler_p(ptr_str, token, args)) flag_error = 1;
             break;
         case 'n':

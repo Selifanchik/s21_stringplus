@@ -58,6 +58,7 @@ void skip_space(const char** ptr_str);
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
 
+void is_prefix_base16(const char** ptr_str, int* width);
 int is_valid_exponent(const char *ptr_str, int width);
 int is_write_specifier(FormatSpecifier* token);
 

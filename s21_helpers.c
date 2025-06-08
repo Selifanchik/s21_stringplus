@@ -123,11 +123,8 @@ int is_write_specifier(FormatSpecifier* token) {
 int parse_i(const char** ptr_str, Callback* cb, int* width) {
     int flag_error = 0;
     if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
-        if (*width > 1 || *width == -1) {
-            (*ptr_str) += 2;
-            if (*width > 1) (*width) -= 2;
-            to_base16(cb);
-        } else flag_error = 1;
+        is_prefix_base16(ptr_str, width);
+        to_base16(cb);
     } else if (**ptr_str == '0') {
         to_base8(cb);
     } else {
@@ -153,4 +150,13 @@ void to_base16(Callback* cb) {
     cb->is_digit = s21_is_hex_digit;
     cb->to_digit = to_hex;
     cb->base = 16;
+}
+
+void is_prefix_base16(const char** ptr_str, int* width) {
+    if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) {
+        if (*width > 1 || *width == -1) {
+            (*ptr_str) += 2;
+            if (*width > 1) *width -= 2;
+        }
+    }
 }
