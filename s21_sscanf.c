@@ -1,7 +1,4 @@
 #include "s21_string.h"
-#include <stdio.h>
-#include <string.h>
-#include <wchar.h>
 
 int s21_sscanf(const char* str, const char* format, ...) {
     va_list arg;
@@ -13,8 +10,8 @@ int s21_sscanf(const char* str, const char* format, ...) {
     const char* ptr_str = str;
     const char* ptr_format = format;
     const char* ptr_specifier = ptr_format;
-    char* separation = NULL;
-    while ((ptr_specifier = strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
+    char* separation = S21_NULL;
+    while ((ptr_specifier = s21_strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
         separation = parse_format_sep(ptr_format, ptr_specifier);
         if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
@@ -96,8 +93,6 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
             else flag_error = 1;
             // иначе закончить считывание
             break;
-        default:
-            break;
     }
     return flag_error;
 }
@@ -107,7 +102,7 @@ char* parse_format_sep(const char* start_format, const char* ptr_specifier) {
     char* separation = (char*)calloc(length_sep + 1, sizeof(char));
     if (separation){
         // заменить на s21_strncpy
-        strncpy(separation, start_format, length_sep);
+        s21_strncpy(separation, start_format, length_sep);
     }
     return separation;
 }
@@ -145,13 +140,13 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
         }
     }
     // заменить strchr на s21_strchr
-    const char* ptr_length = strchr(lengths, **ptr_format);
+    const char* ptr_length = s21_strchr(lengths, **ptr_format);
     if (ptr_length != S21_NULL) {
         token->length = **ptr_format;
         (*ptr_format)++;
     }
     // заменить strchr на s21_strchr
-    const char* ptr_specifier = strchr(specifiers, **ptr_format);
+    const char* ptr_specifier = s21_strchr(specifiers, **ptr_format);
     if (ptr_specifier != S21_NULL) {
         token->specifier = *ptr_specifier;
         (*ptr_format)++;
@@ -272,7 +267,6 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
         unsigned long temp_int_part = 0;
-        printf("ширина перед целой=%d\n", token->width);
         if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_int_part)) {
             float_value->int_part = temp_int_part;
             flag_digit = 1;
@@ -284,7 +278,6 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
         const char* start_fract = *ptr_str;
         if (s21_is_dec_digit(*ptr_str)) {
             unsigned long temp_fract_part = 0;
-            printf("ширина перед дробной=%d\n", token->width);
             if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_fract_part)) {
                 float_value->fract_part = temp_fract_part;
                 float_value->order_fract = *ptr_str - start_fract;

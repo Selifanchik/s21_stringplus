@@ -1,5 +1,4 @@
-#include "s21_string.h"
-#include <stdio.h>
+#include "s21_helpers.h"
 
 int s21_is_dec_digit(const char* symbol) {
     return (*symbol >= '0' && *symbol <= '9');

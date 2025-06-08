@@ -2,6 +2,7 @@
 #define S21_HELPERS_H
 
 #include <stdarg.h>
+#include "s21_string.h"
 
 typedef struct {
     int suppress;
