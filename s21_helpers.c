@@ -124,7 +124,7 @@ int is_valid_exponent(const char *ptr_str, int width) {
 }
 
 int is_write_specifier(FormatSpecifier* token) {
-    return !token->suppress && token->specifier != '%';
+    return !token->suppress && token->specifier != '%' && token->specifier != 'n';
 }
 
 int parse_i(const char** ptr_str, Callback* cb, int* width) {

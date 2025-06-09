@@ -9,6 +9,10 @@ int s21_sscanf(const char* str, const char* format, ...) {
     int read_count = 0;
     int flag_end = 0;
     const char* ptr_str = str;
+    if (!*ptr_str) {
+        flag_end = 1;
+        read_count = -1;
+    }
     const char* ptr_format = format;
     const char* ptr_specifier = ptr_format;
     while ((ptr_specifier = s21_strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
