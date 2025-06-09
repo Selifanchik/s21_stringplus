@@ -1,4 +1,5 @@
 #include "s21_string.h"
+#include "s21_helpers.h"
 
 int s21_sscanf(const char* str, const char* format, ...) {
     va_list arg;
