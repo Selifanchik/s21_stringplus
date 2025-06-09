@@ -10,7 +10,6 @@ int s21_sscanf(const char* str, const char* format, ...) {
     int flag_end = 0;
     const char* ptr_str = str;
     if (!is_empty_or_whitespace(ptr_str)) {
-        flag_end = 1;
         read_count = -1;
     }
     const char* ptr_format = format;
