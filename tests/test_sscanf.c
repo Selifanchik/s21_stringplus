@@ -12,7 +12,8 @@ START_TEST(test_sscanf_int) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -24,7 +25,8 @@ START_TEST(test_sscanf_int_negative) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -36,7 +38,8 @@ START_TEST(test_sscanf_int_positive) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -48,7 +51,8 @@ END_TEST
 //   sscanf(str, "%d", &a);
 //   s21_sscanf(str, "%d", &b);
 //   ck_assert_int_eq(a, b);
-//   //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+//   //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+//   успешно записанные данные
 // }
 // END_TEST
 
@@ -60,7 +64,8 @@ END_TEST
 //   sscanf(str, "%d", &a);
 //   s21_sscanf(str, "%d", &b);
 //   ck_assert_int_eq(a, b);
-//   //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+//   //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+//   успешно записанные данные
 // }
 // END_TEST
 
@@ -72,7 +77,8 @@ END_TEST
 //   sscanf(str, "%d", &a);
 //   s21_sscanf(str, "%d", &b);
 //   ck_assert_int_eq(a, b);
-//   //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+//   //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+//   успешно записанные данные
 // }
 // END_TEST
 
@@ -84,7 +90,8 @@ START_TEST(test_sscanf_int_zeros) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -96,7 +103,8 @@ START_TEST(test_sscanf_int_negative_and_zeros) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -108,7 +116,8 @@ START_TEST(test_sscanf_int_positive_and_zeros) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -120,7 +129,8 @@ START_TEST(test_sscanf_int_zero) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -132,7 +142,8 @@ START_TEST(test_sscanf_int_positive_zero) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -144,22 +155,24 @@ START_TEST(test_sscanf_int_negative_zero) {
   sscanf(str, "%d", &a);
   s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
 // Тест %d несколько чисел
 START_TEST(test_sscanf_int_many_int) {
   const char *str = " 123\t567 2\n\r\v89";
-  int a, b, c , d;
-  int e, f, g , h;
+  int a, b, c, d;
+  int e, f, g, h;
   sscanf(str, "%d %d %d %d", &a, &b, &c, &d);
   s21_sscanf(str, "%d %d %d %d", &e, &f, &g, &h);
   ck_assert_int_eq(a, e);
   ck_assert_int_eq(b, f);
   ck_assert_int_eq(c, g);
   ck_assert_int_eq(d, h);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -171,7 +184,8 @@ START_TEST(test_sscanf_int_width1) {
   sscanf(str, "%5d", &a);
   s21_sscanf(str, "%5d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -183,7 +197,8 @@ START_TEST(test_sscanf_int_width2) {
   sscanf(str, "%5d", &a);
   s21_sscanf(str, "%5d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -195,7 +210,8 @@ START_TEST(test_sscanf_int_width3) {
   sscanf(str, "%5d", &a);
   s21_sscanf(str, "%5d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
@@ -207,11 +223,12 @@ START_TEST(test_sscanf_int_width4) {
   sscanf(str, "%4d", &a);
   s21_sscanf(str, "%4d", &b);
   ck_assert_int_eq(a, b);
-  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
+  //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции,
+  //!успешно записанные данные
 }
 END_TEST
 
-// Тест %c 
+// Тест %c
 START_TEST(test_sscanf_char) {
   const char *str = "1Hello, world!   ";
   char a;
@@ -246,8 +263,8 @@ END_TEST
 
 // Тест %i oc uncorrect
 START_TEST(test_sscanf_i_octal_uncorrect) {
- const char *str = "   Hello, world! 01647 0377   ";
-  int a = 0 , b = 0;
+  const char *str = "   Hello, world! 01647 0377   ";
+  int a = 0, b = 0;
   int c = 0, d = 0;
   sscanf(str, "%i %i", &a, &b);
   s21_sscanf(str, "%i %i", &c, &d);
@@ -258,8 +275,8 @@ END_TEST
 
 // Тест %i oc
 START_TEST(test_sscanf_i_octal) {
- const char *str = "    01647    0377   ";
-  int a = 0 , b = 0;
+  const char *str = "    01647    0377   ";
+  int a = 0, b = 0;
   int c = 0, d = 0;
   sscanf(str, "%i %i", &a, &b);
   s21_sscanf(str, "%i %i", &c, &d);
@@ -363,7 +380,6 @@ START_TEST(test_sscanf_e_double) {
 }
 END_TEST
 
-
 // Тест %e double
 START_TEST(test_sscanf_e_long_double) {
   const char *str = ".3e10 3e11 4e-9 455.234565651";
@@ -419,8 +435,8 @@ END_TEST
 // Тест %o
 START_TEST(test_sscanf_octal) {
   const char *str = "0567 0611";
-  unsigned int a,b;
-  unsigned int c,d;
+  unsigned int a, b;
+  unsigned int c, d;
   sscanf(str, "%o %o", &a, &b);
   s21_sscanf(str, "%o %o", &c, &d);
   ck_assert_int_eq(a, c);
@@ -446,9 +462,9 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_int);
   tcase_add_test(tc_core, test_sscanf_int_negative);
   tcase_add_test(tc_core, test_sscanf_int_positive);
-  //tcase_add_test(tc_core, test_sscanf_int_incorrect_chars);
-  //tcase_add_test(tc_core, test_sscanf_int_incorrect_signs);
-  //tcase_add_test(tc_core, test_sscanf_int_empty_str);
+  // tcase_add_test(tc_core, test_sscanf_int_incorrect_chars);
+  // tcase_add_test(tc_core, test_sscanf_int_incorrect_signs);
+  // tcase_add_test(tc_core, test_sscanf_int_empty_str);
   tcase_add_test(tc_core, test_sscanf_int_zeros);
   tcase_add_test(tc_core, test_sscanf_int_negative_and_zeros);
   tcase_add_test(tc_core, test_sscanf_int_positive_and_zeros);
@@ -462,16 +478,16 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_int_width4);
   tcase_add_test(tc_core, test_sscanf_int_width1);
   tcase_add_test(tc_core, test_sscanf_char);
-  //tcase_add_test(tc_core, test_sscanf_char_with_spaces);
+  // tcase_add_test(tc_core, test_sscanf_char_with_spaces);
   tcase_add_test(tc_core, test_sscanf_i_dec);
   tcase_add_test(tc_core, test_sscanf_i_octal);
-  //tcase_add_test(tc_core, test_sscanf_i_octal_neg_pos_width_delim);
+  // tcase_add_test(tc_core, test_sscanf_i_octal_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_i_octal_uncorrect);
   tcase_add_test(tc_core, test_sscanf_i_hex);
   tcase_add_test(tc_core, test_sscanf_i_hex_uncorrect);
-  //tcase_add_test(tc_core, test_sscanf_i_hex_neg_pos_width_delim);
+  // tcase_add_test(tc_core, test_sscanf_i_hex_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_e_float);
-  //tcase_add_test(tc_core, test_sscanf_e_float_neg_pos_width_delim);
+  // tcase_add_test(tc_core, test_sscanf_e_float_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_e_double);
   tcase_add_test(tc_core, test_sscanf_e_long_double);
   tcase_add_test(tc_core, test_sscanf_E_f_g_G);
@@ -480,4 +496,3 @@ Suite *sscanf_suite(void) {
   suite_add_tcase(s, tc_core);
   return s;
 }
-

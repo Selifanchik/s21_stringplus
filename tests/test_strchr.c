@@ -63,7 +63,6 @@ START_TEST(test_strchr_empty_string_null_char) {
 }
 END_TEST
 
-
 // Ищем спец символ
 START_TEST(test_strchr_spec_char) {
   const char *str = " \nhgf";

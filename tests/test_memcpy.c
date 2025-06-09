@@ -5,7 +5,7 @@
 
 // Базовый случай: полное копирование
 START_TEST(test_memcpy_basic) {
-  char src[] = "hello";
+  const char src[] = "hello";
   char dest[6] = {0};
   char expected[6] = {0};
 
@@ -18,7 +18,7 @@ END_TEST
 
 // Частичное копирование строки
 START_TEST(test_memcpy_partial) {
-  char src[] = "abcdef";
+  const char src[] = "abcdef";
   char dest[6] = {0};
   char expected[6] = {0};
 
@@ -31,7 +31,7 @@ END_TEST
 
 // С нулями
 START_TEST(test_memcpy_with_nulls) {
-  char src[] = {'a', '\0', 'c', '\0', 'e'};
+  const char src[] = {'a', '\0', 'c', '\0', 'e'};
   char dest[5] = {0};
   char expected[5] = {0};
 
@@ -44,7 +44,7 @@ END_TEST
 
 // С байтами, не строками
 START_TEST(test_memcpy_unsigned) {
-  unsigned char src[] = {255, 0, 127, 1};
+  unsigned const char src[] = {255, 0, 127, 1};
   unsigned char dest[4] = {0};
   unsigned char expected[4] = {0};
 
@@ -57,7 +57,7 @@ END_TEST
 
 // Длина равна нулю
 START_TEST(test_memcpy_zero_length) {
-  char src[] = "abcdef";
+  const char src[] = "abcdef";
   char dest[] = "123456";
   char expected[] = "123456";
 
@@ -68,9 +68,9 @@ START_TEST(test_memcpy_zero_length) {
 }
 END_TEST
 
-//Пустая строка
+// Пустая строка
 START_TEST(test_memcpy_empty_str) {
-  char src[] = "";
+  const char src[] = "";
   char dest[] = "123456";
   char expected[] = "123456";
 
@@ -81,9 +81,9 @@ START_TEST(test_memcpy_empty_str) {
 }
 END_TEST
 
-//Пустые строки
+// Пустые строки
 START_TEST(test_memcpy_empty_strs) {
-  char src[] = "";
+  const char src[] = "";
   char dest[2];
   char expected[2];
 

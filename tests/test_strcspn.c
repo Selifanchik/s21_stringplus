@@ -59,10 +59,26 @@ START_TEST(test_strcspn_reg) {
 }
 END_TEST
 
-// С регистром
+// Строки пустые
 START_TEST(test_strcspn_empty_all) {
   const char *str1 = "";
   const char *str2 = "";
+  ck_assert_int_eq(s21_strcspn(str1, str2), strcspn(str1, str2));
+}
+END_TEST
+
+// Содержит \0
+START_TEST(test_strcspn_include_zero) {
+  const char *str1 = "abc";
+  const char *str2 = "\0c";
+  ck_assert_int_eq(s21_strcspn(str1, str2), strcspn(str1, str2));
+}
+END_TEST
+
+// Содержит \0
+START_TEST(test_strcspn_spec_chars) {
+  const char *str1 = "a\nbc";
+  const char *str2 = "\n";
   ck_assert_int_eq(s21_strcspn(str1, str2), strcspn(str1, str2));
 }
 END_TEST
@@ -79,6 +95,8 @@ Suite *strcspn_suite(void) {
   tcase_add_test(tc_core, test_strcspn_equal);
   tcase_add_test(tc_core, test_strcspn_reg);
   tcase_add_test(tc_core, test_strcspn_empty_all);
+  tcase_add_test(tc_core, test_strcspn_include_zero);
+  tcase_add_test(tc_core, test_strcspn_spec_chars);
 
   suite_add_tcase(s, tc_core);
   return s;

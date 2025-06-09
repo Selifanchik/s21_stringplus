@@ -99,7 +99,7 @@ START_TEST(test_strncmp_empty_strings) {
 }
 END_TEST
 
-//n больше строк
+// n больше строк
 START_TEST(test_strncmp_n_more_strings) {
   const char *str2 = " \na";
   const char *str1 = " \na";

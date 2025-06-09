@@ -69,7 +69,7 @@ END_TEST
 // Поиск пересекающиеся области
 START_TEST(test_memchr_found_overlaps) {
   char str[] = "abcd";
-  ck_assert_ptr_eq(s21_memchr(str, *(str+1), 3), memchr(str, *(str+1), 3));
+  ck_assert_ptr_eq(s21_memchr(str, *(str + 1), 3), memchr(str, *(str + 1), 3));
 }
 END_TEST
 

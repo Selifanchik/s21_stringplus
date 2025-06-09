@@ -65,8 +65,8 @@ END_TEST
 
 // Спец символы
 START_TEST(test_memset_spec_char) {
-  char str1[5]="abcd";
-  char str2[5]="abcd";
+  char str1[5] = "abcd";
+  char str2[5] = "abcd";
 
   s21_memset(str1, '\n', 4);
   memset(str2, '\n', 4);

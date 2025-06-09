@@ -39,11 +39,11 @@ END_TEST
 
 // n равна копируемой строке, но без нуль-терминатора
 START_TEST(test_strncpy_no_null_terminator) {
-  const char *src = "abcdef";
+  const char *src = "abc def";
   char dest1[10] = {'\0'};
   char dest2[10] = {'\0'};
-  s21_strncpy(dest1, src, 6);
-  strncpy(dest2, src, 6);
+  s21_strncpy(dest1, src, 7);
+  strncpy(dest2, src, 7);
   ck_assert_str_eq(dest1, dest2);
 }
 END_TEST
@@ -103,7 +103,7 @@ Suite *strncpy_suite(void) {
   // tcase_add_test(tc_core, test_strncpy_n_zero);
   tcase_add_test(tc_core, test_strncpy_zero_src);
   tcase_add_test(tc_core, test_strncpy_spec_char);
-   tcase_add_test(tc_core, test_strncpy_overlap);
+  tcase_add_test(tc_core, test_strncpy_overlap);
 
   suite_add_tcase(s, tc_core);
   return s;
