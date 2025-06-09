@@ -407,7 +407,6 @@ char* rabota_mantisa(char* string, char chr, int mantis){
 int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right, char chr, int *mantis){
     long double toch = powl(10.0L, flag.tochnost + flag.mantis_g);
     number = my_round(number * toch) / toch;
-
     if(number >= 10.0L && s21_strchr("eE", chr)){
         number /= 10.0L;
         (*mantis)++;
@@ -428,7 +427,14 @@ int float_to_string(long double number, char* mas_for_left, flags flag, char* ma
 
         number = (number - left_part) * powl(10.0L, flag.tochnost);
 
+        long right_part = number;
+        int sled = (number - right_part) * 10;
+        if(sled == 9){
+            number += 0.1;
+        }
+    
         int dlina_number = dlina_number_func(number);
+
         if(dlina_number < flag.tochnost){
             number = zero_before_number(flag, mas_for_left, number, left_part, &dlina,  dlina_number);
         }
@@ -866,8 +872,8 @@ char* rabota_width(flags flag, char* string, int dlina){
     return string;
 }
 
-long double my_round(long double number) {//изменить
-    long int_part = number;
+long double my_round(long double number){
+    long long int_part = number;
     long double frac = number - int_part;
 
     if(fabsl(frac) > 0.5L || (fabsl(frac) == 0.5L && (int_part % 2 != 0))){
@@ -889,10 +895,10 @@ long double my_round(long double number) {//изменить
 //     //long unsigned int = 18446744073709551615 
 
 //     //не работает
-//     //"%.300e %.1e %30.20e %#30.20e %+30.20e", 1e-308, 3.14, 3.14, 3.14, 1.7976931348623157e+308
+//     //"%.300 %30.20e %#30.20e %+30.20e", 1e-308, 3.14, 3.14, 1.7976931348623157e+308
 
-//     sprintf(buf1, "%.1e", 3.14);
-//     s21_sprintf(buf2, "%.1e", 3.14);
+//     sprintf(buf1, "%30.20e", 3.14);
+//     s21_sprintf(buf2, "%30.20e", 3.14);
 
 //     printf("%s\n", buf1);
 //     printf("%s\n", buf2);
