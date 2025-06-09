@@ -57,6 +57,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, v
 int s21_isspace(int symbol);
 int is_sign(const char** ptr_str, int* width);
 void skip_space(const char** ptr_str);
+int is_empty_or_whitespace(const char* ptr_str);
 
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);

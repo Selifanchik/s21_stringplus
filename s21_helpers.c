@@ -234,3 +234,8 @@ void to_nan_inf(long double* value, ParseFloat float_value) {
         *value = float_value.sign_float * INFINITY;
     }
 }
+
+int is_empty_or_whitespace(const char* ptr_str) {
+    skip_space(&ptr_str);
+    return *ptr_str;
+}
