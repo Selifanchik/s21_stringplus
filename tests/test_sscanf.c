@@ -9,9 +9,11 @@ START_TEST(test_sscanf_int) {
   const char *str = "   1 Hello, world!   ";
   int a;
   int b;
-  sscanf(str, "%d", &a);
-  s21_sscanf(str, "%d", &b);
+  int count, s21_count;
+  count = sscanf(str, "%d", &a);
+  s21_count = s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
+  ck_assert_int_eq(count, s21_count);
   //!!!!!!!!!!!!!!! еще нужно протестировать результат работы самой функции, успешно записанные данные
 }
 END_TEST
@@ -559,6 +561,24 @@ START_TEST(test_sscanf_wchar_string) {
 END_TEST
 
 
+// Тест %E %f nan
+START_TEST(test_sscanf_float_nan_inf) {
+  const char *str = "nan inf; .8[1.";
+  long double a, b, c, d;
+  long double e, f, g, h;
+  sscanf(str, "%Lf %Lf; %Lf [ %Lf", &a, &b, &c, &d);
+  s21_sscanf(str, "%Lf %Lf; %Lf [ %Lf", &e, &f, &g, &h);
+  ck_assert_ldouble_nan(a);
+  ck_assert_ldouble_nan(e);
+  ck_assert_ldouble_infinite(b);
+  ck_assert_ldouble_infinite(f);
+  ck_assert_ldouble_eq(c, g);
+  ck_assert_ldouble_eq(d, h);
+
+}
+END_TEST
+
+
 
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
@@ -608,6 +628,7 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_length_int_and_incorrect_percent);
   tcase_add_test(tc_core, test_sscanf_p_incorrect);
   tcase_add_test(tc_core, test_sscanf_wchar_string);
+  tcase_add_test(tc_core, test_sscanf_float_nan_inf);
   
   suite_add_tcase(s, tc_core);
   return s;
