@@ -88,7 +88,6 @@ char* parse_format_sep(const char* start_format, const char* ptr_specifier) {
     s21_size_t length_sep = ptr_specifier - start_format;
     char* separation = (char*)calloc(length_sep + 1, sizeof(char));
     if (separation){
-        // заменить на s21_strncpy
         s21_strncpy(separation, start_format, length_sep);
     }
     return separation;
@@ -126,13 +125,11 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
             token->width = (int)temp_width;
         }
     }
-    // заменить strchr на s21_strchr
     const char* ptr_length = s21_strchr(lengths, **ptr_format);
     if (ptr_length != S21_NULL) {
         token->length = **ptr_format;
         (*ptr_format)++;
     }
-    // заменить strchr на s21_strchr
     const char* ptr_specifier = s21_strchr(specifiers, **ptr_format);
     if (ptr_specifier != S21_NULL) {
         token->specifier = *ptr_specifier;
@@ -164,7 +161,6 @@ int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Cal
     } else flag_error = 1;
     return flag_error;
 }
-
 
 int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const Callback* cb) {
     int flag_error = 0;
@@ -289,8 +285,6 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
     return flag_error;
 }
 
-// вычисления перенести в отдельную переменную добавить ширину и занести в переменные типа
-// пересмотреть функции всех типов
 int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
     ParseFloat float_value;
