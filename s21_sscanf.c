@@ -243,53 +243,14 @@ int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     return flag_error;
 }
 
-int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
-    int flag_error = 0;
-    Callback cb;
-    to_base10(&cb);
-    init_parse_float(float_value);
-    float_value->sign_float = is_sign(ptr_str, &(token->width));
-    int flag_digit = 0;
-    if (s21_is_dec_digit(*ptr_str)) {
-        unsigned long temp_int_part = 0;
-        if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_int_part)) {
-            float_value->int_part = temp_int_part;
-            flag_digit = 1;
-        }
-    }
-    if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) && (token->width == -1 || token->width > 0)) {
-        (*ptr_str)++;
-        if (token->width > 0) token->width--;
-        const char* start_fract = *ptr_str;
-        if (s21_is_dec_digit(*ptr_str)) {
-            unsigned long temp_fract_part = 0;
-            if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_fract_part)) {
-                float_value->fract_part = temp_fract_part;
-                float_value->order_fract = *ptr_str - start_fract;
-                flag_digit = 1;
-            }
-        }
-    }
-    if (flag_digit) {
-        if (!is_valid_exponent(*ptr_str, token->width)) {
-            float_value->exp_part = 1;
-            (*ptr_str)++;
-            float_value->sign_exp = is_sign(ptr_str, &(token->width));
-            unsigned long temp_order_exp = 0;
-            if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_order_exp)) {
-                float_value->order_exp = (int)temp_order_exp;
-            }
-        }
-    } else flag_error = 1;
-    return flag_error;
-}
-
 int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
     ParseFloat float_value;
-    flag_error = parse_float(ptr_str, token, &float_value);
+    if (!s21_is_nan_inf(ptr_str, &(token->width), &float_value)) {
+        flag_error = parse_float(ptr_str, token, &float_value);
+    }
     if (!flag_error && !token->suppress) {
-        long double value = 0;
+        long double value = 0.0;
         value = to_float(float_value);
         if (token->length == 'l') {
             double* dest = va_arg(*args, double*);

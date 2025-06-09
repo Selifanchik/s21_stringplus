@@ -1,4 +1,5 @@
 #include "s21_helpers.h"
+#include <stdio.h>
 
 int s21_is_dec_digit(const char* symbol) {
     return (*symbol >= '0' && *symbol <= '9');
@@ -81,6 +82,8 @@ void init_parse_float(ParseFloat* number) {
     number->exp_part = 0;
     number->sign_exp = 1;
     number->order_exp = 0;
+    number->s21_nan = 0;
+    number->s21_inf = 0;
 }
 
 long double s21_pow10(int order) {
@@ -92,17 +95,21 @@ long double s21_pow10(int order) {
 }
 
 long double to_float(ParseFloat float_value) {
-    long double value = 0;
-    long double fraction = 1.0;
-    for (int i = 0; i < float_value.order_fract; i++) {
-        fraction = s21_pow10(float_value.order_fract);
-    }
-    value = (long double)((float_value.int_part + ((long double)float_value.fract_part / fraction)) * float_value.sign_float);
-    if (float_value.exp_part) {
-        long double exp = s21_pow10(float_value.order_exp);
-        if (float_value.sign_exp > 0) {
-            value *= exp;
-        } else value /= exp;
+    long double value = 0.0;
+    if (float_value.s21_nan || float_value.s21_inf) {
+        to_nan_inf(&value, float_value);
+    } else {
+        long double fraction = 1.0;
+        for (int i = 0; i < float_value.order_fract; i++) {
+            fraction = s21_pow10(float_value.order_fract);
+        }
+        value = (long double)((float_value.int_part + ((long double)float_value.fract_part / fraction)) * float_value.sign_float);
+        if (float_value.exp_part) {
+            long double exp = s21_pow10(float_value.order_exp);
+            if (float_value.sign_exp > 0) {
+                value *= exp;
+            } else value /= exp;
+        }
     }
     return value;
 }
@@ -158,5 +165,72 @@ void is_prefix_base16(const char** ptr_str, int* width) {
             (*ptr_str) += 2;
             if (*width > 1) *width -= 2;
         }
+    }
+}
+
+int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* parse_float) {
+    int flag_nan_inf = 0;
+    init_parse_float(parse_float);
+    if (*width == -1 || *width > 2) {
+        if (s21_strncmp(*ptr_str, "nan", 3) == 0) {
+            parse_float->s21_nan = 1;
+            if (*width > 2) *width -= 3;
+            (*ptr_str) += 3;
+            flag_nan_inf = 1;
+        } else if (s21_strncmp(*ptr_str, "inf", 3) == 0) {
+            parse_float->s21_inf = 1;
+            if (*width > 2) *width -= 3;
+            flag_nan_inf = 1;
+            (*ptr_str) += 3;
+        }
+    }
+    return flag_nan_inf;
+}
+
+int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
+    int flag_error = 0;
+    Callback cb; 
+    to_base10(&cb);
+    float_value->sign_float = is_sign(ptr_str, &(token->width));
+    int flag_digit = 0;
+    if (s21_is_dec_digit(*ptr_str)) {
+        unsigned long temp_int_part = 0;
+        if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_int_part)) {
+            float_value->int_part = temp_int_part;
+            flag_digit = 1;
+        }
+    }
+    if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) && (token->width == -1 || token->width > 0)) {
+        (*ptr_str)++;
+        if (token->width > 0) token->width--;
+        const char* start_fract = *ptr_str;
+        if (s21_is_dec_digit(*ptr_str)) {
+            unsigned long temp_fract_part = 0;
+            if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_fract_part)) {
+                float_value->fract_part = temp_fract_part;
+                float_value->order_fract = *ptr_str - start_fract;
+                flag_digit = 1;
+            }
+        }
+    }
+    if (flag_digit) {
+        if (!is_valid_exponent(*ptr_str, token->width)) {
+            float_value->exp_part = 1;
+            (*ptr_str)++;
+            float_value->sign_exp = is_sign(ptr_str, &(token->width));
+            unsigned long temp_order_exp = 0;
+            if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_order_exp)) {
+                float_value->order_exp = (int)temp_order_exp;
+            }
+        }
+    } else flag_error = 1;
+    return flag_error;
+}
+
+void to_nan_inf(long double* value, ParseFloat float_value) {
+    if (float_value.s21_nan) {
+        *value = float_value.sign_float * NAN;
+    } else if (float_value.s21_inf) {
+        *value = float_value.sign_float * INFINITY;
     }
 }

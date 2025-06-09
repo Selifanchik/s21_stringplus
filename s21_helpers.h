@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include "s21_string.h"
+#include "math.h"
 
 typedef struct {
     int suppress;
@@ -25,6 +26,8 @@ typedef struct {
     int exp_part;
     int sign_exp;
     int order_exp;
+    int s21_nan;
+    int s21_inf;
 } ParseFloat;
 
 
@@ -65,6 +68,8 @@ int is_write_specifier(FormatSpecifier* token);
 int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value);
 long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
+int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* parse_float);
+void to_nan_inf(long double* value, ParseFloat float_value);
 
 int parse_i(const char** ptr_str, Callback* cb, int* width);
 
