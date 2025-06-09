@@ -11,9 +11,8 @@ int s21_sscanf(const char* str, const char* format, ...) {
     const char* ptr_str = str;
     const char* ptr_format = format;
     const char* ptr_specifier = ptr_format;
-    char* separation = S21_NULL;
     while ((ptr_specifier = s21_strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
-        separation = parse_format_sep(ptr_format, ptr_specifier);
+        char* separation = parse_format_sep(ptr_format, ptr_specifier);
         if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
             if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
