@@ -471,23 +471,23 @@ START_TEST(test_sscanf_percent) {
 END_TEST
 
 START_TEST(test_sscanf_mix_type_length_width) {
-short sh_num, s21_sh_num;
-char symb, s21_symb;
-char str[100], s21_str[100];
-unsigned long u_l_num, s21_u_l_num;
-unsigned u_x_num, s21_u_x_num;
-void* ptr, *s21_ptr;
-int n, s21_n;
-float f_num, s21_f_num;
-double e_num, s21_e_num;
-unsigned o_num, s21_o_num;
-unsigned short x_num, s21_x_num;
-long double g_num, s21_g_num;
+  short sh_num, s21_sh_num;
+  char symb, s21_symb;
+  char str[100], s21_str[100];
+  unsigned long u_l_num, s21_u_l_num;
+  unsigned u_x_num, s21_u_x_num;
+  void* ptr, *s21_ptr;
+  int n, s21_n;
+  float f_num, s21_f_num;
+  double e_num, s21_e_num;
+  unsigned o_num, s21_o_num;
+  unsigned short x_num, s21_x_num;
+  long double g_num, s21_g_num;
 
-sscanf("123;4567 Hello worldu|%^ yui067 , 12 (one) 6a 0xf43; 1.753223e2, 45 6.E-1 6|7. 7.", 
+  sscanf("123;4567 Hello worldu|%^ yui067 , 12 (one) 6a 0xf43; 1.753223e2, 45 6.E-1 6|7. 7.", 
   "%3hd ; %*4d Hello world%c|%%^%3s %*i , %5lu (one)%X%p ;%n %7f %3le, %o\n %*E %hx |%*g %LG", 
   &sh_num, &symb, str, &u_l_num, &u_x_num, &ptr, &n, &f_num, &e_num, &o_num, &x_num, &g_num);
-s21_sscanf("123;4567 Hello worldu|%^ yui067 , 12 (one) 6a 0xf43; 1.753223e2, 45 6.E-1 6|7. 7.", 
+  s21_sscanf("123;4567 Hello worldu|%^ yui067 , 12 (one) 6a 0xf43; 1.753223e2, 45 6.E-1 6|7. 7.", 
   "%3hd ; %*4d Hello world%c|%%^%3s %*i , %5lu (one)%X%p ;%n %7f %3le, %o\n %*E %hx |%*g %LG", 
   &s21_sh_num, &s21_symb, s21_str, &s21_u_l_num, &s21_u_x_num, &s21_ptr, &s21_n, &s21_f_num, &s21_e_num, &s21_o_num, &s21_x_num, &s21_g_num);
   ck_assert_int_eq(sh_num, s21_sh_num);
@@ -506,6 +506,59 @@ s21_sscanf("123;4567 Hello worldu|%^ yui067 , 12 (one) 6a 0xf43; 1.753223e2, 45 
 
 }
 END_TEST
+
+START_TEST(test_sscanf_o_correct_width) {
+  unsigned a, b, c = 1, d = 1;
+  sscanf(";54   0123", ";%o %1o", &a, &c);
+  s21_sscanf(";54   0123", ";%o %1o", &b, &d);
+  ck_assert_uint_eq(a, b);
+  ck_assert_uint_eq(c, d);
+}
+END_TEST
+
+START_TEST(test_sscanf_x_correct_width) {
+  unsigned a, b, c = 1, d = 1;
+  sscanf(";54   0x123", ";%x %1x", &a, &c);
+  s21_sscanf(";54   0x123", ";%x %1x", &b, &d);
+  ck_assert_uint_eq(a, b);
+  ck_assert_uint_eq(c, d);
+}
+END_TEST
+
+START_TEST(test_sscanf_x_incorrect_width) {
+  unsigned a = 1, b = 1;
+  sscanf(";g0x123", ";%x", &a);
+  s21_sscanf(";g0x123", ";%x", &b);
+  ck_assert_uint_eq(a, b);
+}
+END_TEST
+
+START_TEST(test_sscanf_length_int_and_incorrect_percent) {
+  long a, b = 1, c, d = 1;
+  sscanf("123  643", "  %ld %% %ld ", &a, &b);
+  s21_sscanf("123  643", "  %ld %% %ld ", &c, &d);
+  ck_assert_uint_eq(a, c);
+  ck_assert_uint_eq(b, d);
+}
+END_TEST
+
+START_TEST(test_sscanf_p_incorrect) {
+  void* ptr = NULL, *s21_ptr = S21_NULL;
+  sscanf("qwe123  643", "%p", &ptr);
+  s21_sscanf("qwe123  643", "%p", &s21_ptr);
+  ck_assert_ptr_eq(ptr, s21_ptr);
+}
+END_TEST
+
+START_TEST(test_sscanf_wchar_string) {
+  wchar_t symb[10] = {0}, s21_symb[10] = {0};
+  sscanf("qwe123  643", "qw%2ls", symb);
+  s21_sscanf("qwe123  643", "qw%2ls", s21_symb);
+  ck_assert_int_eq(wcscmp(symb, s21_symb), 0);
+}
+END_TEST
+
+
 
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
@@ -549,6 +602,12 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_n);
   tcase_add_test(tc_core, test_sscanf_percent);
   tcase_add_test(tc_core, test_sscanf_mix_type_length_width);
+  tcase_add_test(tc_core, test_sscanf_o_correct_width);
+  tcase_add_test(tc_core, test_sscanf_x_correct_width);
+  tcase_add_test(tc_core, test_sscanf_x_incorrect_width);
+  tcase_add_test(tc_core, test_sscanf_length_int_and_incorrect_percent);
+  tcase_add_test(tc_core, test_sscanf_p_incorrect);
+  tcase_add_test(tc_core, test_sscanf_wchar_string);
   
   suite_add_tcase(s, tc_core);
   return s;
