@@ -243,20 +243,20 @@ int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
         if (token->length == 'l') dest_w = va_arg(*args, wchar_t*);
         else dest_c = va_arg(*args, char*);
     }
-    int i = 0;
-    for (i = 0;**ptr_str && ((i < token->width && token->width > 0) || token->width == -1) && !s21_isspace(**ptr_str); i++) {
-        if (**ptr_str) {
-            if (!token->suppress) {
-                if (token->length == 'l') *(dest_w + i) = (wchar_t)(unsigned char)*(*ptr_str);
-                else *(dest_c + i) = *(*ptr_str);
-            }
-            (*ptr_str)++;
-            flag_error = 0;
+    int length_str = 0;
+    while (**ptr_str && !s21_isspace(**ptr_str) && is_valid_width(&(token->width), 0)) {
+        if (!token->suppress) {
+            if (token->length == 'l') *(dest_w + length_str) = (wchar_t)(unsigned char)*(*ptr_str);
+            else *(dest_c + length_str) = *(*ptr_str);
         }
+        (*ptr_str)++;
+        flag_error = 0;
+        if (token->width > 0) token->width--;
+        length_str++;
     }
     if (!token->suppress) {
-        if (token->length == 'l') *(dest_w + i) = L'\0';
-        else *(dest_c + i) = '\0';
+        if (token->length == 'l') *(dest_w + length_str) = L'\0';
+        else *(dest_c + length_str) = '\0';
     }
     return flag_error;
 }

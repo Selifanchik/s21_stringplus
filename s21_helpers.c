@@ -50,7 +50,7 @@ void to_base16(Callback* cb) {
 // rename struct Callback
 int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned long* value) {
     int flag_parse_error = 1;
-    while (cb->is_digit(*ptr_str) && (*width == -1 || *width > 0)) {
+    while (cb->is_digit(*ptr_str) && is_valid_width(width, 0)) {
         int digit = cb->to_digit(*ptr_str);
         *value = *value * cb->base + digit;
         if (*width > 0) (*width)--;
@@ -80,6 +80,10 @@ int s21_isspace(int symbol) {
         if (symbol == space_arr[i]) result = 1;
     }
     return result;
+}
+
+int is_valid_width(const int* width, short valid_width) {
+    return (*width == -1 || *width > valid_width);
 }
 
 void skip_space(const char** ptr_str) {
@@ -122,7 +126,7 @@ void init_format_spec_group(FormatSpecGroup* spec_groups) {
 
 int is_sign(const char** ptr_str, int* width) {
     int sign = 1;
-    if ((**ptr_str == '-' || **ptr_str == '+') && (*width == -1 || *width > 0)) {
+    if ((**ptr_str == '-' || **ptr_str == '+') && is_valid_width(width, 0)) {
         if (**ptr_str == '-') {
             sign = -1;
         }
@@ -134,7 +138,7 @@ int is_sign(const char** ptr_str, int* width) {
 
 void is_prefix_base16(const char** ptr_str, int* width) {
     if (**ptr_str == '0' && ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) {
-        if (*width > 1 || *width == -1) {
+        if (is_valid_width(width, 1)) {
             (*ptr_str) += 2;
             if (*width > 1) *width -= 2;
         }
@@ -144,8 +148,8 @@ void is_prefix_base16(const char** ptr_str, int* width) {
 int is_valid_exponent(const char *ptr_str, int width) {
     int flag_error = 1;
     int is_exp = (*ptr_str == 'E' || *ptr_str == 'e');
-    int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') && s21_is_dec_digit(ptr_str + 2) && (width > 1 || width == -1);
-    int has_digit_only = s21_is_dec_digit(ptr_str + 1) && (width > 0 || width == -1);
+    int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') && s21_is_dec_digit(ptr_str + 2) && is_valid_width(&width, 1);
+    int has_digit_only = s21_is_dec_digit(ptr_str + 1) && is_valid_width(&width, 0);
     if (is_exp && (has_sign_and_digit || has_digit_only)) flag_error = 0;
     return flag_error;
 }
@@ -163,7 +167,7 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
             flag_digit = 1;
         }
     }
-    if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) && (token->width == -1 || token->width > 0)) {
+    if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) && is_valid_width(&(token->width), 0)) {
         (*ptr_str)++;
         if (token->width > 0) token->width--;
         const char* start_fract = *ptr_str;
