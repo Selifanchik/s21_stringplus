@@ -29,30 +29,30 @@ int to_hex(const char* hex_num) {
     return digit;
 }
 
-void to_base8(DigitParser* cb) {
-    cb->is_digit = s21_is_oct_digit;
-    cb->to_digit = to_oct_dec;
-    cb->base = 8;
+void to_base8(DigitParser* parser) {
+    parser->is_digit = s21_is_oct_digit;
+    parser->to_digit = to_oct_dec;
+    parser->base = 8;
 }
 
-void to_base10(DigitParser* cb) {
-    cb->is_digit = s21_is_dec_digit;
-    cb->to_digit = to_oct_dec;
-    cb->base = 10;
+void to_base10(DigitParser* parser) {
+    parser->is_digit = s21_is_dec_digit;
+    parser->to_digit = to_oct_dec;
+    parser->base = 10;
 }
 
-void to_base16(DigitParser* cb) {
-    cb->is_digit = s21_is_hex_digit;
-    cb->to_digit = to_hex;
-    cb->base = 16;
+void to_base16(DigitParser* parser) {
+    parser->is_digit = s21_is_hex_digit;
+    parser->to_digit = to_hex;
+    parser->base = 16;
 }
 
 // rename struct DigitParser
-int base_to_dec(const char** ptr_str, const DigitParser* cb, int* width, unsigned long* value) {
+int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width, unsigned long* value) {
     int flag_parse_error = 1;
-    while (cb->is_digit(*ptr_str) && is_valid_width(width, 0)) {
-        int digit = cb->to_digit(*ptr_str);
-        *value = *value * cb->base + digit;
+    while (parser->is_digit(*ptr_str) && is_valid_width(width, 0)) {
+        int digit = parser->to_digit(*ptr_str);
+        *value = *value * parser->base + digit;
         if (*width > 0) (*width)--;
         (*ptr_str)++;
         flag_parse_error = 0;
@@ -60,15 +60,15 @@ int base_to_dec(const char** ptr_str, const DigitParser* cb, int* width, unsigne
     return flag_parse_error;
 }
 
-int parse_i(const char** ptr_str, DigitParser* cb, int* width) {
+int parse_i(const char** ptr_str, DigitParser* parser, int* width) {
     int flag_error = 0;
     if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
         is_prefix_base16(ptr_str, width);
-        to_base16(cb);
+        to_base16(parser);
     } else if (**ptr_str == '0') {
-        to_base8(cb);
+        to_base8(parser);
     } else {
-        to_base10(cb);
+        to_base10(parser);
     }
     return flag_error;
 }
@@ -156,13 +156,13 @@ int is_valid_exponent(const char *ptr_str, int width) {
 
 int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
     int flag_error = 0;
-    DigitParser cb; 
-    to_base10(&cb);
+    DigitParser parser; 
+    to_base10(&parser);
     float_value->sign_float = is_sign(ptr_str, &(token->width));
     int flag_digit = 0;
     if (s21_is_dec_digit(*ptr_str)) {
         unsigned long temp_int_part = 0;
-        if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_int_part)) {
+        if (!base_to_dec(ptr_str, &parser, &(token->width), &temp_int_part)) {
             float_value->int_part = temp_int_part;
             flag_digit = 1;
         }
@@ -173,7 +173,7 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
         const char* start_fract = *ptr_str;
         if (s21_is_dec_digit(*ptr_str)) {
             unsigned long temp_fract_part = 0;
-            if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_fract_part)) {
+            if (!base_to_dec(ptr_str, &parser, &(token->width), &temp_fract_part)) {
                 float_value->fract_part = temp_fract_part;
                 float_value->order_fract = *ptr_str - start_fract;
                 flag_digit = 1;
@@ -186,7 +186,7 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
             (*ptr_str)++;
             float_value->sign_exp = is_sign(ptr_str, &(token->width));
             unsigned long temp_order_exp = 0;
-            if (!base_to_dec(ptr_str, &cb, &(token->width), &temp_order_exp)) {
+            if (!base_to_dec(ptr_str, &parser, &(token->width), &temp_order_exp)) {
                 float_value->order_exp = (int)temp_order_exp;
             }
         }
