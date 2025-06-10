@@ -232,10 +232,6 @@ int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
             flag_error = 0;
         }
     }
-    if (token->width > 1 && !token->suppress) {
-        if (token->length == 'l') *(dest_w + i) = L'\0';
-        else *(dest_c + i) = '\0';
-    }
     return flag_error;
 }
 
