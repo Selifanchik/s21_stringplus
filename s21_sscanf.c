@@ -33,7 +33,7 @@ int s21_sscanf(const char* str, const char* format, ...) {
 
 int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
-    Callback cb;
+    DigitParser cb;
     switch (token->specifier) {
         case 'd':
             to_base10(&cb);
@@ -122,7 +122,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     }
     // parse width
     if (s21_is_dec_digit(*ptr_format)) {
-        Callback cb = {s21_is_dec_digit, to_oct_dec, 10};
+        DigitParser cb = {s21_is_dec_digit, to_oct_dec, 10};
         int width = -1;
         unsigned long temp_width = 0;
         if (!base_to_dec(ptr_format, &cb, &width, &temp_width)) {
@@ -161,7 +161,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     return flag_error;
 }
 
-int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb) {
+int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, DigitParser* cb) {
     int flag_error = 0;
     int sign = is_sign(ptr_str, &(token->width));
     if (token->specifier == 'i') flag_error = parse_i(ptr_str, cb, &(token->width));
@@ -183,7 +183,7 @@ int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Cal
     return flag_error;
 }
 
-int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const Callback* cb) {
+int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const DigitParser* cb) {
     int flag_error = 0;
     unsigned long value = 0;
     if (!base_to_dec(ptr_str, cb, &(token->width), &value)) {
@@ -286,7 +286,7 @@ int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
 
 int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
-    Callback cb;
+    DigitParser cb;
     to_base16(&cb);
     unsigned long value = 0;
     if (!base_to_dec(ptr_str, &cb, &(token->width), &value)) {

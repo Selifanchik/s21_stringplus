@@ -16,7 +16,7 @@ typedef struct {
     int (*is_digit)(const char*);
     int (*to_digit)(const char*);
     int base;
-} Callback;
+} DigitParser;
 
 typedef struct {
     int sign_float;
@@ -31,19 +31,13 @@ typedef struct {
 } ParseFloat;
 
 typedef struct {
-    int length;
-    char spec[16];
-} LenSpec;
-
-
-typedef struct {
     int length_modifier;
     const char* specifiers;
 } FormatSpecGroup;
 
-int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb);
-int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb);
-int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const Callback* cb);
+int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, DigitParser* cb);
+int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, DigitParser* cb);
+int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const DigitParser* cb);
 void handler_n(const char* start_str, const char* ptr_str, va_list* args);
 int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
 int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
@@ -57,12 +51,12 @@ int s21_is_hex_digit(const char* symbol);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
 
-void to_base8(Callback* cb);
-void to_base10(Callback* cb);
-void to_base16(Callback* cb);
+void to_base8(DigitParser* cb);
+void to_base10(DigitParser* cb);
+void to_base16(DigitParser* cb);
 
-int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned long* value);
-int parse_i(const char** ptr_str, Callback* cb, int* width);
+int base_to_dec(const char** ptr_str, const DigitParser* cb, int* width, unsigned long* value);
+int parse_i(const char** ptr_str, DigitParser* cb, int* width);
 
 int parse_specifier(const char** ptr_format, FormatSpecifier* token);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);

@@ -29,26 +29,26 @@ int to_hex(const char* hex_num) {
     return digit;
 }
 
-void to_base8(Callback* cb) {
+void to_base8(DigitParser* cb) {
     cb->is_digit = s21_is_oct_digit;
     cb->to_digit = to_oct_dec;
     cb->base = 8;
 }
 
-void to_base10(Callback* cb) {
+void to_base10(DigitParser* cb) {
     cb->is_digit = s21_is_dec_digit;
     cb->to_digit = to_oct_dec;
     cb->base = 10;
 }
 
-void to_base16(Callback* cb) {
+void to_base16(DigitParser* cb) {
     cb->is_digit = s21_is_hex_digit;
     cb->to_digit = to_hex;
     cb->base = 16;
 }
 
-// rename struct Callback
-int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned long* value) {
+// rename struct DigitParser
+int base_to_dec(const char** ptr_str, const DigitParser* cb, int* width, unsigned long* value) {
     int flag_parse_error = 1;
     while (cb->is_digit(*ptr_str) && is_valid_width(width, 0)) {
         int digit = cb->to_digit(*ptr_str);
@@ -60,7 +60,7 @@ int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned l
     return flag_parse_error;
 }
 
-int parse_i(const char** ptr_str, Callback* cb, int* width) {
+int parse_i(const char** ptr_str, DigitParser* cb, int* width) {
     int flag_error = 0;
     if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
         is_prefix_base16(ptr_str, width);
@@ -156,7 +156,7 @@ int is_valid_exponent(const char *ptr_str, int width) {
 
 int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
     int flag_error = 0;
-    Callback cb; 
+    DigitParser cb; 
     to_base10(&cb);
     float_value->sign_float = is_sign(ptr_str, &(token->width));
     int flag_digit = 0;
