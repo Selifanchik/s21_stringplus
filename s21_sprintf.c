@@ -51,15 +51,16 @@ void specificator_n(va_list *arg, char* buf);
 void specificator_p(va_list *arg, char* buf, flags flag);
 
 void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr);
-char* specificator_feE(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr);
-char* specificator_gG(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr);
-int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right, char chr, int *mantis);
+char* specificator_feE(flags flag, long double number, char* mas_for_left, char chr);
+char* specificator_gG(flags flag, long double number, char* mas_for_left, char chr);
+int float_to_string(long double number, char* mas_for_left, flags* flag, char chr, int* mantis);
 char* rabota_mantisa(char* string, char chr, int mantis);
 int expanent(long double *number, int mantis);
-int dlina_number_func(long double number);
-long double zero_before_number(flags flag, char* mas_for_left, long double number, int left_part, int* dlina, int dlina_number);
 int remove_0(char* string);
-long double my_round(long double number);
+void round_my(char* tmp_mas_for_round, int dlina, int flag_bank);
+void reverse_str(char *str);
+void left_part_to_str(long double val, char *str, flags* flag);
+void right_part_to_str(long double frac, char *str, int precision);
 
 
 int s21_sprintf(char *str, const char *format, ...){
@@ -252,8 +253,7 @@ void NanAndInf(char chr, long double number, char* buf, flags flag){
 }
 
 void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr){
-    char mas_for_left[4096];
-    char mas_for_right[4096];
+    char mas_for_left[8192];
     long double number;
     if(flag.L){
         number = va_arg(*arg, long double);
@@ -261,26 +261,26 @@ void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr){
     else{
         number = va_arg(*arg, double);
     }
-    int flag_nan_inf = 1;
+    int flag_nan_inf = 0;
     if(isinf(number) || isnan(number)) {
         NanAndInf(chr, number, buf, flag);
-        flag_nan_inf = 0;
+        flag_nan_inf = 1;
     }
     if(!flag.istochnost){
         flag.istochnost = 1;
         flag.tochnost = 6;
     }
 
-    if(flag_nan_inf){
+    if(!flag_nan_inf){
         char* string;
         if(chr == 'f'){
-            string = specificator_feE(flag, number, mas_for_left, mas_for_right, chr);
+            string = specificator_feE(flag, number, mas_for_left, chr);
         }
         else if(chr == 'e' || chr == 'E'){
-            string = specificator_feE(flag, number, mas_for_left, mas_for_right, chr);
+            string = specificator_feE(flag, number, mas_for_left, chr);
         }
         else{
-            string = specificator_gG(flag, number, mas_for_left, mas_for_right, chr);
+            string = specificator_gG(flag, number, mas_for_left, chr);
         }
 
         int dlina = s21_strlen(string);
@@ -292,7 +292,7 @@ void specificator_feEgG(flags flag, va_list *arg, char *buf, char chr){
     }
 }
 
-char* specificator_gG(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr){
+char* specificator_gG(flags flag, long double number, char* mas_for_left, char chr){
     long double number_copy = number;
     if(number < 0){
         number = number * -1;
@@ -309,25 +309,22 @@ char* specificator_gG(flags flag, long double number, char* mas_for_left, char* 
             tmp_mantis = mantis * -1;
         }
 
-        flag.mantis_g = tmp_mantis;
+        flag.mantis_g = tmp_mantis;//
 
-        long double toch = powl(10.0L, tmp_mantis + flag.tochnost);
-        long double number_for_dlina = my_round(number_copy * toch) / toch;
-
-        long tmp_number = number_for_dlina < 0 ? number_for_dlina * -1 : number_for_dlina;
-        int dlina_number = dlina_number_func(tmp_number);
         if(flag.tochnost == 0){
             flag.tochnost++;
         }
 
-        flag.tochnost = flag.tochnost - dlina_number;
-        string = specificator_feE(flag, number_copy, mas_for_left, mas_for_right, chr);
+        flag.tochnost = flag.tochnost + tmp_mantis;
+        string = specificator_feE(flag, number_copy, mas_for_left, chr);
     }
     else{//e
         chr = chr == 'g' ? 'e' : 'E';
         flag.isg = 1;
-        flag.tochnost = flag.tochnost - 1;
-        string = specificator_feE(flag, number_copy, mas_for_left, mas_for_right, chr);
+        if(flag.tochnost == 0){
+            flag.tochnost++;
+        }
+        string = specificator_feE(flag, number_copy, mas_for_left, chr);
     }
     return string;
 }
@@ -346,10 +343,10 @@ int remove_0(char* string){
     return dlina;
 }
 
-char* specificator_feE(flags flag, long double number, char* mas_for_left, char* mas_for_right, char chr){
+char* specificator_feE(flags flag, long double number, char* mas_for_left, char chr){
     int znak = 1;
     if(signbit(number)){
-        number = number * -1;
+        number = -number;
         znak = -1;
     }
 
@@ -359,7 +356,7 @@ char* specificator_feE(flags flag, long double number, char* mas_for_left, char*
         mantis = expanent(&number, mantis); 
     }
 
-    int dlina = float_to_string(number, mas_for_left, flag, mas_for_right, chr, &mantis);
+    int dlina = float_to_string(number, mas_for_left, &flag, chr, &mantis);
     
     if(!flag.reshetka && flag.isg){
         dlina = remove_0(mas_for_left);
@@ -404,83 +401,165 @@ char* rabota_mantisa(char* string, char chr, int mantis){
     return string;
 }
 
-int float_to_string(long double number, char* mas_for_left, flags flag, char* mas_for_right, char chr, int *mantis){
-    long double toch = powl(10.0L, flag.tochnost + flag.mantis_g);
-    number = my_round(number * toch) / toch;
-    if(number >= 10.0L && s21_strchr("eE", chr)){
-        number /= 10.0L;
-        (*mantis)++;
+void reverse_str(char *str) {
+    int len = s21_strlen(str);
+    for(int i = 0; i < len / 2; ++i){
+        char tmp = str[i];
+        str[i] = str[len - i - 1];
+        str[len - i - 1] = tmp;
     }
+}
 
-    long left_part = number;
-    int index_left = 0;
-    int dlina = long_to_string(mas_for_left, &index_left, left_part);
-    if(!flag.tochnost){
-        if(flag.reshetka){
-            mas_for_left[dlina++] = '.';
-            mas_for_left[dlina] = '\0';
+void left_part_to_str(long double number, char *str, flags* flag) {
+    if(number == 0.0L){
+        s21_strncpy(str, "0", 1);
+        if(flag->isg){
+            flag->tochnost--;
         }
     }
     else{
-        mas_for_left[dlina++] = '.';
-        mas_for_left[dlina] = '\0';
-
-        number = (number - left_part) * powl(10.0L, flag.tochnost);
-
-        long right_part = number;
-        int sled = (number - right_part) * 10;
-        if(sled == 9){
-            number += 0.1;
+        char buf[4096] = {0};
+        int i = 0;
+        while(number >= 1.0L){
+            long digit = (long)fmodl(number, 10.0L);
+            buf[i++] = '0' + digit;
+            number = floorl(number / 10.0L);
         }
-    
-        int dlina_number = dlina_number_func(number);
-
-        if(dlina_number < flag.tochnost){
-            number = zero_before_number(flag, mas_for_left, number, left_part, &dlina,  dlina_number);
+        buf[i] = '\0';
+        reverse_str(buf);
+        if(flag->isg && i < (flag->tochnost + 1)){
+            flag->tochnost = flag->tochnost - i;
         }
-        dlina_number = dlina_number_func(number);
-        if(dlina_number != 0){
-            long right_part = number;
-            int sled = (number - right_part) * 10;
-            if(sled >= 5){
-                right_part++;
+        else if(flag->isg && i >= (flag->tochnost + 1)){
+            flag->tochnost = 0;
+        }
+
+        s21_strncpy(str, buf, s21_strlen(buf));
+    }
+}
+
+void right_part_to_str(long double right_part, char *str, int toch) {
+    int i = 0;
+    while(i < toch + 1){ 
+        right_part *= 10.0L;
+        int digit = (int)right_part;
+        str[i++] = '0' + digit;
+        right_part -= digit;
+    }
+    str[toch + 1] = '\0';
+}
+
+void round_my(char* tmp_mas_for_round, int dlina, int flag_bank){
+    if(flag_bank){
+        int tochka = 0;
+        while(tmp_mas_for_round[tochka] != '.'){
+            tochka++;
+        }
+        if((tmp_mas_for_round[tochka - 1] - '0') % 2 != 0){
+            for(int j = tochka - 1; j >= 0; j--) {
+                if(tmp_mas_for_round[j] < '9'){
+                    tmp_mas_for_round[j]++;
+                    break;
+                }
+                else{
+                    tmp_mas_for_round[j] = '0';
+                }
             }
-            int index_right = 0;
-            int dlina_right = long_to_string(mas_for_right, &index_right, right_part);
-            s21_strncat(mas_for_left, mas_for_right, s21_strlen(mas_for_right));
-            dlina += dlina_right;
-            mas_for_left[dlina] = '\0';
         }
     }
-    return dlina;
-}
-
-long double zero_before_number(flags flag, char* mas_for_left, long double number, int left_part, int* dlina, int dlina_number){
-    for(int i = 0; i < flag.tochnost - dlina_number; i++){
-        mas_for_left[(*dlina)++] = '0';
-    }
-    mas_for_left[*dlina] = '\0';
-    if(flag.isg && left_part == 0){
-        int mantis = (int)floorl(log10l(number));
-        number = number / powl(10.0L, mantis);
-        mantis = mantis * -1;
-        for(int i = 0; i < mantis - 1; i++){
-            mas_for_left[(*dlina)++] = '0';
+    else if(tmp_mas_for_round[dlina - 1] >= '5') {
+        for(int j = dlina - 2; j >= 0; j--) {
+            if(tmp_mas_for_round[j] == '.'){
+                continue;
+            }
+            else if(tmp_mas_for_round[j] < '9'){
+                tmp_mas_for_round[j]++;
+                break;
+            }
+            else{
+                tmp_mas_for_round[j] = '0';
+            }
         }
-        mas_for_left[*dlina] = '\0';
-        number = number * powl(10.0L, flag.tochnost - 1);//
     }
-    return number;
 }
 
-int dlina_number_func(long double number){
-    long tmp_number = number;
-    int dlina_number = 0;
-    while(tmp_number > 0){
-        tmp_number /= 10;
-        dlina_number++;
+int float_to_string(long double number, char* mas_for_left, flags* flag, char chr, int* mantis){
+    long double intpart;
+    int tmp_tochnost = flag->tochnost;
+    int flag_round = 0;
+    int flag_bank = 0; 
+    char int_str[4096] = {0};
+    char frac_str[4096] = {0};
+
+    long double frac = modfl(number, &intpart);
+    if(frac == 0.5L){
+        flag_bank = 1;
     }
-    return dlina_number;
+
+    left_part_to_str(intpart, int_str, flag);
+    right_part_to_str(frac, frac_str, flag->tochnost);
+
+    char* tmp_mas_for_round = malloc(s21_strlen(int_str) + s21_strlen(frac_str) + 3);
+
+    s21_strncpy(tmp_mas_for_round, "0\0", 2);
+    s21_strncat(tmp_mas_for_round, int_str, s21_strlen(int_str));
+    s21_strncat(tmp_mas_for_round, ".", 1);
+    s21_strncat(tmp_mas_for_round, frac_str, s21_strlen(frac_str));
+    tmp_mas_for_round[s21_strlen(int_str) + s21_strlen(frac_str) + 3] = '\0';
+    int dlina = s21_strlen(tmp_mas_for_round);
+
+    round_my(tmp_mas_for_round, dlina, flag_bank);
+
+    tmp_mas_for_round[dlina - 1] = '\0';
+
+    if(tmp_mas_for_round[0] == '0'){
+        s21_strncpy(mas_for_left, tmp_mas_for_round + 1, dlina - 1);
+        mas_for_left[dlina - 2] = '\0';
+    }
+    else{
+        s21_strncpy(mas_for_left, tmp_mas_for_round, dlina);
+        mas_for_left[dlina - 1] = '\0';
+        flag_round = 1;
+    }
+
+    dlina = s21_strlen(mas_for_left);
+
+    if(s21_strchr("eE", chr) && mas_for_left[2] == '.'){
+        *mantis += 1; 
+        mas_for_left[2] = mas_for_left[1];
+        mas_for_left[1] = '.';
+        mas_for_left[dlina - 1] = '\0';
+    }
+
+    if(flag->isg && flag_round){
+        int k = 0;
+        int kolvo = tmp_tochnost;
+        while(kolvo > 0){
+            if(mas_for_left[k] == '.'){
+                k++;
+                continue;
+            }
+            k++;
+            kolvo--;
+        }
+        mas_for_left[k] = '\0';
+    }
+
+    if(!tmp_tochnost){
+        int k = 0;
+        while(mas_for_left[k] != '.'){
+            k++;
+        }
+        if(flag->reshetka){
+            mas_for_left[k + 1] = '\0';
+        }
+        else{
+            mas_for_left[k] = '\0';
+        }
+    }
+
+    free(tmp_mas_for_round);
+    return s21_strlen(mas_for_left);
 }
 
 void specificator_n(va_list *arg, char* buf){
@@ -872,17 +951,6 @@ char* rabota_width(flags flag, char* string, int dlina){
     return string;
 }
 
-long double my_round(long double number){
-    long long int_part = number;
-    long double frac = number - int_part;
-
-    if(fabsl(frac) > 0.5L || (fabsl(frac) == 0.5L && (int_part % 2 != 0))){
-        number > 0 ? int_part++ : int_part--;
-    }
-
-    return int_part;
-}
-
 // int main(){
 //     setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
 //     char buf1[1024], buf2[1024];
@@ -895,10 +963,10 @@ long double my_round(long double number){
 //     //long unsigned int = 18446744073709551615 
 
 //     //не работает
-//     //"%.300 %30.20e %#30.20e %+30.20e", 1e-308, 3.14, 3.14, 1.7976931348623157e+308
-
-//     sprintf(buf1, "%30.20e", 3.14);
-//     s21_sprintf(buf2, "%30.20e", 3.14);
+//     //"%.300e %+30.20e", 1e-308, 1.7976931348623157e+308
+//     //19 до точки//18 после точки
+//     sprintf(buf1, "%s", NULL);
+//     s21_sprintf(buf2, "%s", NULL);
 
 //     printf("%s\n", buf1);
 //     printf("%s\n", buf2);
