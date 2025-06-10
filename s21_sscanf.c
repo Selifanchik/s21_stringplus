@@ -9,9 +9,6 @@ int s21_sscanf(const char* str, const char* format, ...) {
     int read_count = 0;
     int flag_end = 0;
     const char* ptr_str = str;
-    if (!is_empty_or_whitespace(ptr_str)) {
-        read_count = -1;
-    }
     const char* ptr_format = format;
     const char* ptr_specifier = ptr_format;
     while ((ptr_specifier = s21_strchr(ptr_specifier, '%')) != S21_NULL && !flag_end) {
@@ -19,6 +16,8 @@ int s21_sscanf(const char* str, const char* format, ...) {
         if (*(ptr_specifier + 1) && separation) { 
             ptr_specifier++;
             if (!parse_str_sep(&ptr_str, separation) && !parse_specifier(&ptr_specifier, &token)) {
+                if (token.specifier != 'c' && token.specifier != 'n') skip_space(&ptr_str);
+                if (*ptr_str == '\0' && token.specifier != 'n' && read_count == 0) read_count = -1;
                 if (!parse_value(str, &ptr_str, &token, &arg)) {
                     ptr_format = ptr_specifier;
                     if (is_write_specifier(&token)) read_count++;
@@ -35,7 +34,6 @@ int s21_sscanf(const char* str, const char* format, ...) {
 int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args) {
     int flag_error = 0;
     Callback cb;
-    if (token->specifier != 'c' && token->specifier != 'n') skip_space(ptr_str);
     switch (token->specifier) {
         case 'd':
             to_base10(&cb);
