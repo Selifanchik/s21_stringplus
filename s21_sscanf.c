@@ -110,13 +110,17 @@ int parse_str_sep(const char** ptr_str, const char* ptr_sep) {
 }
 
 int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
-    const char specifiers[] = "cdieEfgGosuxXpn%";
+    FormatSpecGroup spec_groups[4];
+    init_format_spec_group(spec_groups);
+    const char all_specifiers[] = "cdieEfgGosuxXpn%";
     const char lengths[] = "lLh";
-    int error = 0;
+    int flag_error = 0;
+    // parse *
     if (**ptr_format == '*')  {
         token->suppress = 1;
         (*ptr_format)++;
     }
+    // parse width
     if (s21_is_dec_digit(*ptr_format)) {
         Callback cb = {s21_is_dec_digit, to_oct_dec, 10};
         int width = -1;
@@ -125,19 +129,36 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
             token->width = (int)temp_width;
         }
     }
-    const char* ptr_length = s21_strchr(lengths, **ptr_format);
-    if (ptr_length != S21_NULL) {
-        token->length = **ptr_format;
-        (*ptr_format)++;
+    // parse length
+    if (!token->suppress) {
+        const char* ptr_length = s21_strchr(lengths, **ptr_format);
+        if (ptr_length != S21_NULL) {
+            token->length = **ptr_format;
+            (*ptr_format)++;
+        }
     }
-    const char* ptr_specifier = s21_strchr(specifiers, **ptr_format);
-    if (ptr_specifier != S21_NULL) {
-        token->specifier = *ptr_specifier;
-        (*ptr_format)++;
+    // parse all specifiers
+    if (!token->suppress && !token->length && token->width == -1) {
+        const char* ptr_specifier = s21_strchr(all_specifiers, **ptr_format);
+        if (ptr_specifier != S21_NULL) {
+            token->specifier = *ptr_specifier;
+            (*ptr_format)++;
+        }
+    // parsing length dependent specifier
     } else {
-        error = 1;
+        int flag_end = 0;
+        for (int i = 0; i < 4 && !flag_end; i++) {
+            if (token->length == spec_groups[i].length_modifier) {
+                const char* ptr_specifier = s21_strchr(spec_groups[i].specifiers, **ptr_format);
+                if (ptr_specifier != S21_NULL) {
+                    token->specifier = *ptr_specifier;
+                    (*ptr_format)++;
+                    flag_end = 1;
+                } else flag_error = 1;
+            }
+        }
     }
-    return error;
+    return flag_error;
 }
 
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb) {

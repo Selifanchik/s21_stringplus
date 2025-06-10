@@ -30,6 +30,16 @@ typedef struct {
     int s21_inf;
 } ParseFloat;
 
+typedef struct {
+    int length;
+    char spec[16];
+} LenSpec;
+
+
+typedef struct {
+    int length_modifier;
+    const char* specifiers;
+} FormatSpecGroup;
 
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb);
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, Callback* cb);
@@ -61,6 +71,7 @@ int is_empty_or_whitespace(const char* ptr_str);
 
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
+void init_format_spec_group(FormatSpecGroup* spec_groups);
 
 void is_prefix_base16(const char** ptr_str, int* width);
 int is_valid_exponent(const char *ptr_str, int width);

@@ -239,3 +239,14 @@ int is_empty_or_whitespace(const char* ptr_str) {
     skip_space(&ptr_str);
     return *ptr_str;
 }
+
+void init_format_spec_group(FormatSpecGroup* spec_groups) {
+    spec_groups[0].length_modifier = 0;
+    spec_groups[0].specifiers = "csdiouxXceEgGfp";
+    spec_groups[1].length_modifier = 'h';
+    spec_groups[1].specifiers = "diouxX";
+    spec_groups[2].length_modifier = 'l';
+    spec_groups[2].specifiers = "csdiouxXceEgGf";
+    spec_groups[3].length_modifier = 'L';
+    spec_groups[3].specifiers = "eEgGf";
+}
