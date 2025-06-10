@@ -832,6 +832,48 @@ START_TEST(test_sscanf_ret_EOF) {
 }
 END_TEST
 
+START_TEST(test_sscanf_string_with_asterisk) {
+  const char *str = "skip keep";
+  char a[100] = {0}, b[100] = {0};
+  int c1 = sscanf(str, "%*s %s", a);
+  int c2 = s21_sscanf(str, "%*s %s", b);
+  ck_assert_int_eq(c1, c2);
+  ck_assert_str_eq(a, b);  
+}
+END_TEST
+
+START_TEST(test_sscanf_leading_space) {
+  const char *str = "     world";
+  char a[10];
+  char b[10];
+  int c1 = sscanf(str, "%s", a);
+  int c2 = s21_sscanf(str, "%s", b);
+  ck_assert_int_eq(c1, c2);
+  ck_assert_str_eq(a, b);  
+}
+END_TEST
+
+START_TEST(test_sscanf_string_with_punctuation) {
+  const char *str = "text,more";
+  char a[10];
+  char b[10];
+  int c1 = sscanf(str, "%s", a);
+  int c2 = s21_sscanf(str, "%s", b);
+  ck_assert_int_eq(c1, c2);
+  ck_assert_str_eq(a, b); 
+}
+END_TEST
+
+START_TEST(test_sscanf_only_spaces) {
+  const char *str = "   ";
+  char a[10];
+  char b[10];
+  int c1 = sscanf(str, "%s", a);
+  int c2 = s21_sscanf(str, "%s", b);
+  ck_assert_int_eq(c1, c2); 
+}
+END_TEST
+
 
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
@@ -894,6 +936,10 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_short_variants);
   tcase_add_test(tc_core, test_sscanf_long_variants);
   tcase_add_test(tc_core, test_sscanf_ret_EOF);
+  tcase_add_test(tc_core, test_sscanf_string_with_asterisk);
+  tcase_add_test(tc_core, test_sscanf_leading_space);
+  tcase_add_test(tc_core, test_sscanf_string_with_punctuation);
+  tcase_add_test(tc_core, test_sscanf_only_spaces);
 
   suite_add_tcase(s, tc_core);
   return s;
