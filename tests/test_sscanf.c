@@ -822,7 +822,7 @@ END_TEST
 START_TEST(test_sscanf_ret_EOF) {
 
   const char *str = "  %1 ";
-  int a = 234, b = 234, c = 234, d = 234;
+  int a, b = 234, c, d = 234;
   int count, count_21;
   count = sscanf(str, "%n%%%*d%d",&a, &b);
   count_21 = s21_sscanf(str, "%n%%%*d%d",&c, &d);
