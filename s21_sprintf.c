@@ -1,15 +1,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "s21_string.h"
 
 //для lc, ls
 #include <wchar.h>
 #include <locale.h>
-#include <math.h>
-
-//#include <string.h>//потом убрать и использовать только наши функ.(в коде много оригинальных ЗАМЕНИТЬ!!!)
-//#include <math.h>
 
 typedef struct{
     int minus;
@@ -24,7 +21,6 @@ typedef struct{
     int l;
     int L;
     int isg;
-    int mantis_g;
 } flags;
 
 void parsing(const char *format, int *i, flags *flag, va_list *arg);
@@ -41,7 +37,7 @@ char* rabota_width(flags flag, char* string, int dlina);
 
 void specificator_uxXo(flags flag, va_list *arg, char *buf, char chr);
 char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr);
-int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr);
+int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr, unsigned long number);
 
 void specificator_c(flags flag, va_list *arg, char* buf);
 void specificator_s(flags flag, va_list *arg, char* buf);
@@ -300,6 +296,9 @@ char* specificator_gG(flags flag, long double number, char* mas_for_left, char c
     int mantis = 0;
     mantis = expanent(&number, mantis);
     char* string;
+    if(flag.tochnost == 0){
+        flag.tochnost++;
+    }
     if(mantis >= -4 && mantis < flag.tochnost){//f
         chr = 'f';
         flag.isg = 1;
@@ -309,21 +308,12 @@ char* specificator_gG(flags flag, long double number, char* mas_for_left, char c
             tmp_mantis = mantis * -1;
         }
 
-        flag.mantis_g = tmp_mantis;//
-
-        if(flag.tochnost == 0){
-            flag.tochnost++;
-        }
-
         flag.tochnost = flag.tochnost + tmp_mantis;
         string = specificator_feE(flag, number_copy, mas_for_left, chr);
     }
     else{//e
         chr = chr == 'g' ? 'e' : 'E';
         flag.isg = 1;
-        if(flag.tochnost == 0){
-            flag.tochnost++;
-        }
         string = specificator_feE(flag, number_copy, mas_for_left, chr);
     }
     return string;
@@ -427,13 +417,9 @@ void left_part_to_str(long double number, char *str, flags* flag) {
         }
         buf[i] = '\0';
         reverse_str(buf);
-        if(flag->isg && i < (flag->tochnost + 1)){
+        if(flag->isg){
             flag->tochnost = flag->tochnost - i;
         }
-        else if(flag->isg && i >= (flag->tochnost + 1)){
-            flag->tochnost = 0;
-        }
-
         s21_strncpy(str, buf, s21_strlen(buf));
     }
 }
@@ -786,7 +772,7 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr
     }
 
     if(flag.reshetka){
-        dlina = rabota_reshetka(dlina, base, mas_for_number, chr);
+        dlina = rabota_reshetka(dlina, base, mas_for_number, chr, number_copy);
     }
 
     char* result = malloc(dlina + 1);
@@ -802,12 +788,17 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr
     return result;
 }
 
-int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr){
-    int flag = 1;
+int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr, unsigned long number){
+    int flag_resh = 1;
     if(base == 8 && mas_for_number[0] == '0'){
-        flag = 0;
+        flag_resh = 0;
     }
-    if(flag){
+    
+    if(base == 16 && number == 0){
+        flag_resh = 0;
+    }
+
+    if(flag_resh){
         int count = dlina - 1;
         int raznica = base == 8 ? 1 : 2;
         while(count >= 0){
@@ -850,7 +841,14 @@ void specificator_di(flags flag, va_list *arg, char *buf){
 
 char* number_di_to_string(long number, flags flag){
     long tmp_number = number;
-    if(tmp_number < 0) tmp_number = tmp_number * -1;
+    int flag_min = 0;
+    if(number == (-9223372036854775807 - 1)){
+        flag_min = 1;
+        tmp_number = (unsigned long)9223372036854775807;
+    } 
+    else{
+        tmp_number = (number < 0) ? -number : number;
+    }
     char* mas_for_number = malloc(20);
     if(mas_for_number == S21_NULL){
         exit(0);
@@ -858,6 +856,10 @@ char* number_di_to_string(long number, flags flag){
     int index = 0;
     
     int dlina = long_to_string(mas_for_number, &index, tmp_number);
+
+    if(flag_min){
+        mas_for_number[dlina - 1] = '8';
+    }
 
     if(flag.istochnost){
         mas_for_number = rabota_tochnost(flag, number == 0, dlina, mas_for_number, index);
@@ -972,20 +974,14 @@ char* rabota_width(flags flag, char* string, int dlina){
 // int main(){
 //     setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
 //     char buf1[1024], buf2[1024];
-//     //short int = 32767
-//     //int = 2147483647
-//     //long int = 9223372036854775807
-
-//     //short unsigned int = 65535
-//     //unsigned int = 4294967295
-//     //long unsigned int = 18446744073709551615 
-
 //     //не работает
 //     //"%.300e %+30.20e", 1e-308, 1.7976931348623157e+308
-//     //19 до точки//18 после точки
-//     char* a = NULL;
-//     sprintf(buf1, "a%-10.20sa%d", a, 10);
-//     s21_sprintf(buf2, "a%-10.6sa%d", a, 10);
+
+//     //19 до точки
+//     //18 после точки
+    
+//     sprintf(buf1, "!%#x!", 15);
+//     s21_sprintf(buf2, "!%#x!", 15);
 
 //     printf("%s\n", buf1);
 //     printf("%s\n", buf2);
