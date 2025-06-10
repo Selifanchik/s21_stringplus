@@ -1,38 +1,16 @@
 #include "s21_helpers.h"
 #include <stdio.h>
 
+int s21_is_oct_digit(const char* symbol) {
+    return (*symbol >= '0' && *symbol <= '7');
+}
+
 int s21_is_dec_digit(const char* symbol) {
     return (*symbol >= '0' && *symbol <= '9');
 }
 
 int s21_is_hex_digit(const char* symbol) {
     return ((*symbol >= '0' && *symbol <= '9') || (*symbol >= 'A' && *symbol <= 'F') || (*symbol >= 'a' && *symbol <= 'f'));
-}
-
-int s21_is_oct_digit(const char* symbol) {
-    return (*symbol >= '0' && *symbol <= '7');
-}
-
-int s21_isspace(int symbol) {
-    int space_arr[] = {9, 10, 11, 12, 13, 32};
-    int result = 0;
-    for (s21_size_t i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
-        if (symbol == space_arr[i]) result = 1;
-    }
-    return result;
-}
-
-// rename struct Callback
-int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned long* value) {
-    int flag_parse_error = 1;
-    while (cb->is_digit(*ptr_str) && (*width == -1 || *width > 0)) {
-        int digit = cb->to_digit(*ptr_str);
-        *value = *value * cb->base + digit;
-        if (*width > 0) (*width)--;
-        (*ptr_str)++;
-        flag_parse_error = 0;
-    }
-    return flag_parse_error;
 }
 
 int to_oct_dec(const char* num) {
@@ -51,16 +29,65 @@ int to_hex(const char* hex_num) {
     return digit;
 }
 
-int is_sign(const char** ptr_str, int* width) {
-    int sign = 1;
-    if ((**ptr_str == '-' || **ptr_str == '+') && (*width == -1 || *width > 0)) {
-        if (**ptr_str == '-') {
-            sign = -1;
-        }
+void to_base8(Callback* cb) {
+    cb->is_digit = s21_is_oct_digit;
+    cb->to_digit = to_oct_dec;
+    cb->base = 8;
+}
+
+void to_base10(Callback* cb) {
+    cb->is_digit = s21_is_dec_digit;
+    cb->to_digit = to_oct_dec;
+    cb->base = 10;
+}
+
+void to_base16(Callback* cb) {
+    cb->is_digit = s21_is_hex_digit;
+    cb->to_digit = to_hex;
+    cb->base = 16;
+}
+
+// rename struct Callback
+int base_to_dec(const char** ptr_str, const Callback* cb, int* width, unsigned long* value) {
+    int flag_parse_error = 1;
+    while (cb->is_digit(*ptr_str) && (*width == -1 || *width > 0)) {
+        int digit = cb->to_digit(*ptr_str);
+        *value = *value * cb->base + digit;
+        if (*width > 0) (*width)--;
         (*ptr_str)++;
-        if (*width > 0) ((*width)--);
+        flag_parse_error = 0;
     }
-    return sign;
+    return flag_parse_error;
+}
+
+int parse_i(const char** ptr_str, Callback* cb, int* width) {
+    int flag_error = 0;
+    if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
+        is_prefix_base16(ptr_str, width);
+        to_base16(cb);
+    } else if (**ptr_str == '0') {
+        to_base8(cb);
+    } else {
+        to_base10(cb);
+    }
+    return flag_error;
+}
+
+int s21_isspace(int symbol) {
+    int space_arr[] = {9, 10, 11, 12, 13, 32};
+    int result = 0;
+    for (s21_size_t i = 0; i < sizeof(space_arr)/sizeof(*space_arr); i++) {
+        if (symbol == space_arr[i]) result = 1;
+    }
+    return result;
+}
+
+void skip_space(const char** ptr_str) {
+    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
+}
+
+int is_write_specifier(FormatSpecifier* token) {
+    return !token->suppress && token->specifier != '%' && token->specifier != 'n';
 }
 
 void init_token(FormatSpecifier* token) {
@@ -68,10 +95,6 @@ void init_token(FormatSpecifier* token) {
     token->specifier = 0;
     token->suppress = 0;
     token->width = -1;
-}
-
-void skip_space(const char** ptr_str) {
-    while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
 }
 
 void init_parse_float(ParseFloat* number) {
@@ -86,77 +109,27 @@ void init_parse_float(ParseFloat* number) {
     number->s21_inf = 0;
 }
 
-long double s21_pow10(int order) {
-    long double result = 1.0;
-    for (int i = 0; i < order; i++) {
-        result *= 10.;
-    }
-    return result;
+void init_format_spec_group(FormatSpecGroup* spec_groups) {
+    spec_groups[0].length_modifier = 0;
+    spec_groups[0].specifiers = "csdiouxXceEgGfp";
+    spec_groups[1].length_modifier = 'h';
+    spec_groups[1].specifiers = "diouxX";
+    spec_groups[2].length_modifier = 'l';
+    spec_groups[2].specifiers = "csdiouxXceEgGf";
+    spec_groups[3].length_modifier = 'L';
+    spec_groups[3].specifiers = "eEgGf";
 }
 
-long double to_float(ParseFloat float_value) {
-    long double value = 0.0;
-    if (float_value.s21_nan || float_value.s21_inf) {
-        to_nan_inf(&value, float_value);
-    } else {
-        long double fraction = 1.0;
-        for (int i = 0; i < float_value.order_fract; i++) {
-            fraction = s21_pow10(float_value.order_fract);
+int is_sign(const char** ptr_str, int* width) {
+    int sign = 1;
+    if ((**ptr_str == '-' || **ptr_str == '+') && (*width == -1 || *width > 0)) {
+        if (**ptr_str == '-') {
+            sign = -1;
         }
-        value = (long double)((float_value.int_part + ((long double)float_value.fract_part / fraction)) * float_value.sign_float);
-        if (float_value.exp_part) {
-            long double exp = s21_pow10(float_value.order_exp);
-            if (float_value.sign_exp > 0) {
-                value *= exp;
-            } else value /= exp;
-        }
+        (*ptr_str)++;
+        if (*width > 0) ((*width)--);
     }
-    return value;
-}
-
-int is_valid_exponent(const char *ptr_str, int width) {
-    int flag_error = 1;
-    int is_exp = (*ptr_str == 'E' || *ptr_str == 'e');
-    int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') && s21_is_dec_digit(ptr_str + 2) && (width > 1 || width == -1);
-    int has_digit_only = s21_is_dec_digit(ptr_str + 1) && (width > 0 || width == -1);
-    if (is_exp && (has_sign_and_digit || has_digit_only)) flag_error = 0;
-    return flag_error;
-}
-
-int is_write_specifier(FormatSpecifier* token) {
-    return !token->suppress && token->specifier != '%' && token->specifier != 'n';
-}
-
-int parse_i(const char** ptr_str, Callback* cb, int* width) {
-    int flag_error = 0;
-    if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
-        is_prefix_base16(ptr_str, width);
-        to_base16(cb);
-    } else if (**ptr_str == '0') {
-        to_base8(cb);
-    } else {
-        to_base10(cb);
-    }
-    return flag_error;
-  }
-
-void to_base8(Callback* cb) {
-    cb->is_digit = s21_is_oct_digit;
-    cb->to_digit = to_oct_dec;
-    cb->base = 8;
-}
-
-void to_base10(Callback* cb) {
-    cb->is_digit = s21_is_dec_digit;
-    cb->to_digit = to_oct_dec;
-    cb->base = 10;
-}
-
-
-void to_base16(Callback* cb) {
-    cb->is_digit = s21_is_hex_digit;
-    cb->to_digit = to_hex;
-    cb->base = 16;
+    return sign;
 }
 
 void is_prefix_base16(const char** ptr_str, int* width) {
@@ -168,23 +141,13 @@ void is_prefix_base16(const char** ptr_str, int* width) {
     }
 }
 
-int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* parse_float) {
-    int flag_nan_inf = 0;
-    init_parse_float(parse_float);
-    if (*width == -1 || *width > 2) {
-        if (s21_strncmp(*ptr_str, "nan", 3) == 0) {
-            parse_float->s21_nan = 1;
-            if (*width > 2) *width -= 3;
-            (*ptr_str) += 3;
-            flag_nan_inf = 1;
-        } else if (s21_strncmp(*ptr_str, "inf", 3) == 0) {
-            parse_float->s21_inf = 1;
-            if (*width > 2) *width -= 3;
-            flag_nan_inf = 1;
-            (*ptr_str) += 3;
-        }
-    }
-    return flag_nan_inf;
+int is_valid_exponent(const char *ptr_str, int width) {
+    int flag_error = 1;
+    int is_exp = (*ptr_str == 'E' || *ptr_str == 'e');
+    int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') && s21_is_dec_digit(ptr_str + 2) && (width > 1 || width == -1);
+    int has_digit_only = s21_is_dec_digit(ptr_str + 1) && (width > 0 || width == -1);
+    if (is_exp && (has_sign_and_digit || has_digit_only)) flag_error = 0;
+    return flag_error;
 }
 
 int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value) {
@@ -227,26 +190,57 @@ int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_
     return flag_error;
 }
 
+long double to_float(ParseFloat float_value) {
+    long double value = 0.0;
+    if (float_value.s21_nan || float_value.s21_inf) {
+        to_nan_inf(&value, float_value);
+    } else {
+        long double fraction = 1.0;
+        for (int i = 0; i < float_value.order_fract; i++) {
+            fraction = s21_pow10(float_value.order_fract);
+        }
+        value = (long double)((float_value.int_part + ((long double)float_value.fract_part / fraction)) * float_value.sign_float);
+        if (float_value.exp_part) {
+            long double exp = s21_pow10(float_value.order_exp);
+            if (float_value.sign_exp > 0) {
+                value *= exp;
+            } else value /= exp;
+        }
+    }
+    return value;
+}
+
+long double s21_pow10(int order) {
+    long double result = 1.0;
+    for (int i = 0; i < order; i++) {
+        result *= 10.;
+    }
+    return result;
+}
+
+int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* parse_float) {
+    int flag_nan_inf = 0;
+    init_parse_float(parse_float);
+    if (*width == -1 || *width > 2) {
+        if (s21_strncmp(*ptr_str, "nan", 3) == 0) {
+            parse_float->s21_nan = 1;
+            if (*width > 2) *width -= 3;
+            (*ptr_str) += 3;
+            flag_nan_inf = 1;
+        } else if (s21_strncmp(*ptr_str, "inf", 3) == 0) {
+            parse_float->s21_inf = 1;
+            if (*width > 2) *width -= 3;
+            flag_nan_inf = 1;
+            (*ptr_str) += 3;
+        }
+    }
+    return flag_nan_inf;
+}
+
 void to_nan_inf(long double* value, ParseFloat float_value) {
     if (float_value.s21_nan) {
         *value = float_value.sign_float * NAN;
     } else if (float_value.s21_inf) {
         *value = float_value.sign_float * INFINITY;
     }
-}
-
-int is_empty_or_whitespace(const char* ptr_str) {
-    skip_space(&ptr_str);
-    return *ptr_str;
-}
-
-void init_format_spec_group(FormatSpecGroup* spec_groups) {
-    spec_groups[0].length_modifier = 0;
-    spec_groups[0].specifiers = "csdiouxXceEgGfp";
-    spec_groups[1].length_modifier = 'h';
-    spec_groups[1].specifiers = "diouxX";
-    spec_groups[2].length_modifier = 'l';
-    spec_groups[2].specifiers = "csdiouxXceEgGf";
-    spec_groups[3].length_modifier = 'L';
-    spec_groups[3].specifiers = "eEgGf";
 }
