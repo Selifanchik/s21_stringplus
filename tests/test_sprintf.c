@@ -157,8 +157,9 @@ END_TEST
 
 START_TEST(test_string_and_char) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s", "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
-  s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s", "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  char* test_null = NULL;
+  sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s %-10.8s %10.5s", "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc", test_null, test_null);
+  s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s %-10.8s %10.5s", "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc", test_null, test_null);
   ck_assert_str_eq(buf1, buf2);
 }
 END_TEST
@@ -187,9 +188,10 @@ START_TEST(test_wide_char_and_string) {
   wchar_t wc = L'Ж';
   wchar_t *ws = L"Привет";
   wchar_t *ws1 = L"\0";
+  wchar_t* test_null = NULL;
   setlocale(LC_ALL, "C.UTF-8");
-  sprintf(buf1, "%5lc %-10.3ls %ls %.20ls %.1ls", wc, ws, ws, ws, ws1);
-  s21_sprintf(buf2, "%5lc %-10.3ls %ls %.20ls %.1ls", wc, ws, ws, ws, ws1);
+  sprintf(buf1, "%5lc %-10.3ls %ls %.20ls %.1ls %-10.8ls %10.5ls", wc, ws, ws, ws, ws1, test_null, test_null);
+  s21_sprintf(buf2, "%5lc %-10.3ls %ls %.20ls %.1ls %-10.8ls %10.5ls", wc, ws, ws, ws, ws1, test_null, test_null);
   ck_assert_str_eq(buf1, buf2);
 }
 END_TEST

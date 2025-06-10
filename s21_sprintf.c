@@ -627,31 +627,49 @@ void specificator_c(flags flag, va_list *arg, char* buf){
 
 void specificator_s(flags flag, va_list *arg, char* buf){
     char* string = S21_NULL;
+    int flag_null = 0;
     if(flag.l){
         wchar_t* value = va_arg(*arg, wchar_t*);
-        int len = wcstombs(S21_NULL, value, 0);
-        if(flag.istochnost && flag.tochnost < len){
-            len = tochnost_ls(value, flag);
+        if(value == NULL){
+            string = malloc(7);
+            s21_strncpy(string, "(null)\0", 7);
+            flag_null = 1;
         }
-        string = malloc(len + 1);
-        if(string == S21_NULL){
-            exit(0);
+        else{
+            int len = wcstombs(S21_NULL, value, 0);
+            if(flag.istochnost && flag.tochnost < len){
+                len = tochnost_ls(value, flag);
+            }
+            string = malloc(len + 1);
+            if(string == S21_NULL){
+                exit(0);
+            }
+            wcstombs(string, value, len);
+            string[len] = '\0';
         }
-        wcstombs(string, value, len);
-        string[len] = '\0';
     }
     else{
         const char* tmp = va_arg(*arg, const char*);
-        string = malloc(s21_strlen(tmp) + 1);
-        if(string == S21_NULL){
-            exit(0);
+        if(tmp == NULL){
+            string = malloc(7);
+            s21_strncpy(string, "(null)\0", 7);
+            flag_null = 1;
         }
-        s21_strncpy(string, tmp, s21_strlen(tmp));
-        string[s21_strlen(tmp)] = '\0';
+        else{
+            string = malloc(s21_strlen(tmp) + 1);
+            if(string == S21_NULL){
+                exit(0);
+            }
+            s21_strncpy(string, tmp, s21_strlen(tmp));
+            string[s21_strlen(tmp)] = '\0';
+        }
     }
 
     int dlina = s21_strlen(string);
-    if(flag.istochnost && !flag.l){
+    if(flag_null && flag.tochnost < dlina){
+        s21_strncpy(string, "\0", 1);
+    }
+    else if(flag.istochnost && !flag.l){
         if(flag.tochnost < dlina){
             string[flag.tochnost] = '\0';
         }
@@ -965,8 +983,9 @@ char* rabota_width(flags flag, char* string, int dlina){
 //     //не работает
 //     //"%.300e %+30.20e", 1e-308, 1.7976931348623157e+308
 //     //19 до точки//18 после точки
-//     sprintf(buf1, "%s", NULL);
-//     s21_sprintf(buf2, "%s", NULL);
+//     char* a = NULL;
+//     sprintf(buf1, "a%-10.20sa%d", a, 10);
+//     s21_sprintf(buf2, "a%-10.6sa%d", a, 10);
 
 //     printf("%s\n", buf1);
 //     printf("%s\n", buf2);
