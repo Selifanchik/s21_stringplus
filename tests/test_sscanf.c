@@ -817,6 +817,22 @@ START_TEST(test_sscanf_long_variants) {
 }
 END_TEST
 
+
+// Чтение символов с повторением %3c
+START_TEST(test_sscanf_ret_EOF) {
+
+  const char *str = "  %1 ";
+  int a = 234, b = 234, c = 234, d = 234;
+  int count, count_21;
+  count = sscanf(str, "%n%%%*d%d",&a, &b);
+  count_21 = s21_sscanf(str, "%n%%%*d%d",&c, &d);
+  ck_assert_int_eq(count, count_21);
+  ck_assert_int_eq(a, c);
+  ck_assert_int_eq(b, d);
+}
+END_TEST
+
+
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
   TCase *tc_core = tcase_create("Core");
@@ -877,6 +893,7 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_repeated_chars);
   tcase_add_test(tc_core, test_sscanf_short_variants);
   tcase_add_test(tc_core, test_sscanf_long_variants);
+  tcase_add_test(tc_core, test_sscanf_ret_EOF);
 
   suite_add_tcase(s, tc_core);
   return s;
