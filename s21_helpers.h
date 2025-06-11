@@ -2,42 +2,46 @@
 #define S21_HELPERS_H
 
 #include <stdarg.h>
-#include "s21_string.h"
+
 #include "math.h"
+#include "s21_string.h"
 
 typedef struct {
-    int suppress;
-    int width;
-    char length;
-    char specifier;
+  int suppress;
+  int width;
+  char length;
+  char specifier;
 } FormatSpecifier;
 
 typedef struct {
-    int (*is_digit)(const char*);
-    int (*to_digit)(const char*);
-    int base;
+  int (*is_digit)(const char*);
+  int (*to_digit)(const char*);
+  int base;
 } DigitParser;
 
 typedef struct {
-    int sign_float;
-    unsigned long int_part;
-    unsigned long fract_part;
-    int order_fract;
-    int exp_part;
-    int sign_exp;
-    int order_exp;
-    int s21_nan;
-    int s21_inf;
+  int sign_float;
+  unsigned long int_part;
+  unsigned long fract_part;
+  int order_fract;
+  int exp_part;
+  int sign_exp;
+  int order_exp;
+  int s21_nan;
+  int s21_inf;
 } ParseFloat;
 
 typedef struct {
-    int length_modifier;
-    const char* specifiers;
+  int length_modifier;
+  const char* specifiers;
 } FormatSpecGroup;
 
-int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, DigitParser* parser);
-int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args, DigitParser* parser);
-int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token, va_list* args, const DigitParser* parser);
+int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
+                DigitParser* parser);
+int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
+                DigitParser* parser);
+int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
+                         va_list* args, const DigitParser* parser);
 void handler_n(const char* start_str, const char* ptr_str, va_list* args);
 int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
 int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
@@ -55,13 +59,15 @@ void to_base8(DigitParser* parser);
 void to_base10(DigitParser* parser);
 void to_base16(DigitParser* parser);
 
-int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width, unsigned long* value);
+int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
+                unsigned long* value);
 int parse_i(const char** ptr_str, DigitParser* parser, int* width);
 
 int parse_specifier(const char** ptr_format, FormatSpecifier* token);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
-int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token, va_list* args);
+int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
+                va_list* args);
 
 int s21_isspace(int symbol);
 void skip_space(const char** ptr_str);
@@ -73,9 +79,10 @@ void init_format_spec_group(FormatSpecGroup* spec_groups);
 
 int is_sign(const char** ptr_str, int* width);
 void is_prefix_base16(const char** ptr_str, int* width);
-int is_valid_exponent(const char *ptr_str, int width);
+int is_valid_exponent(const char* ptr_str, int width);
 
-int parse_float(const char** ptr_str, FormatSpecifier* token, ParseFloat* float_value);
+int parse_float(const char** ptr_str, FormatSpecifier* token,
+                ParseFloat* float_value);
 long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
 int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* parse_float);
@@ -83,4 +90,3 @@ void to_nan_inf(long double* value, ParseFloat float_value);
 
 int is_valid_width(const int* width, short valid_width);
 #endif
-
