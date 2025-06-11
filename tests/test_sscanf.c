@@ -802,16 +802,16 @@ START_TEST(test_sscanf_leading_zeros) {
 }
 END_TEST
 
-// // Чтение символа пробела %c
-// START_TEST(test_sscanf_space_char) {
-//   const char *str = " ";
-//   char a = 0, b = 0;
-//   int ret_std = sscanf(str, "%c", &a);
-//   int ret_s21 = s21_sscanf(str, "%c", &b);
-//   ck_assert_int_eq(ret_std, ret_s21);
-//   ck_assert_int_eq(a, b);
-// }
-// END_TEST
+// Чтение символа пробела %c
+START_TEST(test_sscanf_space_char) {
+  const char *str = " ";
+  char a = 0, b = 0;
+  int ret_std = sscanf(str, "%c", &a);
+  int ret_s21 = s21_sscanf(str, "%c", &b);
+  ck_assert_int_eq(ret_std, ret_s21);
+  ck_assert_int_eq(a, b);
+}
+END_TEST
 
 // Чтение символов с повторением %3c
 START_TEST(test_sscanf_repeated_chars) {
@@ -834,31 +834,31 @@ START_TEST(test_sscanf_char_asterisk) {
 }
 END_TEST
 
-// START_TEST(test_sscanf_char_newline) {
-//   const char *str = "\n";
-//   char a, b;
-//   int count = sscanf(str, "%c", &a);
-//   int s21_count = s21_sscanf(str, "%c", &b);
-//   ck_assert_int_eq(count, s21_count);
-//   ck_assert_int_eq(a, b);
-// }
-// END_TEST
-// START_TEST(test_sscanf_all_ascii_chars) {
-//   for (int i = 0; i < 128; ++i) {
-//     char input_str[2] = {0};  // строка из одного символа + '\0'
-//     input_str[0] = (char)i;
+START_TEST(test_sscanf_char_newline) {
+  const char *str = "\n";
+  char a, b;
+  int count = sscanf(str, "%c", &a);
+  int s21_count = s21_sscanf(str, "%c", &b);
+  ck_assert_int_eq(count, s21_count);
+  ck_assert_int_eq(a, b);
+}
+END_TEST
+START_TEST(test_sscanf_all_ascii_chars) {
+  for (int i = 0; i < 128; ++i) {
+    char input_str[2] = {0};  // строка из одного символа + '\0'
+    input_str[0] = (char)i;
 
-//     char a = 0, b = 0;
-//     int count = sscanf(input_str, "%c", &a);
-//     int s21_count = s21_sscanf(input_str, "%c", &b);
+    char a = 0, b = 0;
+    int count = sscanf(input_str, "%c", &a);
+    int s21_count = s21_sscanf(input_str, "%c", &b);
 
-//     ck_assert_msg(count == s21_count, "Count mismatch for ASCII %d (0x%02X)", i, i);
-//     if (count == 1 && s21_count == 1) {
-//       ck_assert_msg(a == b, "Char mismatch for ASCII %d (0x%02X): std='%c' s21='%c'", i, i, a, b);
-//     }
-//   }
-// }
-// END_TEST
+    ck_assert_msg(count == s21_count, "Count mismatch for ASCII %d (0x%02X)", i, i);
+    if (count == 1 && s21_count == 1) {
+      ck_assert_msg(a == b, "Char mismatch for ASCII %d (0x%02X): std='%c' s21='%c'", i, i, a, b);
+    }
+  }
+}
+END_TEST
 
 START_TEST(test_sscanf_char_zero_byte) {
   const char str[] = {'\0', 'Z', '\0'};
@@ -949,6 +949,20 @@ START_TEST(test_sscanf_long_variants) {
 }
 END_TEST
 
+START_TEST(test_sscanf_percent2) {
+  const char *str = "%%% %%%X";
+  char a = 0;
+  char b = 0;
+  int count_std = sscanf(str, "%%%c", &a);
+  printf("%d", count_std);
+  printf("%c", a);
+  int count_s21 = s21_sscanf(str, "%%%c", &b);
+   printf("%d", count_s21);
+  ck_assert_int_eq(count_std, count_s21);
+  ck_assert_int_eq(a, b);
+  ck_assert_int_eq(a, 'X');
+}
+END_TEST
 
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
@@ -988,7 +1002,7 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_E_f_g_G);
   tcase_add_test(tc_core, test_sscanf_octal);
   tcase_add_test(tc_core, test_sscanf_str_width);
-//tcase_add_test(tc_core, test_sscanf_string_with_asterisk);
+tcase_add_test(tc_core, test_sscanf_string_with_asterisk);
 tcase_add_test(tc_core, test_sscanf_leading_space);
 tcase_add_test(tc_core, test_sscanf_string_with_punctuation);
 tcase_add_test(tc_core, test_sscanf_only_spaces);
@@ -1012,18 +1026,18 @@ tcase_add_test(tc_core, test_sscanf_width_longer_than_string);
  tcase_add_test(tc_core, test_sscanf_n_count);
  tcase_add_test(tc_core, test_sscanf_percent_sign);
  tcase_add_test(tc_core, test_sscanf_leading_zeros);
- //tcase_add_test(tc_core, test_sscanf_space_char);
+ tcase_add_test(tc_core, test_sscanf_space_char);
   tcase_add_test(tc_core, test_sscanf_repeated_chars);
   tcase_add_test(tc_core, test_sscanf_char_asterisk);
- //tcase_add_test(tc_core, test_sscanf_char_newline);
- //tcase_add_test(tc_core, test_sscanf_all_ascii_chars);
+ tcase_add_test(tc_core, test_sscanf_char_newline);
+ tcase_add_test(tc_core, test_sscanf_all_ascii_chars);
  tcase_add_test(tc_core, test_sscanf_char_zero_byte);
  tcase_add_test(tc_core, test_sscanf_char_multiple);
   tcase_add_test(tc_core, test_sscanf_char_end_of_string);
 tcase_add_test(tc_core, test_sscanf_char_with_trailing_space);
  tcase_add_test(tc_core, test_sscanf_short_variants);
  tcase_add_test(tc_core, test_sscanf_long_variants);
-
+  tcase_add_test(tc_core, test_sscanf_percent2);
   suite_add_tcase(s, tc_core);
   return s;
 }
