@@ -31,7 +31,7 @@ END_TEST
 START_TEST(test_strpbrk_first_char_match) {
   const char *str1 = "abc";
   const char *str2 = "a";
-  ck_assert_ptr_eq(s21_strpbrk(str1, str2), strpbrk(str1, str2));  // 'a'
+  ck_assert_ptr_eq(s21_strpbrk(str1, str2), strpbrk(str1, str2));
 }
 END_TEST
 
@@ -39,7 +39,7 @@ END_TEST
 START_TEST(test_strpbrk_last_char_match) {
   const char str1[10] = "xyz";
   const char str2[10] = "z";
-  ck_assert_ptr_eq(s21_strpbrk(str1, str2), strpbrk(str1, str2));  // 'z'
+  ck_assert_ptr_eq(s21_strpbrk(str1, str2), strpbrk(str1, str2));
 }
 END_TEST
 

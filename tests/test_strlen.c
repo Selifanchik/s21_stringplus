@@ -38,7 +38,8 @@ END_TEST
 
 // Длинная строка
 START_TEST(test_strlen_long) {
-  const char *str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+  const char *str =
+      "  Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
   ck_assert_uint_eq(s21_strlen(str), strlen(str));
 }
 END_TEST

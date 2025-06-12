@@ -94,6 +94,19 @@ START_TEST(test_strncat_empty_all) {
 }
 END_TEST
 
+// Спец символы
+START_TEST(test_strncat_spec_char) {
+  char dest1[20] = "";
+  char dest2[20] = "";
+  const char *src = " \t\ndfg";
+
+  s21_strncat(dest1, src, 5);
+  strncat(dest2, src, 5);
+
+  ck_assert_str_eq(dest1, dest2);
+}
+END_TEST
+
 Suite *strncat_suite(void) {
   Suite *s = suite_create("s21_strncat");
   TCase *tc = tcase_create("Core");
@@ -105,6 +118,7 @@ Suite *strncat_suite(void) {
   tcase_add_test(tc, test_strncat_empty_src);
   tcase_add_test(tc, test_strncat_empty_dest);
   tcase_add_test(tc, test_strncat_empty_all);
+  tcase_add_test(tc, test_strncat_spec_char);
 
   suite_add_tcase(s, tc);
   return s;

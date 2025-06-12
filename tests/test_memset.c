@@ -51,6 +51,30 @@ START_TEST(test_memset_null_bytes) {
 }
 END_TEST
 
+// Заполняются пустые области
+START_TEST(test_memset_empty_loc) {
+  char str1[5];
+  char str2[5];
+
+  s21_memset(str1, 0, 5);
+  memset(str2, 0, 5);
+
+  ck_assert_mem_eq(str1, str2, 5);
+}
+END_TEST
+
+// Спец символы
+START_TEST(test_memset_spec_char) {
+  char str1[5] = "abcd";
+  char str2[5] = "abcd";
+
+  s21_memset(str1, '\n', 4);
+  memset(str2, '\n', 4);
+
+  ck_assert_mem_eq(str1, str2, 5);
+}
+END_TEST
+
 // // Проверка значения >127
 // START_TEST(test_memset_unsigned_conversion) {
 //   char str1[3] = "AB";
@@ -71,6 +95,8 @@ Suite *memset_suite(void) {
   tcase_add_test(tc, test_memset_full_buffer);
   // tcase_add_test(tc, test_memset_zero_length);
   tcase_add_test(tc, test_memset_null_bytes);
+  tcase_add_test(tc, test_memset_empty_loc);
+  tcase_add_test(tc, test_memset_spec_char);
   // tcase_add_test(tc, test_memset_unsigned_conversion);
 
   suite_add_tcase(s, tc);

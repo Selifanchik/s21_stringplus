@@ -1,7 +1,5 @@
 #include "s21_strerror.h"
 
-#include <stdio.h>  //УБРАТЬ
-
 #include "s21_string.h"
 
 char *s21_strerror(int errnum) {
@@ -9,12 +7,12 @@ char *s21_strerror(int errnum) {
   static char result[60];
 
   if (errnum >= 0 && errnum < ERR_N) {
-    sprintf(result, "%s", errors_array[errnum]);
+    s21_sprintf(result, "%s", errors_array[errnum]);
   } else {
 #ifdef __linux__
-    sprintf(result, "Unknown error %d", errnum);  // ЗАМЕНИТЬ
+    s21_sprintf(result, "Unknown error %d", errnum);
 #elif __APPLE__
-    sprintf(result, "Unknown error: %d", errnum);  // ЗАМЕНИТЬ
+    s21_sprintf(result, "Unknown error: %d", errnum);
 #endif
   }
 
