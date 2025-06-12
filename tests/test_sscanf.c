@@ -1,6 +1,6 @@
 #include <check.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../s21_string.h"
 
@@ -9,8 +9,8 @@ START_TEST(test_sscanf_basic) {
   const char *str = "   1Hello, world!   ";
   int a;
   int b;
-  sscanf(str,"%d",&a);
-  s21_sscanf(str,"%d",&b);
+  sscanf(str, "%d", &a);
+  s21_sscanf(str, "%d", &b);
   ck_assert_int_eq(a, b);
 }
 END_TEST
