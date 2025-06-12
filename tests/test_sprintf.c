@@ -1,6 +1,6 @@
 #include <check.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../s21_string.h"
 
@@ -8,12 +8,12 @@
 START_TEST(test_sprintf_basic) {
   char str1[20];
   char str2[20];
- 
- char a[] = "Hello!";
 
-  sprintf(str1,"%s",a);
-  s21_sprintf(str2,"%s",a);
-  ck_assert_str_eq(str1,str2);
+  char a[] = "Hello!";
+
+  sprintf(str1, "%s", a);
+  s21_sprintf(str2, "%s", a);
+  ck_assert_str_eq(str1, str2);
 }
 END_TEST
 

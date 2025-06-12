@@ -69,9 +69,9 @@ Suite *memset_suite(void) {
 
   tcase_add_test(tc, test_memset_basic);
   tcase_add_test(tc, test_memset_full_buffer);
-  //tcase_add_test(tc, test_memset_zero_length);
+  // tcase_add_test(tc, test_memset_zero_length);
   tcase_add_test(tc, test_memset_null_bytes);
-  //tcase_add_test(tc, test_memset_unsigned_conversion);
+  // tcase_add_test(tc, test_memset_unsigned_conversion);
 
   suite_add_tcase(s, tc);
   return s;

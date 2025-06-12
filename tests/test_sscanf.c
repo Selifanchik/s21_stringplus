@@ -817,15 +817,13 @@ START_TEST(test_sscanf_long_variants) {
 }
 END_TEST
 
-
 // Чтение символов с повторением %3c
 START_TEST(test_sscanf_ret_EOF) {
-
   const char *str = "  %1 ";
   int a, b = 234, c, d = 234;
   int count, count_21;
-  count = sscanf(str, "%n%%%*d%d",&a, &b);
-  count_21 = s21_sscanf(str, "%n%%%*d%d",&c, &d);
+  count = sscanf(str, "%n%%%*d%d", &a, &b);
+  count_21 = s21_sscanf(str, "%n%%%*d%d", &c, &d);
   ck_assert_int_eq(count, count_21);
   ck_assert_int_eq(a, c);
   ck_assert_int_eq(b, d);
@@ -838,7 +836,7 @@ START_TEST(test_sscanf_string_with_asterisk) {
   int c1 = sscanf(str, "%*s %s", a);
   int c2 = s21_sscanf(str, "%*s %s", b);
   ck_assert_int_eq(c1, c2);
-  ck_assert_str_eq(a, b);  
+  ck_assert_str_eq(a, b);
 }
 END_TEST
 
@@ -849,7 +847,7 @@ START_TEST(test_sscanf_leading_space) {
   int c1 = sscanf(str, "%s", a);
   int c2 = s21_sscanf(str, "%s", b);
   ck_assert_int_eq(c1, c2);
-  ck_assert_str_eq(a, b);  
+  ck_assert_str_eq(a, b);
 }
 END_TEST
 
@@ -860,7 +858,7 @@ START_TEST(test_sscanf_string_with_punctuation) {
   int c1 = sscanf(str, "%s", a);
   int c2 = s21_sscanf(str, "%s", b);
   ck_assert_int_eq(c1, c2);
-  ck_assert_str_eq(a, b); 
+  ck_assert_str_eq(a, b);
 }
 END_TEST
 
@@ -870,10 +868,9 @@ START_TEST(test_sscanf_only_spaces) {
   char b[10];
   int c1 = sscanf(str, "%s", a);
   int c2 = s21_sscanf(str, "%s", b);
-  ck_assert_int_eq(c1, c2); 
+  ck_assert_int_eq(c1, c2);
 }
 END_TEST
-
 
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
