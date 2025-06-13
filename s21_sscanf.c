@@ -140,7 +140,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     }
   }
   // parse length
-  if (!token->suppress) {
+  if (!token->suppress && token->width != 0) {
     const char* ptr_length = s21_strchr(lengths, **ptr_format);
     if (ptr_length != S21_NULL) {
       token->length = **ptr_format;
@@ -155,7 +155,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
       (*ptr_format)++;
     }
     // parsing length dependent specifier
-  } else {
+  } else if (token->width != 0) {
     int flag_end = 0;
     for (int i = 0; i < 4 && !flag_end; i++) {
       if (token->length == spec_groups[i].length_modifier) {
@@ -165,11 +165,10 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
           token->specifier = *ptr_specifier;
           (*ptr_format)++;
           flag_end = 1;
-        } else
-          flag_error = 1;
+        } else flag_error = 1;
       }
     }
-  }
+  } else flag_error = 1;
   return flag_error;
 }
 
