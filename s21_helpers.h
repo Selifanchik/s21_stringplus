@@ -89,4 +89,5 @@ int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* parse_float);
 void to_nan_inf(long double* value, ParseFloat float_value);
 
 int is_valid_width(const int* width, short valid_width);
+int s21_strncmp_icase(const char* str1, const char* str2, int width);
 #endif

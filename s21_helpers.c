@@ -233,31 +233,32 @@ long double s21_pow10(int order) {
   return result;
 }
 
-// int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value)
-// {
-//   int flag_nan_inf = 0;
-//   init_parse_float(float_value);
-//   float_value->sign_float = is_sign(ptr_str, width);
-//   if (*width == -1 || *width > 2) {
-//     if (s21_strncmp(*ptr_str, "nan", 3) == 0) {
-//       float_value->s21_nan = 1;
-//       if (*width > 2) *width -= 3;
-//       (*ptr_str) += 3;
-//       flag_nan_inf = 1;
-//     } else if (s21_strncmp(*ptr_str, "inf", 3) == 0) {
-//       float_value->s21_inf = 1;
-//       if (*width > 2) *width -= 3;
-//       flag_nan_inf = 1;
-//       (*ptr_str) += 3;
-//       if ((*width > 4 || *width == -1) && s21_strncmp(*ptr_str, "inity", 5)
-//       == 0) {
-//         if (*width > 4) *width -=5;
-//         (*ptr_str) += 5;
-//       }
-//     }
-//   }
-//   return flag_nan_inf;
-// }
+int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
+  int flag_nan_inf = 0;
+  init_parse_float(float_value);
+  float_value->sign_float = is_sign(ptr_str, width);
+  if (is_valid_width(width, 2)) {
+    if (s21_strncmp_icase(*ptr_str, "nan", 3) == 0) {
+      float_value->s21_nan = 1;
+      if (*width > 2) *width -= 3;
+      (*ptr_str) += 3;
+      flag_nan_inf = 1;
+    } else if ((*width == 3 || *(*ptr_str + 3) != 'i') &&
+               s21_strncmp_icase(*ptr_str, "inf", 3) == 0) {
+      float_value->s21_inf = 1;
+      if (*width > 2) *width -= 3;
+      flag_nan_inf = 1;
+      (*ptr_str) += 3;
+    } else if (is_valid_width(width, 7) &&
+               s21_strncmp_icase(*ptr_str, "infinity", 8) == 0) {
+      float_value->s21_inf = 1;
+      if (*width > 7) *width -= 8;
+      flag_nan_inf = 1;
+      (*ptr_str) += 8;
+    }
+  }
+  return flag_nan_inf;
+}
 
 void to_nan_inf(long double* value, ParseFloat float_value) {
   printf("sign =%d\n", float_value.sign_float);
@@ -269,29 +270,8 @@ void to_nan_inf(long double* value, ParseFloat float_value) {
   if (float_value.sign_float == -1) *value = -*value;
 }
 
-int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
-  int flag_nan_inf = 0;
-  init_parse_float(float_value);
-  float_value->sign_float = is_sign(ptr_str, width);
-  if (is_valid_width(width, 2)) {
-    if (s21_strncmp(*ptr_str, "nan", 3) == 0) {
-      float_value->s21_nan = 1;
-      if (*width > 2) *width -= 3;
-      (*ptr_str) += 3;
-      flag_nan_inf = 1;
-    } else if ((*width == 3 || *(*ptr_str + 3) != 'i') &&
-               s21_strncmp(*ptr_str, "inf", 3) == 0) {
-      float_value->s21_inf = 1;
-      if (*width > 2) *width -= 3;
-      flag_nan_inf = 1;
-      (*ptr_str) += 3;
-    } else if (is_valid_width(width, 7) &&
-               s21_strncmp(*ptr_str, "infinity", 8) == 0) {
-      float_value->s21_inf = 1;
-      if (*width > 7) *width -= 8;
-      flag_nan_inf = 1;
-      (*ptr_str) += 8;
-    }
-  }
-  return flag_nan_inf;
+int s21_strncmp_icase(const char* str1, const char* str2, int width) {
+  char temp_compare[9] = {'\0'};
+  s21_strncat(temp_compare, str1, width);
+  return s21_strncmp(s21_to_lower(temp_compare), str2, width);
 }
