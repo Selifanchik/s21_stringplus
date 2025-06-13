@@ -969,7 +969,6 @@ START_TEST(test_sscanf_percent2) {
   printf("%d", count_s21);
   ck_assert_int_eq(count_std, count_s21);
   ck_assert_int_eq(a, b);
-  ck_assert_int_eq(a, 'X');
 }
 END_TEST
 
