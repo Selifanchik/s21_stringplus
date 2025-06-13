@@ -165,10 +165,12 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
           token->specifier = *ptr_specifier;
           (*ptr_format)++;
           flag_end = 1;
-        } else flag_error = 1;
+        } else
+          flag_error = 1;
       }
     }
-  } else flag_error = 1;
+  } else
+    flag_error = 1;
   return flag_error;
 }
 
