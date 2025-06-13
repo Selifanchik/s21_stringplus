@@ -5,7 +5,7 @@
 
 #include "s21_string.h"
 
-//для lc, ls
+// для lc, ls
 #include <locale.h>
 #include <wchar.h>
 
@@ -74,19 +74,19 @@ int s21_sprintf(char* str, const char* format, ...) {
   s21_strncpy(str, "\0", 1);
   int dlina = s21_strlen(format);
   for (int i = 0; i < dlina; i++) {
-    if (format[i] != '%') {  //пока не спецификатор просто печатаем
+    if (format[i] != '%') {  // пока не спецификатор просто печатаем
       char tmp[2] = {format[i], '\0'};
       s21_strncat(str, tmp, s21_strlen(tmp));
       continue;
     }
     i++;
-    if (format[i] == '%') {  //если у нас "%%"" то просто печатаем и продолжаем
+    if (format[i] == '%') {  // если у нас "%%"" то просто печатаем и продолжаем
       char tmp[2] = {format[i], '\0'};
       s21_strncat(str, tmp, s21_strlen(tmp));
       continue;
     }
 
-    s21_memset(&flag, 0, sizeof(flags));  //обнуление структуры
+    s21_memset(&flag, 0, sizeof(flags));  // обнуление структуры
 
     parsing(format, &i, &flag, &arg);
 
@@ -99,8 +99,8 @@ int s21_sprintf(char* str, const char* format, ...) {
 
 void parsing(const char* format, int* i, flags* flag, va_list* arg) {
   while (!s21_strchr("cdieEfgGosuxXpn",
-                     format[*i])) {  //добавить остальные спецификаторы   //пока
-                                     //не спецификатор идем посимвольно
+                     format[*i])) {  // добавить остальные спецификаторы //пока
+                                     // не спецификатор идем посимвольно
 
     if (s21_strchr("-+ #0", format[*i])) {
       pars_flags_dlina(format[*i], flag);
