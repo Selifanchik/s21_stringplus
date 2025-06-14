@@ -1004,6 +1004,19 @@ START_TEST(test_sscanf_correct_inf2) {
 }
 END_TEST
 
+START_TEST(test_sscanf_incorrect_inf) {
+  const char *str = "-iNfin inf";
+  double a = 0, b = 0;
+  char str1[10] = {'\0'}, str2[10] = {'\0'};
+  int count_std = sscanf(str, "%lf %s", &a, str1);
+  int count_s21 = s21_sscanf(str, "%lf %s", &b, str2);
+  ck_assert_int_eq(count_std, count_s21);
+  ck_assert_double_eq(a, b);
+  ck_assert_str_eq(str1, str2);
+}
+END_TEST
+
+
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
   TCase *tc_core = tcase_create("Core");
@@ -1079,7 +1092,8 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_long_variants);
   tcase_add_test(tc_core, test_sscanf_percent2);
   tcase_add_test(tc_core, test_sscanf_correct_inf);
-    tcase_add_test(tc_core, test_sscanf_correct_inf2);
+  tcase_add_test(tc_core, test_sscanf_correct_inf2);
+  tcase_add_test(tc_core, test_sscanf_incorrect_inf);
   suite_add_tcase(s, tc_core);
   return s;
 }
