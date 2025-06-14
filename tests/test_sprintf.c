@@ -7,7 +7,7 @@
 
 #include "../s21_string.h"
 
-#define BUF_SIZE 1024
+#define BUF_SIZE 10000
 
 START_TEST(test_di1) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];

@@ -24,10 +24,10 @@ typedef struct {
   int isg;
 } flags;
 
-void parsing(const char* format, int* i, flags* flag, va_list* arg);
-void pars_flags_dlina(char chr, flags* flag);
+int parsing(const char* format, int* i, flags* flag, va_list* arg);
+int pars_flags_dlina(char chr, flags* flag);
 int pars_width_tochnost(const char* format, int* i);
-void define_specificator(char chr, flags flag, va_list* arg, char* buf);
+int define_specificator(char chr, flags flag, va_list* arg, char* buf);
 
 void specificator_di(flags flag, va_list* arg, char* buf);
 char* number_di_to_string(long number, flags flag);
@@ -68,46 +68,54 @@ void right_part_to_str(long double frac, char* str, int precision);
 
 int s21_sprintf(char* str, const char* format, ...) {
   flags flag = {0};
-  va_list arg;            // указатель на параметр
-  va_start(arg, format);  // получение адреса первого вариадического параметра
-                          // (то есть ссылка на последний не варидлический)
+  va_list arg;
+  va_start(arg, format);
+
   s21_strncpy(str, "\0", 1);
   int dlina = s21_strlen(format);
   for (int i = 0; i < dlina; i++) {
-    if (format[i] != '%') {  // пока не спецификатор просто печатаем
+    if (format[i] != '%') {
       char tmp[2] = {format[i], '\0'};
       s21_strncat(str, tmp, s21_strlen(tmp));
       continue;
     }
     i++;
-    if (format[i] == '%') {  // если у нас "%%"" то просто печатаем и продолжаем
+    if (format[i] == '%') {
       char tmp[2] = {format[i], '\0'};
       s21_strncat(str, tmp, s21_strlen(tmp));
       continue;
     }
 
-    s21_memset(&flag, 0, sizeof(flags));  // обнуление структуры
+    s21_memset(&flag, 0, sizeof(flags));
 
-    parsing(format, &i, &flag, &arg);
-
-    define_specificator(format[i], flag, &arg, str);
-  }
-  va_end(arg);  // завершение процедуры перебора вариадических параметров
-
-  return 1;
-}
-
-void parsing(const char* format, int* i, flags* flag, va_list* arg) {
-  while (format[*i] != '\0' &&
-         !s21_strchr("cdieEfgGosuxXpn",
-                     format[*i])) {  // добавить остальные спецификаторы //пока
-                                     // не спецификатор идем посимвольно
-
-    if (s21_strchr("-+ #0", format[*i])) {
-      pars_flags_dlina(format[*i], flag);
+    if (parsing(format, &i, &flag, &arg)) {
+      exit(0);
     }
 
-    else if (s21_strchr("123456789*", format[*i])) {
+    if (flag.zero && flag.istochnost &&
+        s21_strchr("feEgG", format[i]) == S21_NULL) {
+      exit(0);
+    }
+
+    if (define_specificator(format[i], flag, &arg, str)) {
+      exit(0);
+    }
+  }
+  va_end(arg);
+
+  return s21_strlen(str);
+}
+
+int parsing(const char* format, int* i, flags* flag, va_list* arg) {
+  int error = 0, m_flags = 1, m_width = 1, m_toch = 1, m_dlina = 1;
+  while (format[*i] != '\0' && !s21_strchr("cdieEfgGosuxXpn", format[*i]) &&
+         !error) {
+    if (s21_strchr("-+ #0", format[*i]) && m_flags) {
+      error = pars_flags_dlina(format[*i], flag);
+    }
+
+    else if (s21_strchr("123456789*", format[*i]) && m_width) {
+      m_flags = 0;
       if (format[*i] == '*') {
         flag->width = va_arg(*arg, int);
       } else {
@@ -116,7 +124,9 @@ void parsing(const char* format, int* i, flags* flag, va_list* arg) {
       }
     }
 
-    else if (format[*i] == '.') {
+    else if (format[*i] == '.' && m_toch) {
+      m_flags = 0;
+      m_width = 0;
       (*i)++;
       if (format[*i] == '*') {
         flag->tochnost = va_arg(*arg, int);
@@ -128,30 +138,55 @@ void parsing(const char* format, int* i, flags* flag, va_list* arg) {
       }
     }
 
-    if (s21_strchr("lhL", format[*i])) {
-      pars_flags_dlina(format[*i], flag);
+    else if (s21_strchr("lhL", format[*i]) && m_dlina) {
+      m_flags = 0;
+      m_width = 0;
+      m_toch = 0;
+      m_dlina = 0;
+      error = pars_flags_dlina(format[*i], flag);
+    }
+
+    else {
+      error = 1;
     }
 
     (*i)++;
   }
+  if (format[*i] == '\0') {
+    error = 1;
+  }
+  return error;
 }
 
-void pars_flags_dlina(char chr, flags* flag) {
+int pars_flags_dlina(char chr, flags* flag) {
+  int error = 0;
   switch (chr) {
     case '-':
       flag->minus = 1;
+      if (flag->zero) {
+        error = 1;
+      }
       break;
     case '+':
       flag->plus = 1;
+      if (flag->space) {
+        error = 1;
+      }
       break;
     case ' ':
       flag->space = 1;
+      if (flag->plus) {
+        error = 1;
+      }
       break;
     case '#':
       flag->reshetka = 1;
       break;
     case '0':
       flag->zero = 1;
+      if (flag->minus) {
+        error = 1;
+      }
       break;
     case 'h':
       flag->h = 1;
@@ -164,6 +199,7 @@ void pars_flags_dlina(char chr, flags* flag) {
       flag->L = 1;
       break;
   }
+  return error;
 }
 
 int pars_width_tochnost(const char* format, int* i) {
@@ -175,55 +211,79 @@ int pars_width_tochnost(const char* format, int* i) {
   return sum;
 }
 
-void define_specificator(char chr, flags flag, va_list* arg, char* buf) {
+int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
+  int error = 0;
   switch (chr) {
     case 'd':
-      specificator_di(flag, arg, buf);
-      break;
     case 'i':
-      specificator_di(flag, arg, buf);
+      if (flag.L || flag.reshetka) {
+        error = 1;
+      } else {
+        specificator_di(flag, arg, buf);
+      }
       break;
     case 'u':
-      specificator_uxXo(flag, arg, buf, chr);
+      if (flag.L || flag.reshetka || flag.plus || flag.space) {
+        error = 1;
+      } else {
+        specificator_uxXo(flag, arg, buf, chr);
+      }
       break;
     case 'x':
-      specificator_uxXo(flag, arg, buf, chr);
-      break;
     case 'X':
-      specificator_uxXo(flag, arg, buf, chr);
-      break;
     case 'o':
-      specificator_uxXo(flag, arg, buf, chr);
+      if (flag.L || flag.plus || flag.space) {
+        error = 1;
+      } else {
+        specificator_uxXo(flag, arg, buf, chr);
+      }
       break;
     case 's':
-      specificator_s(flag, arg, buf);
+      if (flag.h || flag.L || flag.zero || flag.reshetka || flag.plus ||
+          flag.space) {
+        error = 1;
+      } else {
+        specificator_s(flag, arg, buf);
+      }
       break;
     case 'c':
-      specificator_c(flag, arg, buf);
+      if (flag.h || flag.L || flag.zero || flag.reshetka || flag.plus ||
+          flag.space || flag.istochnost) {
+        error = 1;
+      } else {
+        specificator_c(flag, arg, buf);
+      }
       break;
     case 'f':
-      specificator_feEgG(flag, arg, buf, chr);
-      break;
     case 'e':
-      specificator_feEgG(flag, arg, buf, chr);
-      break;
     case 'E':
-      specificator_feEgG(flag, arg, buf, chr);
-      break;
     case 'g':
-      specificator_feEgG(flag, arg, buf, chr);
-      break;
     case 'G':
-      specificator_feEgG(flag, arg, buf, chr);
+      if (flag.l || flag.h) {
+        error = 1;
+      } else {
+        specificator_feEgG(flag, arg, buf, chr);
+      }
       break;
     case 'n':
-      specificator_n(arg, buf);
+      if (flag.istochnost || flag.L || flag.l || flag.h || flag.minus ||
+          flag.plus || flag.reshetka || flag.space || flag.width || flag.zero) {
+        error = 1;
+      } else {
+        specificator_n(arg, buf);
+      }
       break;
     // case 'p':
     default:
-      specificator_p(arg, buf, flag);
+      if (flag.istochnost || flag.L || flag.l || flag.h || flag.plus ||
+          flag.reshetka || flag.space || flag.zero) {
+        error = 1;
+      } else {
+        specificator_p(arg, buf, flag);
+      }
       break;
   }
+  return error;
 }
 
 void NanAndInf(char chr, long double number, char* buf, flags flag) {
@@ -969,7 +1029,12 @@ char* rabota_width(flags flag, char* string, int dlina) {
 
 // int main(){
 //     setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
-//     char buf1[10000], buf2[10000];
+//     //+ " "
+//     //0 -
+//     //0 и точность
+//     //# не со всеми
+
+//     char buf1[5], buf2[5];
 //     //не работает
 //     //"%.300e %+30.20e", 1e-308, 1.7976931348623157e+308
 
@@ -989,12 +1054,14 @@ char* rabota_width(flags flag, char* string, int dlina) {
 //     // s21_sprintf(buf2, "%5lc %-10.3ls %ls %.20ls %.1ls %-10.8ls %10.5ls",
 //     wc, ws, ws, ws, ws1, test_null, test_null);
 
-//     char* test_null = NULL;
-//     sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s %-10.8s
+//     //char* test_null = NULL;
+//     //sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s %-10.8s
 //     %10.5s", "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc",
-//     test_null, test_null); s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c
-//     %-5c %.10s %1s %-10.8s %10.5s", "hello", "hi", "abcdef", "testing", 'A',
-//     'f', 'B', "abc", "abc", test_null, test_null);
+//     test_null, test_null);
+//     //s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s %-10.8s
+//     %10.5s", "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc",
+//     test_null, test_null); int a = sprintf(buf1, "%dghjgj", 123456789); int b
+//     = s21_sprintf(buf2, "%dghjgj", 123456789);
 
 //     // sprintf(buf1, "%#x %#.0x %#8.0X %#x %#X %#010x %#12.4X %#-10x %#08x
 //     %#x", 0, 0, 0, 15, 255, 26, 48879, 0xabc, 7, 4294967295U);
@@ -1003,6 +1070,9 @@ char* rabota_width(flags flag, char* string, int dlina) {
 
 //     printf("%s\n", buf1);
 //     printf("%s\n", buf2);
+
+//     printf("%d\n", a);
+//     printf("%d\n", b);
 
 //     printf("%d\n", s21_strncmp(buf1, buf2, s21_strlen(buf1)));
 
