@@ -1016,6 +1016,30 @@ START_TEST(test_sscanf_incorrect_inf) {
 }
 END_TEST
 
+START_TEST(test_sscanf_char_width_and_length) {
+  const char *str = "CD-DVD";
+  wchar_t a[3], b[3];
+  int count = sscanf(str, "%*c%3lc", a);  // пропускаем первый символ
+  int s21_count = s21_sscanf(str, "%*c%3lc", b);
+  ck_assert_int_eq(count, s21_count);
+  for (int i = 0; i < 3; i++) {
+    ck_assert_int_eq(a[i], b[i]);
+  }
+}
+END_TEST
+
+START_TEST(test_sscanf_ret) {
+  const char *str = "%1";
+  int a, b = 0, c, d = 0;
+  int count = sscanf(str, "%n%%%*d%d", &a, &b);
+  int s21_count = s21_sscanf(str, "%n%%%*d%d", &c, &d);
+  ck_assert_int_eq(count, s21_count);
+  ck_assert_int_eq(a, c);
+  ck_assert_int_eq(b, d);
+
+
+}
+END_TEST
 
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
@@ -1094,6 +1118,8 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_correct_inf);
   tcase_add_test(tc_core, test_sscanf_correct_inf2);
   tcase_add_test(tc_core, test_sscanf_incorrect_inf);
+  tcase_add_test(tc_core, test_sscanf_char_width_and_length);
+  tcase_add_test(tc_core, test_sscanf_ret);
   suite_add_tcase(s, tc_core);
   return s;
 }
