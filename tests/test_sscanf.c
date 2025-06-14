@@ -963,12 +963,44 @@ START_TEST(test_sscanf_percent2) {
   char a = 0;
   char b = 0;
   int count_std = sscanf(str, "%%%c", &a);
-  printf("%d", count_std);
-  printf("%c", a);
   int count_s21 = s21_sscanf(str, "%%%c", &b);
-  printf("%d", count_s21);
   ck_assert_int_eq(count_std, count_s21);
   ck_assert_int_eq(a, b);
+}
+END_TEST
+
+START_TEST(test_sscanf_correct_inf) {
+  const char *str = "-inf inf infi nan";
+  long double a, b, c, e, f, g;
+  float d, h;
+  char str1[2], str2[2];
+  int count_std = sscanf(str, "%Lf %Lf %3Lf %s %f", &a, &b, &c, str1, &d);
+  int count_s21 = s21_sscanf(str, "%Lf %Lf %3Lf %s %f", &e, &f, &g, str2, &h);
+  ck_assert_int_eq(count_std, count_s21);
+  ck_assert_ldouble_infinite(a);
+  ck_assert_ldouble_infinite(e);
+  ck_assert_ldouble_infinite(b);
+  ck_assert_ldouble_infinite(f);
+  ck_assert_ldouble_infinite(c);
+  ck_assert_ldouble_infinite(g);
+  ck_assert_str_eq(str1, str2);
+  ck_assert_float_nan(d);
+  ck_assert_float_nan(h);
+}
+END_TEST
+
+START_TEST(test_sscanf_correct_inf2) {
+  const char *str = "-iNf infInity naN";
+  long double a, b, c, e, f, g;
+  int count_std = sscanf(str, "%Lf %Lf %Lf", &a, &b, &c);
+  int count_s21 = s21_sscanf(str, "%Lf %Lf %Lf", &e, &f, &g);
+  ck_assert_int_eq(count_std, count_s21);
+  ck_assert_ldouble_infinite(a);
+  ck_assert_ldouble_infinite(e);
+  ck_assert_ldouble_infinite(b);
+  ck_assert_ldouble_infinite(f);
+  ck_assert_ldouble_nan(c);
+  ck_assert_ldouble_nan(g);
 }
 END_TEST
 
@@ -1046,6 +1078,8 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_short_variants);
   tcase_add_test(tc_core, test_sscanf_long_variants);
   tcase_add_test(tc_core, test_sscanf_percent2);
+  tcase_add_test(tc_core, test_sscanf_correct_inf);
+    tcase_add_test(tc_core, test_sscanf_correct_inf2);
   suite_add_tcase(s, tc_core);
   return s;
 }

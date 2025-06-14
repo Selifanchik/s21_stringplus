@@ -243,7 +243,7 @@ int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
       if (*width > 2) *width -= 3;
       (*ptr_str) += 3;
       flag_nan_inf = 1;
-    } else if ((*width == 3 || *(*ptr_str + 3) != 'i') &&
+    } else if ((*width == 3 || (*(*ptr_str + 3) != 'i' && *(*ptr_str + 3) != 'I')) &&
                s21_strncmp_icase(*ptr_str, "inf", 3) == 0) {
       float_value->s21_inf = 1;
       if (*width > 2) *width -= 3;
@@ -261,7 +261,6 @@ int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
 }
 
 void to_nan_inf(long double* value, ParseFloat float_value) {
-  printf("sign =%d\n", float_value.sign_float);
   if (float_value.s21_nan) {
     *value = NAN;
   } else if (float_value.s21_inf) {
