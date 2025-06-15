@@ -206,6 +206,18 @@ START_TEST(test_sscanf_char_multiple) {
 }
 END_TEST
 
+START_TEST(test_sscanf_char_width_and_length) {
+  const char *str = "CD-DVD";
+  wchar_t std_buf[3], s21_buf[3];
+  int std_count, s21_count;
+  std_count = sscanf(str, "%*c%3lc", std_buf);  // пропускаем первый символ
+  s21_count = s21_sscanf(str, "%*c%3lc", s21_buf);
+  ck_assert_int_eq(std_count, s21_count);
+  for (int i = 0; i < 3; i++) {
+    ck_assert_int_eq(std_buf[i], s21_buf[i]);
+  }
+}
+END_TEST
 
 
 
@@ -1106,18 +1118,6 @@ START_TEST(test_sscanf_incorrect_inf) {
 }
 END_TEST
 
-START_TEST(test_sscanf_char_width_and_length) {
-  const char *str = "CD-DVD";
-  wchar_t a[3], b[3];
-  int count = sscanf(str, "%*c%3lc", a);  // пропускаем первый символ
-  int s21_count = s21_sscanf(str, "%*c%3lc", b);
-  ck_assert_int_eq(count, s21_count);
-  for (int i = 0; i < 3; i++) {
-    ck_assert_int_eq(a[i], b[i]);
-  }
-}
-END_TEST
-
 START_TEST(test_sscanf_ret) {
   const char *str = "%1";
   int a, b = 0, c, d = 0;
@@ -1133,6 +1133,17 @@ Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
   TCase *tc_core = tcase_create("Core");
 
+
+
+
+  tcase_add_test(tc_core, test_sscanf_char);
+  tcase_add_test(tc_core, test_sscanf_char_with_spaces);
+  tcase_add_test(tc_core, test_sscanf_char_asterisk);
+  tcase_add_test(tc_core, test_sscanf_char_newline);
+  tcase_add_test(tc_core, test_sscanf_char_zero_byte);
+  tcase_add_test(tc_core, test_sscanf_char_multiple);
+  tcase_add_test(tc_core, test_sscanf_char_end_of_string);
+  tcase_add_test(tc_core, test_sscanf_char_width_and_length);
   tcase_add_test(tc_core, test_sscanf_int);
   tcase_add_test(tc_core, test_sscanf_int_negative);
   tcase_add_test(tc_core, test_sscanf_int_positive);
@@ -1151,8 +1162,6 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_int_width3);
   tcase_add_test(tc_core, test_sscanf_int_width4);
   tcase_add_test(tc_core, test_sscanf_int_width1);
-  tcase_add_test(tc_core, test_sscanf_char);
-  tcase_add_test(tc_core, test_sscanf_char_with_spaces);
   tcase_add_test(tc_core, test_sscanf_i_dec);
   tcase_add_test(tc_core, test_sscanf_i_octal);
   tcase_add_test(tc_core, test_sscanf_i_octal_neg_pos_width_delim);
@@ -1193,19 +1202,13 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_leading_zeros);
   tcase_add_test(tc_core, test_sscanf_space_char);
   tcase_add_test(tc_core, test_sscanf_repeated_chars);
-  tcase_add_test(tc_core, test_sscanf_char_asterisk);
-  tcase_add_test(tc_core, test_sscanf_char_newline);
   tcase_add_test(tc_core, test_sscanf_all_ascii_chars);
-  tcase_add_test(tc_core, test_sscanf_char_zero_byte);
-  tcase_add_test(tc_core, test_sscanf_char_multiple);
-  tcase_add_test(tc_core, test_sscanf_char_end_of_string);
   tcase_add_test(tc_core, test_sscanf_short_variants);
   tcase_add_test(tc_core, test_sscanf_long_variants);
   tcase_add_test(tc_core, test_sscanf_percent2);
   tcase_add_test(tc_core, test_sscanf_correct_inf);
   tcase_add_test(tc_core, test_sscanf_correct_inf2);
   tcase_add_test(tc_core, test_sscanf_incorrect_inf);
-  tcase_add_test(tc_core, test_sscanf_char_width_and_length);
   tcase_add_test(tc_core, test_sscanf_ret);
   suite_add_tcase(s, tc_core);
   return s;
