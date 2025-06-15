@@ -243,7 +243,8 @@ int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
       if (*width > 2) *width -= 3;
       (*ptr_str) += 3;
       flag_nan_inf = 1;
-    } else if ((*width == 3 || (*(*ptr_str + 3) != 'i' && *(*ptr_str + 3) != 'I')) &&
+    } else if ((*width == 3 ||
+                (*(*ptr_str + 3) != 'i' && *(*ptr_str + 3) != 'I')) &&
                s21_strncmp_icase(*ptr_str, "inf", 3) == 0) {
       float_value->s21_inf = 1;
       if (*width > 2) *width -= 3;
@@ -273,4 +274,13 @@ int s21_strncmp_icase(const char* str1, const char* str2, int width) {
   char temp_compare[9] = {'\0'};
   s21_strncat(temp_compare, str1, width);
   return s21_strncmp(s21_to_lower(temp_compare), str2, width);
+}
+
+int valid_c(const char* ptr_str, FormatSpecifier* token) {
+  return *ptr_str && token->width > 0;
+}
+
+int valid_s(const char* ptr_str, FormatSpecifier* token) {
+  return *ptr_str && !s21_isspace(*ptr_str) &&
+         is_valid_width(&(token->width), 0);
 }

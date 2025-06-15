@@ -36,6 +36,8 @@ typedef struct {
   const char* specifiers;
 } FormatSpecGroup;
 
+typedef int (*ValidatorFunc)(const char*, FormatSpecifier*);
+
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
                 DigitParser* parser);
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
@@ -43,10 +45,10 @@ int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
 int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
                          va_list* args, const DigitParser* parser);
 void handler_n(const char* start_str, const char* ptr_str, va_list* args);
-int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args);
-int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args);
 int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args);
 int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args);
+int handler_cs(const char** ptr_str, FormatSpecifier* token, va_list* args,
+               ValidatorFunc validator);
 
 int s21_is_oct_digit(const char* symbol);
 int s21_is_dec_digit(const char* symbol);
@@ -90,4 +92,7 @@ void to_nan_inf(long double* value, ParseFloat float_value);
 
 int is_valid_width(const int* width, short valid_width);
 int s21_strncmp_icase(const char* str1, const char* str2, int width);
+
+int valid_c(const char* ptr_str, FormatSpecifier* token);
+int valid_s(const char* ptr_str, FormatSpecifier* token);
 #endif

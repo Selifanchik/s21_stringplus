@@ -1036,8 +1036,6 @@ START_TEST(test_sscanf_ret) {
   ck_assert_int_eq(count, s21_count);
   ck_assert_int_eq(a, c);
   ck_assert_int_eq(b, d);
-
-
 }
 END_TEST
 

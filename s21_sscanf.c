@@ -62,10 +62,10 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
       if (handler_unsigned_int(ptr_str, token, args, &parser)) flag_error = 1;
       break;
     case 'c':
-      if (handler_c(ptr_str, token, args)) flag_error = 1;
+      if (handler_cs(ptr_str, token, args, valid_c)) flag_error = 1;
       break;
     case 's':
-      if (handler_s(ptr_str, token, args)) flag_error = 1;
+      if (handler_cs(ptr_str, token, args, valid_s)) flag_error = 1;
       break;
     case 'u':
       to_base10(&parser);
@@ -229,34 +229,9 @@ void handler_n(const char* start_str, const char* ptr_str, va_list* args) {
   }
 }
 
-int handler_c(const char** ptr_str, FormatSpecifier* token, va_list* args) {
-  int flag_error = 1;
-  if (token->width == -1) token->width = 1;
-  wchar_t* dest_w = (wchar_t*)S21_NULL;
-  char* dest_c = (char*)S21_NULL;
-  if (!token->suppress) {
-    if (token->length == 'l')
-      dest_w = va_arg(*args, wchar_t*);
-    else
-      dest_c = va_arg(*args, char*);
-  }
-  int i = 0;
-  for (i = 0; i < token->width; i++) {
-    if (**ptr_str) {
-      if (!token->suppress) {
-        if (token->length == 'l')
-          *(dest_w + i) = (wchar_t)(unsigned char)*(*ptr_str);
-        else
-          *(dest_c + i) = *(*ptr_str);
-      }
-      (*ptr_str)++;
-      flag_error = 0;
-    }
-  }
-  return flag_error;
-}
-
-int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
+int handler_cs(const char** ptr_str, FormatSpecifier* token, va_list* args,
+               ValidatorFunc validator) {
+  if (token->specifier == 'c' && token->width == -1) token->width = 1;
   int flag_error = 1;
   wchar_t* dest_w = (wchar_t*)S21_NULL;
   char* dest_c = (char*)S21_NULL;
@@ -267,8 +242,7 @@ int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
       dest_c = va_arg(*args, char*);
   }
   int length_str = 0;
-  while (**ptr_str && !s21_isspace(**ptr_str) &&
-         is_valid_width(&(token->width), 0)) {
+  while (validator(*ptr_str, token)) {
     if (!token->suppress) {
       if (token->length == 'l')
         *(dest_w + length_str) = (wchar_t)(unsigned char)*(*ptr_str);
@@ -280,7 +254,7 @@ int handler_s(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     if (token->width > 0) token->width--;
     length_str++;
   }
-  if (!token->suppress) {
+  if (!token->suppress && token->specifier == 's') {
     if (token->length == 'l')
       *(dest_w + length_str) = L'\0';
     else
