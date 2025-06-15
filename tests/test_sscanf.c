@@ -4,6 +4,222 @@
 
 #include "../s21_string.h"
 
+/*
+  * - Тесты для спецификатора с (%c)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора d (%d)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора i (%i)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора e (%e)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора E (%E)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора f (%f)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора g (%g)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора G (%G)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора o (%o)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора s (%s)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора u (%u)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора x (%x)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора X (%X)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора p (%p)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора n (%n)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+  * - Тесты для спецификатора % (%%)
+    * - корректные значения
+    * - некоректные значения
+    * - корректные и некорректные значения
+*/
+
+
+// * - Тесты для спецификатора c (%c)
+
+// Тест %c
+START_TEST(test_sscanf_char) {
+  const char *src = "1Hello, world!   ";
+  char std_char, s21_char;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%c", &std_char);
+  s21_count = s21_sscanf(src, "%c", &s21_char);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char, s21_char);
+}
+END_TEST
+
+// Тест %c пробелы впереди
+START_TEST(test_sscanf_char_with_spaces) {
+  const char *src = "   1Hello, world!   ";
+  char std_char, s21_char;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%c", &std_char);
+  s21_count = s21_sscanf(src, "%c", &s21_char);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char, s21_char);
+}
+END_TEST
+
+// Чтение символа пробела %c
+START_TEST(test_sscanf_space_char) {
+  const char *src = " ";
+  char std_char, s21_char;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%c", &std_char);
+  s21_count = s21_sscanf(src, "%c", &s21_char);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char, s21_char);
+}
+END_TEST
+
+// Чтение символов с шириной %3c
+START_TEST(test_sscanf_repeated_chars) {
+  const char *src = "abcde";
+  char std_buf[4] = {0}, s21_buf[4] = {0};
+  int std_count, s21_count;
+  std_count = sscanf(src, "%3c", std_buf);
+  s21_count = s21_sscanf(src, "%3c", s21_buf);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_mem_eq(std_buf, s21_buf, 3);
+}
+END_TEST
+
+// Чтение символов с *
+START_TEST(test_sscanf_char_asterisk) {
+  const char *src = "CD";
+  char std_char, s21_char;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%*c%c", &std_char);
+  s21_count = s21_sscanf(src, "%*c%c", &s21_char);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char, s21_char);
+}
+END_TEST
+
+// Чтение символа '\n'
+START_TEST(test_sscanf_char_newline) {
+  const char *str = "\n";
+  char std_char, s21_char;
+  int std_count, s21_count;
+  std_count = sscanf(str, "%c", &std_char);
+  s21_count = s21_sscanf(str, "%c", &s21_char);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char, s21_char);
+}
+END_TEST
+
+// что за тест?
+START_TEST(test_sscanf_all_ascii_chars) {
+  for (int i = 0; i < 128; ++i) {
+    char src[2] = {0};  // строка из одного символа + '\0'
+    src[0] = (char)i;
+
+    char std_char, s21_char;
+    int std_count, s21_count;
+    std_count = sscanf(src, "%c", &std_char);
+    s21_count = s21_sscanf(src, "%c", &s21_char);
+
+    ck_assert_msg(std_count == s21_count, "Count mismatch for ASCII %d (0x%02X)", i,
+                  i);
+    if (std_count == 1 && s21_count == 1) {
+      ck_assert_msg(std_char == s21_char,
+                    "Char mismatch for ASCII %d (0x%02X): std='%c' s21='%c'", i,
+                    i, std_char, s21_char);
+    }
+  }
+}
+END_TEST
+
+// Чтение пустой строки !!!!
+START_TEST(test_sscanf_char_zero_byte) {
+  const char src[] = {'\0', 'Z', '\0'};
+  char std_char1 = 0, s21_char1 = 0;
+  char std_char2 = 0, s21_char2 = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%c%c", &std_char1, &std_char2);
+  s21_count = s21_sscanf(src, "%c%c", &s21_char1, &s21_char2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char1, s21_char1);
+  ck_assert_int_eq(std_char2, s21_char2);
+}
+END_TEST
+
+// Чтение пустой строки !!!!
+START_TEST(test_sscanf_char_end_of_string) {
+  const char *src = "";
+  char std_char1 = 0, s21_char1 = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%c", &std_char1);
+  s21_count = s21_sscanf(src, "%c", &s21_char1);
+  ck_assert_int_eq(std_count, s21_count);
+}
+END_TEST
+
+// Чтение 2x символов
+START_TEST(test_sscanf_char_multiple) {
+  const char *src = "AB";
+  char std_char1, std_char2, s21_char1, s21_char2;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%c%c", &std_char1, &std_char2);
+  s21_count = s21_sscanf(src, "%c%c", &s21_char1, &s21_char2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char1, s21_char1);
+  ck_assert_int_eq(std_char2, s21_char2);
+}
+END_TEST
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Тест %d
 START_TEST(test_sscanf_int) {
   const char *str = "   1 Hello, world!   ";
@@ -228,31 +444,6 @@ START_TEST(test_sscanf_int_width4) {
 }
 END_TEST
 
-// Тест %c
-START_TEST(test_sscanf_char) {
-  const char *str = "1Hello, world!   ";
-  char a;
-  char b;
-  int count, s21_count;
-  count = sscanf(str, "%c", &a);
-  s21_count = s21_sscanf(str, "%c", &b);
-  ck_assert_int_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// Тест %c пробелы впереди
-START_TEST(test_sscanf_char_with_spaces) {
-  const char *str = "   1Hello, world!   ";
-  char a;
-  char b;
-  int count, s21_count;
-  count = sscanf(str, "%c", &a);
-  s21_count = s21_sscanf(str, "%c", &b);
-  ck_assert_int_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
 
 // Тест %i dec
 START_TEST(test_sscanf_i_dec) {
@@ -805,107 +996,6 @@ START_TEST(test_sscanf_leading_zeros) {
 }
 END_TEST
 
-// Чтение символа пробела %c
-START_TEST(test_sscanf_space_char) {
-  const char *str = " ";
-  char a = 0, b = 0;
-  int ret_std = sscanf(str, "%c", &a);
-  int ret_s21 = s21_sscanf(str, "%c", &b);
-  ck_assert_int_eq(ret_std, ret_s21);
-  ck_assert_int_eq(a, b);
-}
-END_TEST
-
-// Чтение символов с повторением %3c
-START_TEST(test_sscanf_repeated_chars) {
-  const char *str = "abcde";
-  char buf_std[4] = {0}, buf_s21[4] = {0};
-  int ret_std = sscanf(str, "%3c", buf_std);
-  int ret_s21 = s21_sscanf(str, "%3c", buf_s21);
-  ck_assert_int_eq(ret_std, ret_s21);
-  ck_assert_mem_eq(buf_std, buf_s21, 3);
-}
-END_TEST
-
-START_TEST(test_sscanf_char_asterisk) {
-  const char *str = "CD";
-  char a, b;
-  int count = sscanf(str, "%*c%c", &a);  // пропускаем первый символ
-  int s21_count = s21_sscanf(str, "%*c%c", &b);
-  ck_assert_int_eq(count, s21_count);
-  ck_assert_int_eq(a, b);
-}
-END_TEST
-
-START_TEST(test_sscanf_char_newline) {
-  const char *str = "\n";
-  char a, b;
-  int count = sscanf(str, "%c", &a);
-  int s21_count = s21_sscanf(str, "%c", &b);
-  ck_assert_int_eq(count, s21_count);
-  ck_assert_int_eq(a, b);
-}
-END_TEST
-START_TEST(test_sscanf_all_ascii_chars) {
-  for (int i = 0; i < 128; ++i) {
-    char input_str[2] = {0};  // строка из одного символа + '\0'
-    input_str[0] = (char)i;
-
-    char a = 0, b = 0;
-    int count = sscanf(input_str, "%c", &a);
-    int s21_count = s21_sscanf(input_str, "%c", &b);
-
-    ck_assert_msg(count == s21_count, "Count mismatch for ASCII %d (0x%02X)", i,
-                  i);
-    if (count == 1 && s21_count == 1) {
-      ck_assert_msg(a == b,
-                    "Char mismatch for ASCII %d (0x%02X): std='%c' s21='%c'", i,
-                    i, a, b);
-    }
-  }
-}
-END_TEST
-
-START_TEST(test_sscanf_char_zero_byte) {
-  const char str[] = {'\0', 'Z', '\0'};
-  char a, b;
-  int count = sscanf(str, "%c", &a);
-  int s21_count = s21_sscanf(str, "%c", &b);
-  ck_assert_int_eq(count, s21_count);
-  ck_assert_int_eq(a, b);
-}
-END_TEST
-
-START_TEST(test_sscanf_char_multiple) {
-  const char *str = "AB";
-  char a, b, c, d;
-  int count = sscanf(str, "%c%c", &a, &b);
-  int s21_count = s21_sscanf(str, "%c%c", &c, &d);
-  ck_assert_int_eq(count, s21_count);
-  ck_assert_int_eq(a, c);
-  ck_assert_int_eq(b, d);
-}
-END_TEST
-
-START_TEST(test_sscanf_char_end_of_string) {
-  const char *str = "";
-  char a = 'x', b = 'y';
-  int count = sscanf(str, "%c", &a);
-  int s21_count = s21_sscanf(str, "%c", &b);
-  ck_assert_int_eq(count, s21_count);  // оба должны вернуть 0
-}
-END_TEST
-
-START_TEST(test_sscanf_char_with_trailing_space) {
-  const char *str = "X ";
-  char a, b;
-  int count = sscanf(str, "%c", &a);
-  int s21_count = s21_sscanf(str, "%c", &b);
-  ck_assert_int_eq(count, s21_count);
-  ck_assert_int_eq(a, b);
-}
-END_TEST
-
 // Тест для short
 START_TEST(test_sscanf_short_variants) {
   const char *str = "32767 -32768 377 65535 1a3f 1A3F";
@@ -1109,7 +1199,6 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_char_zero_byte);
   tcase_add_test(tc_core, test_sscanf_char_multiple);
   tcase_add_test(tc_core, test_sscanf_char_end_of_string);
-  tcase_add_test(tc_core, test_sscanf_char_with_trailing_space);
   tcase_add_test(tc_core, test_sscanf_short_variants);
   tcase_add_test(tc_core, test_sscanf_long_variants);
   tcase_add_test(tc_core, test_sscanf_percent2);
