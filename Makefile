@@ -89,3 +89,6 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
+
+format:
+	clang-format -i *.c *.h tests/*.c
