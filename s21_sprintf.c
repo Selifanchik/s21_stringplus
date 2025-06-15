@@ -76,13 +76,13 @@ int s21_sprintf(char* str, const char* format, ...) {
   for (int i = 0; i < dlina; i++) {
     if (format[i] != '%') {
       char tmp[2] = {format[i], '\0'};
-      s21_strncat(str, tmp, s21_strlen(tmp));
+      s21_strncat(str, tmp, s21_strlen(tmp));// + 1
       continue;
     }
     i++;
     if (format[i] == '%') {
       char tmp[2] = {format[i], '\0'};
-      s21_strncat(str, tmp, s21_strlen(tmp));
+      s21_strncat(str, tmp, s21_strlen(tmp));// + 1
       continue;
     }
 
@@ -293,7 +293,7 @@ void NanAndInf(char chr, long double number, char* buf, flags flag) {
   }
   if (isinf(number)) {
     if (signbit(number)) {
-      s21_strncat(buf, up ? "-INF\0" : "-inf\0", 5);
+      s21_strncat(buf, up ? "-INF\0" : "-inf\0", 5);//может быть сделать подругому
     } else if (flag.plus) {
       s21_strncat(buf, up ? "+INF\0" : "+inf\0", 5);
     } else {
@@ -816,13 +816,9 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base,
 
   mas_for_number[index] = '\0';
 
-  int dlina = s21_strlen(mas_for_number);
+  reverse_str(mas_for_number);
 
-  for (int i = 0; i < index / 2; i++) {
-    int tmp1 = mas_for_number[i];
-    mas_for_number[i] = mas_for_number[dlina - i - 1];
-    mas_for_number[dlina - i - 1] = tmp1;
-  }
+  int dlina = s21_strlen(mas_for_number);
 
   if (flag.istochnost) {
     mas_for_number =
@@ -873,6 +869,7 @@ int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr,
       mas_for_number[0] = '0';
       dlina += 1;
     }
+    mas_for_number[dlina] = '\0';
   }
 
   return dlina;
@@ -938,11 +935,13 @@ int long_to_string(char* mas_for_number, int* index, long number) {
   mas_for_number[*index] = '\0';
   int dlina = s21_strlen(mas_for_number);
 
-  for (int i = 0; i < *index / 2; i++) {
+  /*for (int i = 0; i < *index / 2; i++) {// можно использовать функцию.
     int tmp1 = mas_for_number[i];
     mas_for_number[i] = mas_for_number[dlina - i - 1];
     mas_for_number[dlina - i - 1] = tmp1;
-  }
+  }*/
+
+  reverse_str(mas_for_number);
 
   return dlina;
 }
@@ -951,7 +950,7 @@ char* rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number,
                       int index) {
   if (!flag.tochnost && zero) {
     s21_strncpy(mas_for_number, "\0", 1);
-    dlina = s21_strlen(mas_for_number);
+    //dlina = s21_strlen(mas_for_number);
   } else if (dlina < flag.tochnost) {
     int count = dlina - 1;
     int raznica = flag.tochnost - dlina;
