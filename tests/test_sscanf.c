@@ -10,12 +10,12 @@
     * + некоректные значения
     * + корректные и некорректные значения
   * - Тесты для спецификатора d (%d)
-    * - корректные значения
-    * - некоректные значения
+    * + корректные значения
+    * + некоректные значения
     * - корректные и некорректные значения
   * - Тесты для спецификатора i (%i)
-    * - корректные значения
-    * - некоректные значения
+    * + корректные значения
+    * + некоректные значения
     * - корректные и некорректные значения
   * - Тесты для спецификатора e (%e)
     * - корректные значения
@@ -79,51 +79,51 @@
 
 // Тест %c
 START_TEST(test_sscanf_char) {
-  const char *src = "1Hello, world!   ";
-  char std_char, s21_char;
+  const char *src = "1He llo, world!   ";
+  char std_char1, s21_char1;
+  char std_buf1[2], s21_buf1[2];
+  wchar_t std_char2, s21_char2;
+  wchar_t std_buf2[2], s21_buf2[2];
   int std_count, s21_count;
-  std_count = sscanf(src, "%c", &std_char);
-  s21_count = s21_sscanf(src, "%c", &s21_char);
+  std_count = sscanf(src, "%c %*c %2c %lc %*2c %2lc", &std_char1, std_buf1, &std_char2, std_buf2);
+  s21_count = s21_sscanf(src, "%c %*c %2c %lc %*2c %2lc", &s21_char1, s21_buf1, &s21_char2, s21_buf2);
   ck_assert_int_eq(std_count, s21_count);
-  ck_assert_int_eq(std_char, s21_char);
+  ck_assert_int_eq(std_char1, s21_char1);
+  ck_assert_mem_eq(std_buf1, s21_buf1, sizeof(char) * 2);
+  ck_assert_int_eq(std_char2, s21_char2);
+  ck_assert_mem_eq(std_buf2, s21_buf2, sizeof(wchar_t) * 2);
+}
+END_TEST
+
+// Тест %c
+START_TEST(test_sscanf_char_sep) {
+  const char *src = "ab;cd MHello, 000world!   ";
+  char std_char1, s21_char1;
+  char std_buf1[2], s21_buf1[2];
+  wchar_t std_char2, s21_char2;
+  wchar_t std_buf2[2], s21_buf2[2];
+  int std_count, s21_count;
+  std_count = sscanf(src, "%c%*c ;%2c\t %lcHello%*2c000%2lc", &std_char1, std_buf1, &std_char2, std_buf2);
+  s21_count = s21_sscanf(src, "%c%*c ;%2c\t %lcHello%*2c000%2lc", &s21_char1, s21_buf1, &s21_char2, s21_buf2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_char1, s21_char1);
+  ck_assert_mem_eq(std_buf1, s21_buf1, sizeof(char) * 2);
+  ck_assert_int_eq(std_char2, s21_char2);
+  ck_assert_mem_eq(std_buf2, s21_buf2, sizeof(wchar_t) * 2);
 }
 END_TEST
 
 // Тест %c пробелы впереди
 START_TEST(test_sscanf_char_with_spaces) {
-  const char *src = "   1Hello, world!   ";
+  const char *src = "   1 He llo, world!   ";
   char std_char1, s21_char1;
   char std_char2, s21_char2;
   int std_count, s21_count;
-  std_count = sscanf(src, "%c %c", &std_char1, &std_char2);
-  s21_count = s21_sscanf(src, "%c %c", &s21_char1, &s21_char2);
+  std_count = sscanf(src, " %c%c", &std_char1, &std_char2);
+  s21_count = s21_sscanf(src, " %c%c", &s21_char1, &s21_char2);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert_int_eq(std_char1, s21_char1);
   ck_assert_int_eq(std_char2, s21_char2);
-}
-END_TEST
-
-// Чтение символов с *
-START_TEST(test_sscanf_char_asterisk) {
-  const char *src = "CD";
-  char std_char, s21_char;
-  int std_count, s21_count;
-  std_count = sscanf(src, "%*c%c", &std_char);
-  s21_count = s21_sscanf(src, "%*c%c", &s21_char);
-  ck_assert_int_eq(std_count, s21_count);
-  ck_assert_int_eq(std_char, s21_char);
-}
-END_TEST
-
-// Чтение символов с шириной %3c
-START_TEST(test_sscanf_repeated_chars) {
-  const char *src = "abcde";
-  char std_buf[4] = {0}, s21_buf[4] = {0};
-  int std_count, s21_count;
-  std_count = sscanf(src, "%3c", std_buf);
-  s21_count = s21_sscanf(src, "%3c", s21_buf);
-  ck_assert_int_eq(std_count, s21_count);
-  ck_assert_mem_eq(std_buf, s21_buf, 3);
 }
 END_TEST
 
@@ -163,33 +163,6 @@ START_TEST(test_sscanf_char_end_of_string) {
 }
 END_TEST
 
-// Чтение 2x символов
-START_TEST(test_sscanf_char_multiple) {
-  const char *src = "AB";
-  char std_char1, std_char2, s21_char1, s21_char2;
-  int std_count, s21_count;
-  std_count = sscanf(src, "%c%c", &std_char1, &std_char2);
-  s21_count = s21_sscanf(src, "%c%c", &s21_char1, &s21_char2);
-  ck_assert_int_eq(std_count, s21_count);
-  ck_assert_int_eq(std_char1, s21_char1);
-  ck_assert_int_eq(std_char2, s21_char2);
-}
-END_TEST
-
-//  
-START_TEST(test_sscanf_char_width_and_length) {
-  const char *src = "CD-DVD";
-  wchar_t std_buf[3], s21_buf[3];
-  int std_count, s21_count;
-  std_count = sscanf(src, "%*c%3lc", std_buf);  // пропускаем первый символ
-  s21_count = s21_sscanf(src, "%*c%3lc", s21_buf);
-  ck_assert_int_eq(std_count, s21_count);
-  for (int i = 0; i < 3; i++) {
-    ck_assert_int_eq(std_buf[i], s21_buf[i]);
-  }
-}
-END_TEST
-
 // Чтение символа '\n'
 START_TEST(test_sscanf_char_newline) {
   const char *src = "123\n";
@@ -204,35 +177,39 @@ START_TEST(test_sscanf_char_newline) {
 }
 END_TEST
 
+// Чтение символа '\n' c шириной
+START_TEST(test_sscanf_char_buf) {
+  const char *src = "123\n";
+  char std_buf[5] = {'\0'}, s21_buf[5] = {'\0'};
+  int std_count, s21_count;
+  std_count = sscanf(src, "%5c", std_buf);
+  s21_count = s21_sscanf(src, "%5c", s21_buf);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_mem_eq(std_buf, s21_buf, sizeof(char) * 5);
+}
+END_TEST
 
   // * - Тесты для спецификатора d (%d)
-  //   * - корректные значения
-  //   * - некоректные значения
+  //   * + корректные значения
+  //   * + некоректные значения
   //   * - корректные и некорректные значения
 
 // Тест %d
 START_TEST(test_sscanf_int) {
-  const char *src = "   1 ";
-  int std_int, s21_int;
+  const char *src = " 1 34 1456-23456 +14 +11 -23478";
+  int std_int1, std_int2, s21_int1, s21_int2;
+  short std_short1,std_short2, s21_short1, s21_short2;
+  long std_long1,std_long2, s21_long1, s21_long2;
   int std_count, s21_count;
-  std_count = sscanf(src, "%d", &std_int);
-  s21_count = s21_sscanf(src, "%d", &s21_int);
-  ck_assert_int_eq(std_count, s21_count);
-  ck_assert_int_eq(std_int, s21_int);
-}
-END_TEST
-
-// Тест %d +-
-START_TEST(test_sscanf_int_negative) {
-  const char *src = "   -14532 +14532";
-  int std_int1, s21_int1;
-  int std_int2, s21_int2;
-  int std_count, s21_count;
-  std_count = sscanf(src, "%d %d", &std_int1, &std_int2);
-  s21_count = s21_sscanf(src, "%d %d", &s21_int1, &s21_int2);
+  std_count = sscanf(src, "%d %*d %3d %hd %ld %*3d %3hd %4ld", &std_int1, &std_int2, &std_short1, &std_long1, &std_short2, &std_long2);
+  s21_count = s21_sscanf(src, "%d %*d %3d %hd %ld %*3d %3hd %4ld", &s21_int1, &s21_int2, &s21_short1, &s21_long1, &s21_short2, &s21_long2);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert_int_eq(std_int1, s21_int1);
   ck_assert_int_eq(std_int2, s21_int2);
+  ck_assert_int_eq(std_short1, s21_short1);
+  ck_assert_int_eq(std_short2, s21_short2);
+  ck_assert_msg(std_long1 == s21_long1, "Values are not equal: %ld != %ld", std_long1, s21_long1);
+  ck_assert_msg(std_long2 == s21_long2, "Values are not equal: %ld != %ld", std_long2, s21_long2);
 }
 END_TEST
 
@@ -268,234 +245,215 @@ START_TEST(test_sscanf_int_zero) {
 }
 END_TEST
 
-// Тест %d ширина
-START_TEST(test_sscanf_int_width1) {
-  const char *src = "123-14532 3452Abc";
-  int std_int1, s21_int1;
-  int std_int2, s21_int2;
-  int std_count, s21_count;
-  std_count = sscanf(src, "%*3d%5d%*d %5d", &std_int1, &std_int2);
-  s21_count = s21_sscanf(src, "%*3d%5d%*d %5d", &s21_int1, &s21_int2);
-  ck_assert_int_eq(std_count, s21_count);
-  ck_assert_int_eq(std_int1, s21_int1);
-  ck_assert_int_eq(std_int2, s21_int2);
-
-}
-END_TEST
-
-
-
 // Тест %d некорректное +-
 START_TEST(test_sscanf_int_incorrect_signs) {
-  const char *str = "+-23";
-  int a = 2;
-  int b = 2;
-  int count, s21_count;
-  count = sscanf(str, "%d", &a);
-  s21_count = s21_sscanf(str, "%d", &b);
-  ck_assert_int_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
+  const char *src = "+-23";
+  int std_int = 0, s21_int = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%d", &std_int);
+  s21_count = s21_sscanf(src, "%d", &s21_int);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_int, s21_int);
 }
 END_TEST
 
 // Тест %d некорректное пустая строка
 START_TEST(test_sscanf_int_empty_str) {
-  const char *str = "";
-  int a = 1;
-  int b = 1;
-  int count, s21_count;
-  count = sscanf(str, "%d", &a);
-  s21_count = s21_sscanf(str, "%d", &b);
-  ck_assert_int_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
+  const char *src = "";
+  int std_int = 0, s21_int = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%d", &std_int);
+  s21_count = s21_sscanf(src, "%d", &s21_int);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_int, s21_int);
 }
 END_TEST
 
 // Тест %d некорректное символы
 START_TEST(test_sscanf_int_incorrect_chars) {
-  const char *str = " Hello, world!   ";
-  int a = 5;
-  int b = 5;
-  int count, s21_count;
-  count = sscanf(str, "%d", &a);
-  s21_count = s21_sscanf(str, "%d", &b);
-  ck_assert_int_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
+  const char *src = " Hello, world!   ";
+  int std_int = 0, s21_int = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%d", &std_int);
+  s21_count = s21_sscanf(src, "%d", &s21_int);
+  ck_assert_int_eq(std_int, s21_int);
+  ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
 
-
-
-
-
-
-// Тест %i dec
-START_TEST(test_sscanf_i_dec) {
-  const char *str = "   1Hello, world!   ";
-  int a;
-  int b;
-  int count, s21_count;
-  count = sscanf(str, "%d", &a);
-  s21_count = s21_sscanf(str, "%d", &b);
+// Чтение int max и int min
+START_TEST(test_sscanf_int_limits) {
+  int a = 0, b = 0;
+  int ret_std = sscanf("2147483647", "%d", &a);
+  int ret_s21 = s21_sscanf("2147483647", "%d", &b);
+  ck_assert_int_eq(ret_std, ret_s21);
   ck_assert_int_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
+
+  ret_std = sscanf("-2147483648", "%d", &a);
+  ret_s21 = s21_sscanf("-2147483648", "%d", &b);
+  ck_assert_int_eq(ret_std, ret_s21);
+  ck_assert_int_eq(a, b);
+}
+END_TEST
+
+// * - Тесты для спецификатора i (%i)
+  // * + корректные значения
+  // * + некоректные значения
+  // * - корректные и некорректные значения
+
+  START_TEST(test_sscanf_i_dec) {
+    const char *src = " 1 34 1456-23456 +14 +11 -23478";
+    int std_int1, std_int2, s21_int1, s21_int2;
+    short std_short1,std_short2, s21_short1, s21_short2;
+    long std_long1,std_long2, s21_long1, s21_long2;
+    int std_count, s21_count;
+    std_count = sscanf(src, "%i %*i %3i %hi %li %*3i %3hi %4li", &std_int1, &std_int2, &std_short1, &std_long1, &std_short2, &std_long2);
+    s21_count = s21_sscanf(src, "%i %*i %3i %hi %li %*3i %3hi %4li", &s21_int1, &s21_int2, &s21_short1, &s21_long1, &s21_short2, &s21_long2);
+    ck_assert_int_eq(std_count, s21_count);
+    ck_assert_int_eq(std_int1, s21_int1);
+    ck_assert_int_eq(std_int2, s21_int2);
+    ck_assert_int_eq(std_short1, s21_short1);
+    ck_assert_int_eq(std_short2, s21_short2);
+    ck_assert_msg(std_long1 == s21_long1, "Values are not equal: %ld != %ld", std_long1, s21_long1);
+    ck_assert_msg(std_long2 == s21_long2, "Values are not equal: %ld != %ld", std_long2, s21_long2);
+  }
+  END_TEST
+
+  START_TEST(test_sscanf_i_oct) {
+    const char *src = " 01 034 014056-023456 +01 +011 -023478";
+    int std_int1, std_int2, s21_int1, s21_int2;
+    short std_short1,std_short2, s21_short1, s21_short2;
+    long std_long1,std_long2, s21_long1, s21_long2;
+    int std_count, s21_count;
+    std_count = sscanf(src, "%i %*i %3i %hi %li %*3i %4hi %4li", &std_int1, &std_int2, &std_short1, &std_long1, &std_short2, &std_long2);
+    s21_count = s21_sscanf(src, "%i %*i %3i %hi %li %*3i %4hi %4li", &s21_int1, &s21_int2, &s21_short1, &s21_long1, &s21_short2, &s21_long2);
+    ck_assert_int_eq(std_count, s21_count);
+    ck_assert_int_eq(std_int1, s21_int1);
+    ck_assert_int_eq(std_int2, s21_int2);
+    ck_assert_int_eq(std_short1, s21_short1);
+    ck_assert_int_eq(std_short2, s21_short2);
+    ck_assert_msg(std_long1 == s21_long1, "Values are not equal: %ld != %ld", std_long1, s21_long1);
+    ck_assert_msg(std_long2 == s21_long2, "Values are not equal: %ld != %ld", std_long2, s21_long2);
+  }
+  END_TEST
+
+  START_TEST(test_sscanf_i_hex) {
+    const char *src = " 0x1 0x3F 0x140x56-0x234B6 +0x1 +0xC1 -0x2A3478";
+    int std_int1, std_int2, s21_int1, s21_int2;
+    short std_short1,std_short2, s21_short1, s21_short2;
+    long std_long1,std_long2, s21_long1, s21_long2;
+    int std_count, s21_count;
+    std_count = sscanf(src, "%i %*i %4i %hi %li %*4i %5hi %6li", &std_int1, &std_int2, &std_short1, &std_long1, &std_short2, &std_long2);
+    s21_count = s21_sscanf(src, "%i %*i %4i %hi %li %*4i %5hi %6li", &s21_int1, &s21_int2, &s21_short1, &s21_long1, &s21_short2, &s21_long2);
+    ck_assert_int_eq(std_count, s21_count);
+    ck_assert_int_eq(std_int1, s21_int1);
+    ck_assert_int_eq(std_int2, s21_int2);
+    ck_assert_int_eq(std_short1, s21_short1);
+    ck_assert_int_eq(std_short2, s21_short2);
+    ck_assert_msg(std_long1 == s21_long1, "Values are not equal: %ld != %ld", std_long1, s21_long1);
+    ck_assert_msg(std_long2 == s21_long2, "Values are not equal: %ld != %ld", std_long2, s21_long2);
+  }
+  END_TEST
+
+// Тест %i hex uncorrect
+START_TEST(test_sscanf_i_hex_uncorrect) {
+  const char *src = "w0x1A3F 0XFF   ";
+  int std_int1 = 0, s21_int1 = 0;
+  int std_int2 = 0, s21_int2 = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%i %i", &std_int1, &std_int2);
+  s21_count = s21_sscanf(src, "%i %i", &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_int1, s21_int1);
+  ck_assert_int_eq(std_int2, s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
 
 // Тест %i oc uncorrect
 START_TEST(test_sscanf_i_octal_uncorrect) {
-  const char *str = "   Hello, world! 01647 0377   ";
-  int a = 0, b = 0;
-  int c = 0, d = 0;
-  int count, s21_count;
-  count = sscanf(str, "%i %i", &a, &b);
-  s21_count = s21_sscanf(str, "%i %i", &c, &d);
-  ck_assert_int_eq(a, c);
-  ck_assert_int_eq(b, d);
-  ck_assert_int_eq(count, s21_count);
+  const char *src = " y01647 0377   ";
+  int std_int1 = 0, s21_int1 = 0;
+  int std_int2 = 0, s21_int2 = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, "y%i %i", &std_int1, &std_int2);
+  s21_count = s21_sscanf(src, "%i %i", &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_int1, s21_int1);
+  ck_assert_int_eq(std_int2, s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
 
-// Тест %i oc
-START_TEST(test_sscanf_i_octal) {
-  const char *str = "    01647    0377   ";
-  int a = 0, b = 0;
-  int c = 0, d = 0;
-  int count, s21_count;
-  count = sscanf(str, "%i %i", &a, &b);
-  s21_count = s21_sscanf(str, "%i %i", &c, &d);
-  ck_assert_int_eq(a, c);
-  ck_assert_int_eq(b, d);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// Тест %i oc с +- и шириной и делителем
-START_TEST(test_sscanf_i_octal_neg_pos_width_delim) {
-  const char *str = "    -0377,    +0377,   +0377, +0377";
-  int a, b, c = 1, d = 4;
-  int e, f, g = 1, h = 4;
-  int count, s21_count;
-  count = sscanf(str, "%i, %i, %1i, %6i", &a, &b, &c, &d);
-  s21_count = s21_sscanf(str, "%i, %i, %1i, %6i", &e, &f, &g, &h);
-  ck_assert_int_eq(a, e);
-  ck_assert_int_eq(b, f);
-  ck_assert_int_eq(c, g);
-  ck_assert_int_eq(d, h);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// Тест %i hex
-START_TEST(test_sscanf_i_hex) {
-  const char *str = " 0x1A3F 0XFF   ";
-  int a, b;
-  int c, d;
-  int count, s21_count;
-  count = sscanf(str, "%i %i", &a, &b);
-  s21_count = s21_sscanf(str, "%i %i", &c, &d);
-  ck_assert_int_eq(a, c);
-  ck_assert_int_eq(b, d);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// Тест %i hex uncorrect
-START_TEST(test_sscanf_i_hex_uncorrect) {
-  const char *str = "w 0x1A3F 0XFF   ";
-  int a = 0, b = 0;
-  int c = 0, d = 0;
-  int count, s21_count;
-  count = sscanf(str, "%i %i", &a, &b);
-  s21_count = s21_sscanf(str, "%i %i", &c, &d);
-  ck_assert_int_eq(a, c);
-  ck_assert_int_eq(b, d);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// Тест %i hex с +- шириной делителем
-START_TEST(test_sscanf_i_hex_neg_pos_width_delim) {
-  const char *str = " -0x1A3F +0XFF,-0x1A3F,+0x1A3F ";
-  int a, b, c = 1, d = 4;
-  int e, f, g = 1, h = 4;
-  int count, s21_count;
-  count = sscanf(str, "%i %i,%6i, %8i", &a, &b, &c, &d);
-  s21_count = s21_sscanf(str, "%i %i,%6i, %8i", &e, &f, &g, &h);
-  ck_assert_int_eq(a, e);
-  ck_assert_int_eq(b, f);
-  ck_assert_int_eq(c, g);
-  ck_assert_int_eq(d, h);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
+// * - Тесты для спецификатора e E f g G (%e %E %f %g %G)
+// * - корректные значения
+// * - некоректные значения
+// * - корректные и некорректные значения
 
 // Тест %e float
 START_TEST(test_sscanf_e_float) {
-  const char *str = ".3e2 3e2 4e-3 1.234";
-  float a, b, c, d;
-  float e, f, g, h;
-  int count, s21_count;
-  count = sscanf(str, "%e %e %e %e", &a, &b, &c, &d);
-  s21_count = s21_sscanf(str, "%e %e %e %e", &e, &f, &g, &h);
-  ck_assert_float_eq(a, e);
-  ck_assert_float_eq(b, f);
-  ck_assert_float_eq(c, g);
-  ck_assert_float_eq(d, h);
-  ck_assert_int_eq(count, s21_count);
+  const char *src = ".3e2 3e2 4e-3 1.234";
+  float std_float1, std_float2, std_float3, std_float4;
+  float s21_float1, s21_float2, s21_float3, s21_float4;
+  int std_count, s21_count;
+  std_count = sscanf(src, "%e %e %e %e", &std_float1, &std_float2, &std_float3, &std_float4);
+  s21_count = s21_sscanf(src, "%e %e %e %e", &s21_float1, &s21_float2, &s21_float3, &s21_float4);
+  ck_assert_float_eq(std_float1, s21_float1);
+  ck_assert_float_eq(std_float2, s21_float2);
+  ck_assert_float_eq(std_float3, s21_float3);
+  ck_assert_float_eq(std_float4, s21_float4);
+  ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
 
 // Тест %e float +- delim width uncorrect
 START_TEST(test_sscanf_e_float_neg_pos_width_delim) {
   const char *str = "\t+.3e2 -3e2: 0.0e0 \n1.234s 0.ee2";
-  float a, b, c, d, u = 1;
-  float e, f, g, h, u1 = 1;
-  int count, s21_count;
-  count = sscanf(str, "%e %e: %e %5e %e", &a, &b, &c, &d, &u);
-  s21_count = s21_sscanf(str, "%e %e: %e %5e %e", &e, &f, &g, &h, &u1);
-  ck_assert_float_eq(a, e);
-  ck_assert_float_eq(b, f);
-  ck_assert_float_eq(c, g);
-  ck_assert_float_eq(d, h);
-  ck_assert_float_eq(u, u1);
-  ck_assert_int_eq(count, s21_count);
+  float std_float1, std_float2, std_float3, std_float4, std_float5 = 1;
+  float s21_float1, s21_float2, s21_float3, s21_float4, s21_float5 = 1;
+  int std_count, s21_count;
+  std_count = sscanf(str, "%e %e: %e %5e %e", &std_float1, &std_float2, &std_float3, &std_float4, &std_float5);
+  s21_count = s21_sscanf(str, "%e %e: %e %5e %e", &s21_float1, &s21_float2, &s21_float3, &s21_float4, &s21_float5);
+  ck_assert_float_eq(std_float1, s21_float1);
+  ck_assert_float_eq(std_float2, s21_float2);
+  ck_assert_float_eq(std_float3, s21_float3);
+  ck_assert_float_eq(std_float4, s21_float4);
+  ck_assert_float_eq(std_float5, s21_float5);
+  ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
 
 // Тест %e double
 START_TEST(test_sscanf_e_double) {
   const char *str = ".3e8 3e7 4e-5 455.2345653";
-  double a, b, c, d;
-  double e, f, g, h;
-  int count, s21_count;
-  count = sscanf(str, "%le %le %le %le", &a, &b, &c, &d);
-  s21_count = s21_sscanf(str, "%le %le %le %le", &e, &f, &g, &h);
-  ck_assert_float_eq(a, e);
-  ck_assert_float_eq(b, f);
-  ck_assert_float_eq(c, g);
-  ck_assert_float_eq(d, h);
-  ck_assert_int_eq(count, s21_count);
+  double std_double1, std_double2, std_double3, std_double4;
+  double s21_double1, s21_double2, s21_double3, s21_double4;
+  int std_count, s21_count;
+  std_count = sscanf(str, "%le %le %le %le", &std_double1, &std_double2, &std_double3, &std_double4);
+  s21_count = s21_sscanf(str, "%le %le %le %le", &s21_double1, &s21_double2, &s21_double3, &s21_double4);
+  ck_assert_double_eq(std_double1, s21_double1);
+  ck_assert_double_eq(std_double2, s21_double2);
+  ck_assert_double_eq(std_double3, s21_double3);
+  ck_assert_double_eq(std_double4, s21_double4);
+  ck_assert_double_eq(std_count, s21_count);
 }
 END_TEST
 
 // Тест %e double
 START_TEST(test_sscanf_e_long_double) {
   const char *str = ".3e10 3e11 4e-9 455.234565651";
-  long double a, b, c, d;
-  long double e, f, g, h;
-  int count, s21_count;
-  count = sscanf(str, "%Le %Le %Le %Le", &a, &b, &c, &d);
-  s21_count = s21_sscanf(str, "%Le %Le %Le %Le", &e, &f, &g, &h);
-  ck_assert_float_eq(a, e);
-  ck_assert_float_eq(b, f);
-  ck_assert_float_eq(c, g);
-  ck_assert_float_eq(d, h);
-  ck_assert_int_eq(count, s21_count);
+  long double std_ldouble1, std_ldouble2, std_ldouble3, std_ldouble4;
+  long double s21_ldouble1, s21_ldouble2, s21_ldouble3, s21_ldouble4;
+  int std_count, s21_count;
+  std_count = sscanf(str, "%Le %Le %Le %Le", &std_ldouble1, &std_ldouble2, &std_ldouble3, &std_ldouble4);
+  s21_count = s21_sscanf(str, "%Le %Le %Le %Le", &s21_ldouble1, &s21_ldouble2, &s21_ldouble3, &s21_ldouble4);
+  ck_assert_ldouble_eq(std_ldouble1, s21_ldouble1);
+  ck_assert_ldouble_eq(std_ldouble2, s21_ldouble2);
+  ck_assert_ldouble_eq(std_ldouble3, s21_ldouble3);
+  ck_assert_ldouble_eq(std_ldouble4, s21_ldouble4);
+  ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
 
-// Тест %E %f %g %G
+// Тест %E %f %g %G ?
 START_TEST(test_sscanf_E_f_g_G) {
   const char *str = ".3e2 3e2 4e-3 1.234";
   float a, b, c, d;
@@ -537,9 +495,59 @@ START_TEST(test_sscanf_E_f_g_G) {
 }
 END_TEST
 
+// Тест %E %f nan
+START_TEST(test_sscanf_float_nan_inf) {
+  const char *str = "nan inf; .8[1.";
+  long double a, b, c, d;
+  long double e, f, g, h;
+  int count, s21_count;
+  count = sscanf(str, "%Lf %Lf; %Lf [ %Lf", &a, &b, &c, &d);
+  s21_count = s21_sscanf(str, "%Lf %Lf; %Lf [ %Lf", &e, &f, &g, &h);
+  ck_assert_ldouble_nan(a);
+  ck_assert_ldouble_nan(e);
+  ck_assert_ldouble_infinite(b);
+  ck_assert_ldouble_infinite(f);
+  ck_assert_ldouble_eq(c, g);
+  ck_assert_ldouble_eq(d, h);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_correct_inf2) {
+  const char *str = "-iNf infInity naN";
+  long double a, b, c, e, f, g;
+  int count_std = sscanf(str, "%Lf %Lf %Lf", &a, &b, &c);
+  int count_s21 = s21_sscanf(str, "%Lf %Lf %Lf", &e, &f, &g);
+  ck_assert_int_eq(count_std, count_s21);
+  ck_assert_ldouble_infinite(a);
+  ck_assert_ldouble_infinite(e);
+  ck_assert_ldouble_infinite(b);
+  ck_assert_ldouble_infinite(f);
+  ck_assert_ldouble_nan(c);
+  ck_assert_ldouble_nan(g);
+}
+END_TEST
+
+START_TEST(test_sscanf_incorrect_inf) {
+  const char *str = "-iNfin inf";
+  double a = 0, b = 0;
+  char str1[10] = {'\0'}, str2[10] = {'\0'};
+  int count_std = sscanf(str, "%lf %s", &a, str1);
+  int count_s21 = s21_sscanf(str, "%lf %s", &b, str2);
+  ck_assert_int_eq(count_std, count_s21);
+  ck_assert_double_eq(a, b);
+  ck_assert_str_eq(str1, str2);
+}
+END_TEST
+
+// * - Тесты для спецификатора o (%o)
+  // * - корректные значения
+  // * - некоректные значения
+  // * - корректные и некорректные значения
+
 // Тест %o
 START_TEST(test_sscanf_octal) {
-  const char *str = "0567 0611";
+  const char *str = "0567 611";
   unsigned int a, b;
   unsigned int c, d;
   int count, s21_count;
@@ -550,6 +558,33 @@ START_TEST(test_sscanf_octal) {
   ck_assert_int_eq(count, s21_count);
 }
 END_TEST
+
+START_TEST(test_sscanf_o_correct_width) {
+  unsigned a, b, c = 1, d = 1;
+  int count, s21_count;
+  count = sscanf(";54   0123", ";%o %1o", &a, &c);
+  s21_count = s21_sscanf(";54   0123", ";%o %1o", &b, &d);
+  ck_assert_uint_eq(a, b);
+  ck_assert_uint_eq(c, d);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_o_uncorrect_width) {
+  unsigned a, b, c = 1, d = 1;
+  int count, s21_count;
+  count = sscanf(";54   90123", ";%o %1o", &a, &c);
+  s21_count = s21_sscanf(";54   90123", ";%o %1o", &b, &d);
+  ck_assert_uint_eq(a, b);
+  ck_assert_uint_eq(c, d);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+// * - Тесты для спецификатора s (%s)
+  // * - корректные значения
+  // * - некоректные значения
+  // * - корректные и некорректные значения
 
 // Тест %s
 START_TEST(test_sscanf_str_width) {
@@ -626,6 +661,66 @@ START_TEST(test_sscanf_width_longer_than_string) {
 }
 END_TEST
 
+START_TEST(test_sscanf_wchar_string) {
+  wchar_t symb[10] = {0}, s21_symb[10] = {0};
+  int count, s21_count;
+  count = sscanf("qwe123  643", "qw%2ls", symb);
+  s21_count = s21_sscanf("qwe123  643", "qw%2ls", s21_symb);
+  ck_assert_int_eq(wcscmp(symb, s21_symb), 0);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+// * - Тесты для спецификатора u (%u)
+// * - корректные значения
+// * - некоректные значения
+// * - корректные и некорректные значения
+
+// максимальное беззнаковое
+START_TEST(test_sscanf_uint_max) {
+  unsigned int a, b;
+  int count = sscanf("4294967295", "%u", &a);
+  int s21_count = s21_sscanf("4294967295", "%u", &b);
+  ck_assert_uint_eq(a, b);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+// * - Тесты для спецификатора x (%x)
+// * - корректные значения
+// * - некоректные значения
+// * - корректные и некорректные значения
+// * - Тесты для спецификатора X (%X)
+// * - корректные значения
+// * - некоректные значения
+// * - корректные и некорректные значения
+
+START_TEST(test_sscanf_x_correct_width) {
+  unsigned a, b, c = 1, d = 1;
+  int count, s21_count;
+  count = sscanf(";54   0x123", ";%x %1x", &a, &c);
+  s21_count = s21_sscanf(";54   0x123", ";%x %1x", &b, &d);
+  ck_assert_uint_eq(a, b);
+  ck_assert_uint_eq(c, d);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_x_incorrect_width) {
+  unsigned a = 1, b = 1;
+  int count, s21_count;
+  count = sscanf(";g0x123", ";%x", &a);
+  s21_count = s21_sscanf(";g0x123", ";%x", &b);
+  ck_assert_uint_eq(a, b);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+// * - Тесты для спецификатора p (%p)
+// * - корректные значения
+// * - некоректные значения
+// * - корректные и некорректные значения
+
 // Тест %p
 START_TEST(test_sscanf_p) {
   void *ptr_sscanf = NULL;
@@ -639,6 +734,21 @@ START_TEST(test_sscanf_p) {
 }
 END_TEST
 
+START_TEST(test_sscanf_p_incorrect) {
+  void *ptr = NULL, *s21_ptr = S21_NULL;
+  int count, s21_count;
+  count = sscanf("qwe123  643", "%p", &ptr);
+  s21_count = s21_sscanf("qwe123  643", "%p", &s21_ptr);
+  ck_assert_ptr_eq(ptr, s21_ptr);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+// * - Тесты для спецификатора n (%n)
+// * - корректные значения
+// * - некоректные значения
+// * - корректные и некорректные значения
+
 START_TEST(test_sscanf_n) {
   int n_sscanf;
   int n_s21_sscanf;
@@ -651,6 +761,22 @@ START_TEST(test_sscanf_n) {
 }
 END_TEST
 
+// тест для n
+START_TEST(test_sscanf_n_count) {
+  int n1, n2, a, b;
+  int count = sscanf("12345", "%d%n", &a, &n1);
+  int s21_count = s21_sscanf("12345", "%d%n", &b, &n2);
+  ck_assert_int_eq(a, b);
+  ck_assert_int_eq(n1, n2);
+  ck_assert_int_eq(count, s21_count);
+}
+END_TEST
+
+// * - Тесты для спецификатора % (%%)
+// * - корректные значения
+// * - некоректные значения
+// * - корректные и некорректные значения
+
 START_TEST(test_sscanf_percent) {
   int a;
   int b;
@@ -662,6 +788,8 @@ START_TEST(test_sscanf_percent) {
   ck_assert_int_eq(count, s21_count);
 }
 END_TEST
+
+// * - Микс тесты
 
 START_TEST(test_sscanf_mix_type_length_width) {
   short sh_num, s21_sh_num;
@@ -708,49 +836,6 @@ START_TEST(test_sscanf_mix_type_length_width) {
 }
 END_TEST
 
-START_TEST(test_sscanf_o_correct_width) {
-  unsigned a, b, c = 1, d = 1;
-  int count, s21_count;
-  count = sscanf(";54   0123", ";%o %1o", &a, &c);
-  s21_count = s21_sscanf(";54   0123", ";%o %1o", &b, &d);
-  ck_assert_uint_eq(a, b);
-  ck_assert_uint_eq(c, d);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-START_TEST(test_sscanf_o_uncorrect_width) {
-  unsigned a, b, c = 1, d = 1;
-  int count, s21_count;
-  count = sscanf(";54   90123", ";%o %1o", &a, &c);
-  s21_count = s21_sscanf(";54   90123", ";%o %1o", &b, &d);
-  ck_assert_uint_eq(a, b);
-  ck_assert_uint_eq(c, d);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-START_TEST(test_sscanf_x_correct_width) {
-  unsigned a, b, c = 1, d = 1;
-  int count, s21_count;
-  count = sscanf(";54   0x123", ";%x %1x", &a, &c);
-  s21_count = s21_sscanf(";54   0x123", ";%x %1x", &b, &d);
-  ck_assert_uint_eq(a, b);
-  ck_assert_uint_eq(c, d);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-START_TEST(test_sscanf_x_incorrect_width) {
-  unsigned a = 1, b = 1;
-  int count, s21_count;
-  count = sscanf(";g0x123", ";%x", &a);
-  s21_count = s21_sscanf(";g0x123", ";%x", &b);
-  ck_assert_uint_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
 START_TEST(test_sscanf_length_int_and_incorrect_percent) {
   long a, b = 1, c, d = 1;
   int count, s21_count;
@@ -758,44 +843,6 @@ START_TEST(test_sscanf_length_int_and_incorrect_percent) {
   s21_count = s21_sscanf("123  643", "  %ld %% %ld ", &c, &d);
   ck_assert_uint_eq(a, c);
   ck_assert_uint_eq(b, d);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-START_TEST(test_sscanf_p_incorrect) {
-  void *ptr = NULL, *s21_ptr = S21_NULL;
-  int count, s21_count;
-  count = sscanf("qwe123  643", "%p", &ptr);
-  s21_count = s21_sscanf("qwe123  643", "%p", &s21_ptr);
-  ck_assert_ptr_eq(ptr, s21_ptr);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-START_TEST(test_sscanf_wchar_string) {
-  wchar_t symb[10] = {0}, s21_symb[10] = {0};
-  int count, s21_count;
-  count = sscanf("qwe123  643", "qw%2ls", symb);
-  s21_count = s21_sscanf("qwe123  643", "qw%2ls", s21_symb);
-  ck_assert_int_eq(wcscmp(symb, s21_symb), 0);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// Тест %E %f nan
-START_TEST(test_sscanf_float_nan_inf) {
-  const char *str = "nan inf; .8[1.";
-  long double a, b, c, d;
-  long double e, f, g, h;
-  int count, s21_count;
-  count = sscanf(str, "%Lf %Lf; %Lf [ %Lf", &a, &b, &c, &d);
-  s21_count = s21_sscanf(str, "%Lf %Lf; %Lf [ %Lf", &e, &f, &g, &h);
-  ck_assert_ldouble_nan(a);
-  ck_assert_ldouble_nan(e);
-  ck_assert_ldouble_infinite(b);
-  ck_assert_ldouble_infinite(f);
-  ck_assert_ldouble_eq(c, g);
-  ck_assert_ldouble_eq(d, h);
   ck_assert_int_eq(count, s21_count);
 }
 END_TEST
@@ -818,60 +865,13 @@ START_TEST(test_sscanf_united_str) {
 }
 END_TEST
 
-// Чтение int max и int min
-START_TEST(test_sscanf_int_limits) {
-  int a = 0, b = 0;
-  int ret_std = sscanf("2147483647", "%d", &a);
-  int ret_s21 = s21_sscanf("2147483647", "%d", &b);
-  ck_assert_int_eq(ret_std, ret_s21);
-  ck_assert_int_eq(a, b);
-
-  ret_std = sscanf("-2147483648", "%d", &a);
-  ret_s21 = s21_sscanf("-2147483648", "%d", &b);
-  ck_assert_int_eq(ret_std, ret_s21);
-  ck_assert_int_eq(a, b);
-}
-END_TEST
-
-// максимальное беззнаковое
-START_TEST(test_sscanf_uint_max) {
-  unsigned int a, b;
-  int count = sscanf("4294967295", "%u", &a);
-  int s21_count = s21_sscanf("4294967295", "%u", &b);
-  ck_assert_uint_eq(a, b);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// тест для n
-START_TEST(test_sscanf_n_count) {
-  int n1, n2, a, b;
-  int count = sscanf("12345", "%d%n", &a, &n1);
-  int s21_count = s21_sscanf("12345", "%d%n", &b, &n2);
-  ck_assert_int_eq(a, b);
-  ck_assert_int_eq(n1, n2);
-  ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
 // тест для %
 START_TEST(test_sscanf_percent_sign) {
   char a, b;
-  int count = sscanf("%%X", "%%%c", &a);  // Ожидается символ 'X'
+  int count = sscanf("%%X", "%%%c", &a); 
   int s21_count = s21_sscanf("%%X", "%%%c", &b);
   ck_assert_int_eq(a, b);
   ck_assert_int_eq(count, s21_count);
-}
-END_TEST
-
-// Чтение числа с ведущими нулями
-START_TEST(test_sscanf_leading_zeros) {
-  const char *str = "0000123";
-  int a = 0, b = 0;
-  int ret_std = sscanf(str, "%d", &a);
-  int ret_s21 = s21_sscanf(str, "%d", &b);
-  ck_assert_int_eq(ret_std, ret_s21);
-  ck_assert_int_eq(a, b);
 }
 END_TEST
 
@@ -958,33 +958,6 @@ START_TEST(test_sscanf_correct_inf) {
 }
 END_TEST
 
-START_TEST(test_sscanf_correct_inf2) {
-  const char *str = "-iNf infInity naN";
-  long double a, b, c, e, f, g;
-  int count_std = sscanf(str, "%Lf %Lf %Lf", &a, &b, &c);
-  int count_s21 = s21_sscanf(str, "%Lf %Lf %Lf", &e, &f, &g);
-  ck_assert_int_eq(count_std, count_s21);
-  ck_assert_ldouble_infinite(a);
-  ck_assert_ldouble_infinite(e);
-  ck_assert_ldouble_infinite(b);
-  ck_assert_ldouble_infinite(f);
-  ck_assert_ldouble_nan(c);
-  ck_assert_ldouble_nan(g);
-}
-END_TEST
-
-START_TEST(test_sscanf_incorrect_inf) {
-  const char *str = "-iNfin inf";
-  double a = 0, b = 0;
-  char str1[10] = {'\0'}, str2[10] = {'\0'};
-  int count_std = sscanf(str, "%lf %s", &a, str1);
-  int count_s21 = s21_sscanf(str, "%lf %s", &b, str2);
-  ck_assert_int_eq(count_std, count_s21);
-  ck_assert_double_eq(a, b);
-  ck_assert_str_eq(str1, str2);
-}
-END_TEST
-
 START_TEST(test_sscanf_ret) {
   const char *str = "%1";
   int a, b = 0, c, d = 0;
@@ -999,36 +972,47 @@ END_TEST
 Suite *sscanf_suite(void) {
   Suite *s = suite_create("s21_sscanf");
   TCase *tc_core = tcase_create("Core");
-
+  
+// Tests %c
   tcase_add_test(tc_core, test_sscanf_char);
+  tcase_add_test(tc_core, test_sscanf_char_sep);
   tcase_add_test(tc_core, test_sscanf_char_with_spaces);
-  tcase_add_test(tc_core, test_sscanf_char_asterisk);
-  tcase_add_test(tc_core, test_sscanf_char_newline);
-  tcase_add_test(tc_core, test_sscanf_char_multiple);
   tcase_add_test(tc_core, test_sscanf_char_end_of_string);
-  tcase_add_test(tc_core, test_sscanf_char_width_and_length);
+  tcase_add_test(tc_core, test_sscanf_char_newline);
+  tcase_add_test(tc_core, test_sscanf_char_buf);
+
+// Tests %d
   tcase_add_test(tc_core, test_sscanf_int);
-  tcase_add_test(tc_core, test_sscanf_int_negative);
-  tcase_add_test(tc_core, test_sscanf_int_incorrect_chars);
-  tcase_add_test(tc_core, test_sscanf_int_incorrect_signs);
-  tcase_add_test(tc_core, test_sscanf_int_empty_str);
   tcase_add_test(tc_core, test_sscanf_int_zeros);
   tcase_add_test(tc_core, test_sscanf_int_zero);
-  tcase_add_test(tc_core, test_sscanf_int_width1);
-  tcase_add_test(tc_core, test_sscanf_int_width1);
+  tcase_add_test(tc_core, test_sscanf_int_incorrect_signs);
+  tcase_add_test(tc_core, test_sscanf_int_empty_str);
+  tcase_add_test(tc_core, test_sscanf_int_incorrect_chars);
+  tcase_add_test(tc_core, test_sscanf_int_limits);
+
+// Tests %i
   tcase_add_test(tc_core, test_sscanf_i_dec);
-  tcase_add_test(tc_core, test_sscanf_i_octal);
-  tcase_add_test(tc_core, test_sscanf_i_octal_neg_pos_width_delim);
-  tcase_add_test(tc_core, test_sscanf_i_octal_uncorrect);
+  tcase_add_test(tc_core, test_sscanf_i_oct);
   tcase_add_test(tc_core, test_sscanf_i_hex);
   tcase_add_test(tc_core, test_sscanf_i_hex_uncorrect);
-  tcase_add_test(tc_core, test_sscanf_i_hex_neg_pos_width_delim);
+  tcase_add_test(tc_core, test_sscanf_i_octal_uncorrect);
+
+// Tests %e %E %f %g %G
   tcase_add_test(tc_core, test_sscanf_e_float);
   tcase_add_test(tc_core, test_sscanf_e_float_neg_pos_width_delim);
   tcase_add_test(tc_core, test_sscanf_e_double);
   tcase_add_test(tc_core, test_sscanf_e_long_double);
   tcase_add_test(tc_core, test_sscanf_E_f_g_G);
+  tcase_add_test(tc_core, test_sscanf_float_nan_inf);
+  tcase_add_test(tc_core, test_sscanf_correct_inf2);
+  tcase_add_test(tc_core, test_sscanf_incorrect_inf);
+
+// Tests %o
   tcase_add_test(tc_core, test_sscanf_octal);
+  tcase_add_test(tc_core, test_sscanf_o_correct_width);
+  tcase_add_test(tc_core, test_sscanf_o_uncorrect_width);
+
+// Tests %s
   tcase_add_test(tc_core, test_sscanf_str_width);
   tcase_add_test(tc_core, test_sscanf_string_with_asterisk);
   tcase_add_test(tc_core, test_sscanf_leading_space);
@@ -1036,33 +1020,37 @@ Suite *sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_only_spaces);
   tcase_add_test(tc_core, test_sscanf_string_width_1);
   tcase_add_test(tc_core, test_sscanf_width_longer_than_string);
-  tcase_add_test(tc_core, test_sscanf_p);
-  tcase_add_test(tc_core, test_sscanf_n);
-  tcase_add_test(tc_core, test_sscanf_percent);
-  tcase_add_test(tc_core, test_sscanf_mix_type_length_width);
-  tcase_add_test(tc_core, test_sscanf_o_correct_width);
+  tcase_add_test(tc_core, test_sscanf_wchar_string);
+
+// Tests %u
+  tcase_add_test(tc_core, test_sscanf_uint_max);
+
+// Tests %x %X
   tcase_add_test(tc_core, test_sscanf_x_correct_width);
   tcase_add_test(tc_core, test_sscanf_x_incorrect_width);
-  tcase_add_test(tc_core, test_sscanf_length_int_and_incorrect_percent);
+
+// Tests %p
+  tcase_add_test(tc_core, test_sscanf_p);
   tcase_add_test(tc_core, test_sscanf_p_incorrect);
-  tcase_add_test(tc_core, test_sscanf_wchar_string);
-  tcase_add_test(tc_core, test_sscanf_float_nan_inf);
-  tcase_add_test(tc_core, test_sscanf_united_str);
-  tcase_add_test(tc_core, test_sscanf_int_limits);
-  tcase_add_test(tc_core, test_sscanf_uint_max);
+
+// Tests %n
+  tcase_add_test(tc_core, test_sscanf_n);
   tcase_add_test(tc_core, test_sscanf_n_count);
+
+// Tests %%
+  tcase_add_test(tc_core, test_sscanf_percent);
+
+// Mix tests
+  tcase_add_test(tc_core, test_sscanf_mix_type_length_width);
+  tcase_add_test(tc_core, test_sscanf_length_int_and_incorrect_percent);
+  tcase_add_test(tc_core, test_sscanf_united_str);
   tcase_add_test(tc_core, test_sscanf_percent_sign);
-  tcase_add_test(tc_core, test_sscanf_leading_zeros);
-  tcase_add_test(tc_core, test_sscanf_repeated_chars);
   tcase_add_test(tc_core, test_sscanf_all_ascii_chars);
   tcase_add_test(tc_core, test_sscanf_short_variants);
   tcase_add_test(tc_core, test_sscanf_long_variants);
   tcase_add_test(tc_core, test_sscanf_percent2);
   tcase_add_test(tc_core, test_sscanf_correct_inf);
-  tcase_add_test(tc_core, test_sscanf_correct_inf2);
-  tcase_add_test(tc_core, test_sscanf_incorrect_inf);
   tcase_add_test(tc_core, test_sscanf_ret);
-  tcase_add_test(tc_core, test_sscanf_o_uncorrect_width);
   suite_add_tcase(s, tc_core);
   return s;
 }
