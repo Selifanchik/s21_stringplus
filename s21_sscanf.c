@@ -148,7 +148,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     }
   }
   // parse all specifiers
-  if (!token->suppress && !token->length && token->width == -1) {
+  if (!token->suppress && token->length != 0 && token->width == -1) {
     const char* ptr_specifier = s21_strchr(all_specifiers, **ptr_format);
     if (ptr_specifier != S21_NULL) {
       token->specifier = *ptr_specifier;
@@ -202,18 +202,19 @@ int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
 int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
                          va_list* args, const DigitParser* parser) {
   int flag_error = 0;
+  int sign = is_sign(ptr_str, &(token->width));
   unsigned long value = 0;
   if (!base_to_dec(ptr_str, parser, &(token->width), &value)) {
     if (!token->suppress) {
       if (token->length == 'l') {
         unsigned long* dest = va_arg(*args, unsigned long*);
-        *dest = (unsigned long)value;
+        *dest = (unsigned long)value * sign;
       } else if (token->length == 'h') {
         unsigned short* dest = va_arg(*args, unsigned short*);
-        *dest = (unsigned short)value;
+        *dest = (unsigned short)value * sign;
       } else {
         unsigned* dest = va_arg(*args, unsigned*);
-        *dest = (unsigned)value;
+        *dest = (unsigned)value * sign;
       }
     }
   } else
