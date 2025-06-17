@@ -151,12 +151,7 @@ void is_prefix_base16(const char** ptr_str, int* width) {
 int is_valid_exponent(const char* ptr_str, int width) {
   int flag_error = 1;
   int is_exp = (*ptr_str == 'E' || *ptr_str == 'e');
-  int has_sign_and_digit = (*(ptr_str + 1) == '+' || *(ptr_str + 1) == '-') &&
-                           s21_is_dec_digit(ptr_str + 2) &&
-                           is_valid_width(&width, 1);
-  int has_digit_only =
-      s21_is_dec_digit(ptr_str + 1) && is_valid_width(&width, 0);
-  if (is_exp && (has_sign_and_digit || has_digit_only)) flag_error = 0;
+  if (is_exp && is_valid_width(&width, 0)) flag_error = 0;
   return flag_error;
 }
 
@@ -191,6 +186,7 @@ int parse_float(const char** ptr_str, FormatSpecifier* token,
     if (!is_valid_exponent(*ptr_str, token->width)) {
       float_value->exp_part = 1;
       (*ptr_str)++;
+      if (token->width > 0) token->width--;
       float_value->sign_exp = is_sign(ptr_str, &(token->width));
       unsigned long temp_order_exp = 0;
       if (!base_to_dec(ptr_str, &parser, &(token->width), &temp_order_exp)) {
