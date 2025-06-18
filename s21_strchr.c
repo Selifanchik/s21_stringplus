@@ -2,11 +2,12 @@
 
 char *s21_strchr(const char *str, int c) {
   char *result = S21_NULL;
+  int to_exit = 0;
 
-  while (*str != '\0') {
+  while (*str != '\0' && !to_exit) {
     if ((unsigned char)*str == (unsigned char)c) {
       result = (char *)str;
-      break;
+      to_exit = 1;
     }
     str++;
   }

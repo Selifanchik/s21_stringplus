@@ -71,7 +71,7 @@
   }
 
 #elif __APPLE__
-#define ERR_N 107
+#define ERR_N 108
 
 #define ERROR_LIST                                                             \
   {                                                                            \

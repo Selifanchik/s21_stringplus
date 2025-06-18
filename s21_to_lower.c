@@ -9,7 +9,7 @@ void *s21_to_lower(const char *str) {
 
   s21_size_t len = s21_strlen(str);
 
-  char *new_str = malloc(sizeof(char) * (len + 1));
+  char *new_str = (char*)malloc(sizeof(char) * (len + 1));
 
   if (new_str != S21_NULL) {
     for (s21_size_t i = 0; str[i] != '\0'; i++) {

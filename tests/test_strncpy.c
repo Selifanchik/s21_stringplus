@@ -21,7 +21,7 @@ START_TEST(test_strncpy_n_more_src) {
   char dest2[10];
   s21_strncpy(dest1, src, 7);
   strncpy(dest2, src, 7);
-  ck_assert_str_eq(dest1, dest2);
+  ck_assert_mem_eq(dest1, dest2, 7);
 }
 END_TEST
 
@@ -33,7 +33,7 @@ START_TEST(test_strncpy_n_less_src) {
   char dest2[10] = {'\0'};
   s21_strncpy(dest1, src, 3);
   strncpy(dest2, src, 3);
-  ck_assert_str_eq(dest1, dest2);
+  ck_assert_mem_eq(dest1, dest2, 3);
 }
 END_TEST
 
@@ -44,7 +44,7 @@ START_TEST(test_strncpy_no_null_terminator) {
   char dest2[10] = {'\0'};
   s21_strncpy(dest1, src, 7);
   strncpy(dest2, src, 7);
-  ck_assert_str_eq(dest1, dest2);
+  ck_assert_mem_eq(dest1, dest2, 7);
 }
 END_TEST
 
@@ -62,15 +62,15 @@ END_TEST
 // Копируемая строка пустая
 START_TEST(test_strncpy_zero_src) {
   const char *src = "";
-  char dest1[10];
-  char dest2[10];
+  char dest1[10]="helloworl";
+  char dest2[10]="helloworl";
   s21_strncpy(dest1, src, 5);
   strncpy(dest2, src, 5);
-  ck_assert_str_eq(dest1, dest2);
+  ck_assert_mem_eq(dest1, dest2, 5);
 }
 END_TEST
 
-// Копируемая строка пустая
+// Спец символы
 START_TEST(test_strncpy_spec_char) {
   const char *src = "abcde \n\t";
   char dest1[10];
