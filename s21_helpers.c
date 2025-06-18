@@ -269,7 +269,10 @@ void to_nan_inf(long double* value, ParseFloat float_value) {
 int s21_strncmp_icase(const char* str1, const char* str2, int width) {
   char temp_compare[9] = {'\0'};
   s21_strncat(temp_compare, str1, width);
-  return s21_strncmp(s21_to_lower(temp_compare), str2, width);
+  char* temp = (char*)s21_to_lower(temp_compare);
+  int result = s21_strncmp(temp, str2, width);
+  free(temp);
+  return result;
 }
 
 int valid_c(const char* ptr_str, FormatSpecifier* token) {

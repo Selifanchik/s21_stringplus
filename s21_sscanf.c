@@ -148,7 +148,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     }
   }
   // parse all specifiers
-  if (!token->suppress && token->length != 0 && token->width == -1) {
+  if (!token->suppress && token->length == 0 && token->width == -1) {
     const char* ptr_specifier = s21_strchr(all_specifiers, **ptr_format);
     if (ptr_specifier != S21_NULL) {
       token->specifier = *ptr_specifier;
