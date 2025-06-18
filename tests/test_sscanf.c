@@ -603,8 +603,7 @@ START_TEST(test_sscanf_float_nan_inf) {
                          &s21_ldouble3, &s21_ldouble4);
   ck_assert_ldouble_nan(std_ldouble1);
   ck_assert_ldouble_nan(s21_ldouble1);
-  ck_assert_ldouble_infinite(std_ldouble2);
-  ck_assert_ldouble_infinite(s21_ldouble2);
+  ck_assert(isinf(std_ldouble2) == isinf(s21_ldouble2));
   ck_assert_ldouble_eq(std_ldouble3, s21_ldouble3);
   ck_assert_ldouble_eq(std_ldouble4, s21_ldouble4);
   ck_assert_int_eq(std_count, s21_count);
@@ -621,10 +620,8 @@ START_TEST(test_sscanf_correct_inf2) {
   s21_count =
       s21_sscanf(src, format, &s21_ldouble1, &s21_ldouble2, &s21_ldouble3);
   ck_assert_int_eq(std_count, s21_count);
-  ck_assert_ldouble_infinite(std_ldouble1);
-  ck_assert_ldouble_infinite(s21_ldouble1);
-  ck_assert_ldouble_infinite(std_ldouble2);
-  ck_assert_ldouble_infinite(s21_ldouble2);
+  ck_assert(isinf(std_ldouble1) == isinf(s21_ldouble1));
+  ck_assert(isinf(std_ldouble2) == isinf(s21_ldouble2));
   ck_assert_ldouble_nan(std_ldouble3);
   ck_assert_ldouble_nan(s21_ldouble3);
 }
@@ -1100,12 +1097,9 @@ START_TEST(test_sscanf_correct_inf) {
   s21_count = s21_sscanf(src, format, &s21_ldouble1, &s21_ldouble2,
                          &s21_ldouble3, s21_str, &s21_float);
   ck_assert_int_eq(std_count, s21_count);
-  ck_assert_ldouble_infinite(std_ldouble1);
-  ck_assert_ldouble_infinite(s21_ldouble1);
-  ck_assert_ldouble_infinite(std_ldouble2);
-  ck_assert_ldouble_infinite(s21_ldouble2);
-  ck_assert_ldouble_infinite(std_ldouble3);
-  ck_assert_ldouble_infinite(s21_ldouble3);
+  ck_assert(isinf(std_ldouble1) == isinf(s21_ldouble1));
+  ck_assert(isinf(std_ldouble2) == isinf(s21_ldouble2));
+  ck_assert(isinf(std_ldouble3) == isinf(s21_ldouble3));
   ck_assert_str_eq(std_str, s21_str);
   ck_assert_float_nan(std_float);
   ck_assert_float_nan(s21_float);

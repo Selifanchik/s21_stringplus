@@ -141,7 +141,7 @@ int is_sign(const char** ptr_str, int* width) {
 void is_prefix_base16(const char** ptr_str, int* width) {
   if (**ptr_str == '0' &&
       ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) {
-    if (is_valid_width(width, 1)) {
+    if (is_valid_width(width, 2) && s21_is_hex_digit(*ptr_str + 2)) {
       (*ptr_str) += 2;
       if (*width > 1) *width -= 2;
     }

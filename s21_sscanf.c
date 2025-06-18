@@ -73,12 +73,10 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
       break;
     case 'x':
     case 'X':
-      is_prefix_base16(ptr_str, &(token->width));
       to_base16(&parser);
       if (handler_unsigned_int(ptr_str, token, args, &parser)) flag_error = 1;
       break;
     case 'p':
-      is_prefix_base16(ptr_str, &(token->width));
       if (handler_p(ptr_str, token, args)) flag_error = 1;
       break;
     case 'n':
@@ -136,11 +134,11 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     int width = -1;
     unsigned long temp_width = 0;
     if (!base_to_dec(ptr_format, &parser, &width, &temp_width)) {
-      token->width = (int)temp_width;
+      if (temp_width != 0) token->width = (int)temp_width;
     }
   }
   // parse length
-  if (!token->suppress && token->width != 0) {
+  if (!token->suppress) {
     const char* ptr_length = s21_strchr(lengths, **ptr_format);
     if (ptr_length != S21_NULL) {
       token->length = **ptr_format;
@@ -155,7 +153,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
       (*ptr_format)++;
     }
     // parsing length dependent specifier
-  } else if (token->width != 0) {
+  } else {
     int flag_end = 0;
     for (int i = 0; i < 4 && !flag_end; i++) {
       if (token->length == spec_groups[i].length_modifier) {
@@ -169,8 +167,7 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
           flag_error = 1;
       }
     }
-  } else
-    flag_error = 1;
+  }
   return flag_error;
 }
 
@@ -203,6 +200,8 @@ int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
                          va_list* args, const DigitParser* parser) {
   int flag_error = 0;
   int sign = is_sign(ptr_str, &(token->width));
+  if (s21_strchr("xX", token->specifier))
+    is_prefix_base16(ptr_str, &(token->width));
   unsigned long value = 0;
   if (!base_to_dec(ptr_str, parser, &(token->width), &value)) {
     if (!token->suppress) {
@@ -291,11 +290,13 @@ int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
   int flag_error = 0;
   DigitParser parser;
   to_base16(&parser);
+  int sign = is_sign(ptr_str, &(token->width));
+  is_prefix_base16(ptr_str, &(token->width));
   unsigned long value = 0;
   if (!base_to_dec(ptr_str, &parser, &(token->width), &value)) {
     if (!token->suppress) {
       void** dest = va_arg(*args, void**);
-      *dest = (void*)value;
+      *dest = (void*)(value * sign);
     }
   } else
     flag_error = 1;
