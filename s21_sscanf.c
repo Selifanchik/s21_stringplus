@@ -233,21 +233,14 @@ int handler_cs(const char** ptr_str, FormatSpecifier* token, va_list* args,
                ValidatorFunc validator) {
   if (token->specifier == 'c' && token->width == -1) token->width = 1;
   int flag_error = 1;
-  wchar_t* dest_w = (wchar_t*)S21_NULL;
   char* dest_c = (char*)S21_NULL;
   if (!token->suppress) {
-    if (token->length == 'l')
-      dest_w = va_arg(*args, wchar_t*);
-    else
-      dest_c = va_arg(*args, char*);
+    dest_c = va_arg(*args, char*);
   }
   int length_str = 0;
   while (validator(*ptr_str, token)) {
     if (!token->suppress) {
-      if (token->length == 'l')
-        *(dest_w + length_str) = (wchar_t)(unsigned char)*(*ptr_str);
-      else
-        *(dest_c + length_str) = *(*ptr_str);
+      *(dest_c + length_str) = *(*ptr_str);
     }
     (*ptr_str)++;
     flag_error = 0;
@@ -255,10 +248,7 @@ int handler_cs(const char** ptr_str, FormatSpecifier* token, va_list* args,
     length_str++;
   }
   if (!token->suppress && token->specifier == 's') {
-    if (token->length == 'l')
-      *(dest_w + length_str) = L'\0';
-    else
-      *(dest_c + length_str) = '\0';
+    *(dest_c + length_str) = '\0';
   }
   return flag_error;
 }
