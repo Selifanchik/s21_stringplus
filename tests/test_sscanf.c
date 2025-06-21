@@ -364,8 +364,8 @@ START_TEST(test_sscanf_i_oct) {
 END_TEST
 
 START_TEST(test_sscanf_i_hex) {
-  const char* src = " 0x1 0x3F 0x140x56-0x234B6 +0x1 +0xC1 -0x2A3478";
-  const char* format = "%i %*i %4i %hi %li %*4i %5hi %6li";
+  const char* src = " 0x1 0x3F 0x140X56-0x234B6 +0x1 +0xC1 -0x2A3478";
+  const char* format = "%i %*i %4i %hi %li %*4i %3hiC1 %6li";
   int std_int1, std_int2, s21_int1, s21_int2;
   short std_short1, std_short2, s21_short1, s21_short2;
   long std_long1, std_long2, s21_long1, s21_long2;
