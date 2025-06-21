@@ -43,7 +43,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
   DigitParser parser;
   switch (token->specifier) {
     case 'd':
-      to_base10(&parser);
+      base_dec(&parser);
       if (handler_int(ptr_str, token, args, &parser)) flag_error = 1;
       ;
       break;
@@ -58,7 +58,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
       if (handler_fegEG(ptr_str, token, args)) flag_error = 1;
       break;
     case 'o':
-      to_base8(&parser);
+      base_oct(&parser);
       if (handler_unsigned_int(ptr_str, token, args, &parser)) flag_error = 1;
       break;
     case 'c':
@@ -68,12 +68,12 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
       if (handler_cs(ptr_str, token, args, valid_s)) flag_error = 1;
       break;
     case 'u':
-      to_base10(&parser);
+      base_dec(&parser);
       if (handler_unsigned_int(ptr_str, token, args, &parser)) flag_error = 1;
       break;
     case 'x':
     case 'X':
-      to_base16(&parser);
+      base_hex(&parser);
       if (handler_unsigned_int(ptr_str, token, args, &parser)) flag_error = 1;
       break;
     case 'p':
@@ -173,12 +173,12 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
                 DigitParser* parser) {
   int flag_error = 0;
-  int prefix = 1;
-  int sign = is_sign(ptr_str, &(token->width));
+  int prefix = 0;
+  int sign = s21_sign(ptr_str, &(token->width));
   if (token->specifier == 'i')
     flag_error = parse_i(ptr_str, parser, &(token->width), &prefix);
   unsigned long value = 0;
-  if (!flag_error && (!base_to_dec(ptr_str, parser, &(token->width), &value) || !prefix)) {
+  if (!flag_error && (!base_to_dec(ptr_str, parser, &(token->width), &value) || prefix)) {
     if (!token->suppress) {
       if (token->length == 'l') {
         long* dest = va_arg(*args, long*);
@@ -199,11 +199,11 @@ int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
 int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
                          va_list* args, const DigitParser* parser) {
   int flag_error = 0;
-  int sign = is_sign(ptr_str, &(token->width));
-  int flag_prefix = 1;
-  if (s21_strchr("xX", token->specifier)) flag_prefix = is_prefix_base16(ptr_str, &(token->width));
+  int sign = s21_sign(ptr_str, &(token->width));
+  int flag_prefix = 0;
+  if (s21_strchr("xX", token->specifier)) flag_prefix = is_prefix_base_hex(ptr_str, &(token->width));
   unsigned long value = 0;
-  if (!base_to_dec(ptr_str, parser, &(token->width), &value) || !flag_prefix) {
+  if (!base_to_dec(ptr_str, parser, &(token->width), &value) || flag_prefix) {
     if (!token->suppress) {
       if (token->length == 'l') {
         unsigned long* dest = va_arg(*args, unsigned long*);
@@ -280,9 +280,9 @@ int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
 int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
   int flag_error = 0;
   DigitParser parser;
-  to_base16(&parser);
-  int sign = is_sign(ptr_str, &(token->width));
-  is_prefix_base16(ptr_str, &(token->width));
+  base_hex(&parser);
+  int sign = s21_sign(ptr_str, &(token->width));
+  is_prefix_base_hex(ptr_str, &(token->width));
   unsigned long value = 0;
   if (!base_to_dec(ptr_str, &parser, &(token->width), &value)) {
     if (!token->suppress) {

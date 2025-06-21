@@ -57,9 +57,9 @@ int s21_is_hex_digit(const char* symbol);
 int to_oct_dec(const char* num);
 int to_hex(const char* hex_num);
 
-void to_base8(DigitParser* parser);
-void to_base10(DigitParser* parser);
-void to_base16(DigitParser* parser);
+void base_oct(DigitParser* parser);
+void base_dec(DigitParser* parser);
+void base_hex(DigitParser* parser);
 
 int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
                 unsigned long* value);
@@ -79,8 +79,8 @@ void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
 void init_format_spec_group(FormatSpecGroup* spec_groups);
 
-int is_sign(const char** ptr_str, int* width);
-int is_prefix_base16(const char** ptr_str, int* width);
+int s21_sign(const char** ptr_str, int* width);
+int is_prefix_base_hex(const char** ptr_str, int* width);
 int is_valid_exponent(const char* ptr_str, int width);
 
 int parse_float(const char** ptr_str, FormatSpecifier* token,

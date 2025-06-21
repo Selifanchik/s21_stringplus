@@ -28,19 +28,19 @@ int to_hex(const char* hex_num) {
   return digit;
 }
 
-void to_base8(DigitParser* parser) {
+void base_oct(DigitParser* parser) {
   parser->is_digit = s21_is_oct_digit;
   parser->to_digit = to_oct_dec;
   parser->base = 8;
 }
 
-void to_base10(DigitParser* parser) {
+void base_dec(DigitParser* parser) {
   parser->is_digit = s21_is_dec_digit;
   parser->to_digit = to_oct_dec;
   parser->base = 10;
 }
 
-void to_base16(DigitParser* parser) {
+void base_hex(DigitParser* parser) {
   parser->is_digit = s21_is_hex_digit;
   parser->to_digit = to_hex;
   parser->base = 16;
@@ -63,12 +63,12 @@ int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
 int parse_i(const char** ptr_str, DigitParser* parser, int* width, int* prefix) {
   int flag_error = 0;
   if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
-    *prefix = is_prefix_base16(ptr_str, width);
-    to_base16(parser);
+    *prefix = is_prefix_base_hex(ptr_str, width);
+    base_hex(parser);
   } else if (**ptr_str == '0') {
-    to_base8(parser);
+    base_oct(parser);
   } else {
-    to_base10(parser);
+    base_dec(parser);
   }
   return flag_error;
 }
@@ -124,7 +124,7 @@ void init_format_spec_group(FormatSpecGroup* spec_groups) {
   spec_groups[3].specifiers = "eEgGf";
 }
 
-int is_sign(const char** ptr_str, int* width) {
+int s21_sign(const char** ptr_str, int* width) {
   int sign = 1;
   if ((**ptr_str == '-' || **ptr_str == '+') && is_valid_width(width, 0)) {
     if (**ptr_str == '-') {
@@ -136,31 +136,31 @@ int is_sign(const char** ptr_str, int* width) {
   return sign;
 }
 
-int is_prefix_base16(const char** ptr_str, int* width) {
-  int flag_error = 1;
+int is_prefix_base_hex(const char** ptr_str, int* width) {
+  int ret = 0;
   if (**ptr_str == '0' &&
       ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) {
     if (is_valid_width(width, 1)) {
       (*ptr_str) += 2;
       if (*width > 1) *width -= 2;
-      flag_error = 0;
+      ret = 1;
     }
   }
-  return flag_error;
+  return ret;
 }
 
 int is_valid_exponent(const char* ptr_str, int width) {
-  int flag_error = 1;
+  int ret = 0;
   int is_exp = (*ptr_str == 'E' || *ptr_str == 'e');
-  if (is_exp && is_valid_width(&width, 0)) flag_error = 0;
-  return flag_error;
+  if (is_exp && is_valid_width(&width, 0)) ret = 1;
+  return ret;
 }
 
 int parse_float(const char** ptr_str, FormatSpecifier* token,
                 ParseFloat* float_value) {
   int flag_error = 0;
   DigitParser parser;
-  to_base10(&parser);
+  base_dec(&parser);
   int flag_digit = 0;
   if (s21_is_dec_digit(*ptr_str)) {
     unsigned long temp_int_part = 0;
@@ -184,11 +184,11 @@ int parse_float(const char** ptr_str, FormatSpecifier* token,
     }
   }
   if (flag_digit) {
-    if (!is_valid_exponent(*ptr_str, token->width)) {
+    if (is_valid_exponent(*ptr_str, token->width)) {
       float_value->exp_part = 1;
       (*ptr_str)++;
       if (token->width > 0) token->width--;
-      float_value->sign_exp = is_sign(ptr_str, &(token->width));
+      float_value->sign_exp = s21_sign(ptr_str, &(token->width));
       unsigned long temp_order_exp = 0;
       if (!base_to_dec(ptr_str, &parser, &(token->width), &temp_order_exp)) {
         float_value->order_exp = (int)temp_order_exp;
@@ -233,7 +233,7 @@ long double s21_pow10(int order) {
 int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
   int flag_nan_inf = 0;
   init_parse_float(float_value);
-  float_value->sign_float = is_sign(ptr_str, width);
+  float_value->sign_float = s21_sign(ptr_str, width);
   if (is_valid_width(width, 2)) {
     if (s21_strncmp_icase(*ptr_str, "nan", 3) == 0) {
       float_value->s21_nan = 1;
