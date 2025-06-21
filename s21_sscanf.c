@@ -282,9 +282,9 @@ int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
   DigitParser parser;
   base_hex(&parser);
   int sign = s21_sign(ptr_str, &(token->width));
-  is_prefix_base_hex(ptr_str, &(token->width));
+  int prefix = is_prefix_base_hex(ptr_str, &(token->width));
   unsigned long value = 0;
-  if (!base_to_dec(ptr_str, &parser, &(token->width), &value)) {
+  if (!base_to_dec(ptr_str, &parser, &(token->width), &value) || prefix) {
     if (!token->suppress) {
       void** dest = va_arg(*args, void**);
       *dest = (void*)(value * sign);
