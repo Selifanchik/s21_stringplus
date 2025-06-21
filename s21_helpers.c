@@ -1,7 +1,5 @@
 #include "s21_helpers.h"
 
-#include <stdio.h>
-
 int s21_is_oct_digit(const char* symbol) {
   return (*symbol >= '0' && *symbol <= '7');
 }
@@ -138,14 +136,17 @@ int is_sign(const char** ptr_str, int* width) {
   return sign;
 }
 
-void is_prefix_base16(const char** ptr_str, int* width) {
+int is_prefix_base16(const char** ptr_str, int* width) {
+  int flag_error = 1;
   if (**ptr_str == '0' &&
       ((*(*ptr_str + 1)) == 'x' || (*(*ptr_str + 1)) == 'X')) {
-    if (is_valid_width(width, 2) && s21_is_hex_digit(*ptr_str + 2)) {
+    if (is_valid_width(width, 1)) {
       (*ptr_str) += 2;
       if (*width > 1) *width -= 2;
+      flag_error = 0;
     }
   }
+  return flag_error;
 }
 
 int is_valid_exponent(const char* ptr_str, int width) {

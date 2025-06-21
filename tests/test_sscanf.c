@@ -401,6 +401,20 @@ START_TEST(test_sscanf_i_hex_incorrect) {
 }
 END_TEST
 
+START_TEST(test_sscanf_i_oct_incorrect) {
+  const char* src = "-01A3F +0XFF   ";
+  const char* format = "%i %1i";
+  int std_int1 = 0, s21_int1 = 0;
+  int std_int2 = 0, s21_int2 = 0;
+  int std_count, s21_count;
+  std_count = sscanf(src, format, &std_int1, &std_int2);
+  s21_count = s21_sscanf(src, format, &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_int1, s21_int1);
+  ck_assert_int_eq(std_int2, s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
+}
+END_TEST
+
 // Тест %i oc incorrect
 START_TEST(test_sscanf_i_octal_incorrect) {
   const char* src = " y01647 0377   ";
@@ -836,15 +850,20 @@ END_TEST
 // * - корректные и некорректные значения
 
 START_TEST(test_sscanf_x_correct_width) {
-  const char* src = ";54   0x123";
-  const char* format = ";%x %1x";
-  unsigned std_uint1, s21_uint1, std_uint2 = 1, s21_uint2 = 1;
+  const char* src = ";54   0x123 0X6AFd 0X654";
+  const char* format = ";%x %x %*2x %X %4X %*4X";
+  unsigned std_uint1, s21_uint1;
+  unsigned std_uint2, s21_uint2;
+  unsigned std_uint3, s21_uint3;
+  unsigned std_uint4, s21_uint4;
   int std_count, s21_count;
-  std_count = sscanf(src, format, &std_uint1, &std_uint2);
-  s21_count = s21_sscanf(src, format, &s21_uint1, &s21_uint2);
+  std_count = sscanf(src, format, &std_uint1, &std_uint2, &std_uint3, &std_uint4);
+  s21_count = s21_sscanf(src, format, &s21_uint1, &s21_uint2, &s21_uint3, &s21_uint4);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert_uint_eq(std_uint1, s21_uint1);
   ck_assert_uint_eq(std_uint2, s21_uint2);
+  ck_assert_uint_eq(std_uint3, s21_uint3);
+  ck_assert_uint_eq(std_uint4, s21_uint4);
 }
 END_TEST
 
@@ -859,6 +878,8 @@ START_TEST(test_sscanf_x_incorrect_width) {
   ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
+
+
 
 // * - Тесты для спецификатора p (%p)
 // * - корректные значения
@@ -1203,6 +1224,7 @@ Suite* sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_i_oct);
   tcase_add_test(tc_core, test_sscanf_i_hex);
   tcase_add_test(tc_core, test_sscanf_i_hex_incorrect);
+  tcase_add_test(tc_core, test_sscanf_i_oct_incorrect);
   tcase_add_test(tc_core, test_sscanf_i_octal_incorrect);
 
   // Tests %e %E %f %g %G

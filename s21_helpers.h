@@ -80,7 +80,7 @@ void init_parse_float(ParseFloat* number);
 void init_format_spec_group(FormatSpecGroup* spec_groups);
 
 int is_sign(const char** ptr_str, int* width);
-void is_prefix_base16(const char** ptr_str, int* width);
+int is_prefix_base16(const char** ptr_str, int* width);
 int is_valid_exponent(const char* ptr_str, int width);
 
 int parse_float(const char** ptr_str, FormatSpecifier* token,

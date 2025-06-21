@@ -133,9 +133,8 @@ int parse_specifier(const char** ptr_format, FormatSpecifier* token) {
     DigitParser parser = {s21_is_dec_digit, to_oct_dec, 10};
     int width = -1;
     unsigned long temp_width = 0;
-    if (!base_to_dec(ptr_format, &parser, &width, &temp_width)) {
-      if (temp_width != 0) token->width = (int)temp_width;
-    }
+    base_to_dec(ptr_format, &parser, &width, &temp_width);
+    if (temp_width != 0) token->width = (int)temp_width;
   }
   // parse length
   if (!token->suppress) {
@@ -200,10 +199,10 @@ int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
                          va_list* args, const DigitParser* parser) {
   int flag_error = 0;
   int sign = is_sign(ptr_str, &(token->width));
-  if (s21_strchr("xX", token->specifier))
-    is_prefix_base16(ptr_str, &(token->width));
+  int flag_prefix = 1;
+  if (s21_strchr("xX", token->specifier)) flag_prefix = is_prefix_base16(ptr_str, &(token->width));
   unsigned long value = 0;
-  if (!base_to_dec(ptr_str, parser, &(token->width), &value)) {
+  if (!base_to_dec(ptr_str, parser, &(token->width), &value) || !flag_prefix) {
     if (!token->suppress) {
       if (token->length == 'l') {
         unsigned long* dest = va_arg(*args, unsigned long*);
@@ -212,6 +211,7 @@ int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
         unsigned short* dest = va_arg(*args, unsigned short*);
         *dest = (unsigned short)value * sign;
       } else {
+
         unsigned* dest = va_arg(*args, unsigned*);
         *dest = (unsigned)value * sign;
       }
