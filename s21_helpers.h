@@ -1,8 +1,6 @@
 #ifndef S21_HELPERS_H
 #define S21_HELPERS_H
 
-#include <stdarg.h>
-
 #include "math.h"
 #include "s21_string.h"
 

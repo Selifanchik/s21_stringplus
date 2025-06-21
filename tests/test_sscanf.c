@@ -84,8 +84,7 @@ START_TEST(test_sscanf_char) {
   char std_buf1[2], s21_buf1[2];
   int std_count, s21_count;
   std_count = sscanf(src, format, &std_char1, std_buf1);
-  s21_count =
-      s21_sscanf(src, format, &s21_char1, s21_buf1);
+  s21_count = s21_sscanf(src, format, &s21_char1, s21_buf1);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert_int_eq(std_char1, s21_char1);
   ck_assert_mem_eq(std_buf1, s21_buf1, sizeof(char) * 2);
@@ -667,16 +666,18 @@ START_TEST(test_sscanf_octal) {
   unsigned long std_ulong1, std_ulong2;
   unsigned long s21_ulong1, s21_ulong2;
   int std_count, s21_count;
-  std_count = sscanf(src, format, &std_uint1, &std_uint2, &std_ushort1, &std_ulong1, &std_ushort2, &std_ulong2);
-  s21_count = s21_sscanf(src, format, &s21_uint1, &s21_uint2, &s21_ushort1, &s21_ulong1, &s21_ushort2, &s21_ulong2);
+  std_count = sscanf(src, format, &std_uint1, &std_uint2, &std_ushort1,
+                     &std_ulong1, &std_ushort2, &std_ulong2);
+  s21_count = s21_sscanf(src, format, &s21_uint1, &s21_uint2, &s21_ushort1,
+                         &s21_ulong1, &s21_ushort2, &s21_ulong2);
   ck_assert_uint_eq(std_uint1, s21_uint1);
   ck_assert_uint_eq(std_uint2, s21_uint2);
   ck_assert_uint_eq(std_ushort1, s21_ushort1);
-  ck_assert_uint_eq(std_ushort2, s21_ushort2); 
+  ck_assert_uint_eq(std_ushort2, s21_ushort2);
   ck_assert_msg(std_ulong1 == s21_ulong1, "Values are not equal: %ld != %ld",
-    std_ulong1, s21_ulong1);
+                std_ulong1, s21_ulong1);
   ck_assert_msg(std_ulong2 == s21_ulong2, "Values are not equal: %ld != %ld",
-    std_ulong2, s21_ulong2);
+                std_ulong2, s21_ulong2);
   ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
@@ -815,16 +816,18 @@ START_TEST(test_sscanf_uint_max) {
   unsigned long std_ulong1, std_ulong2;
   unsigned long s21_ulong1, s21_ulong2;
   int std_count, s21_count;
-  std_count = sscanf(src, format, &std_uint1, &std_uint2, &std_ushort1, &std_ulong1, &std_ushort2, &std_ulong2);
-  s21_count = s21_sscanf(src, format, &s21_uint1, &s21_uint2, &s21_ushort1, &s21_ulong1, &s21_ushort2, &s21_ulong2);
+  std_count = sscanf(src, format, &std_uint1, &std_uint2, &std_ushort1,
+                     &std_ulong1, &std_ushort2, &std_ulong2);
+  s21_count = s21_sscanf(src, format, &s21_uint1, &s21_uint2, &s21_ushort1,
+                         &s21_ulong1, &s21_ushort2, &s21_ulong2);
   ck_assert_uint_eq(std_uint1, s21_uint1);
   ck_assert_uint_eq(std_uint2, s21_uint2);
   ck_assert_uint_eq(std_ushort1, s21_ushort1);
-  ck_assert_uint_eq(std_ushort2, s21_ushort2); 
+  ck_assert_uint_eq(std_ushort2, s21_ushort2);
   ck_assert_msg(std_ulong1 == s21_ulong1, "Values are not equal: %ld != %ld",
-    std_ulong1, s21_ulong1);
+                std_ulong1, s21_ulong1);
   ck_assert_msg(std_ulong2 == s21_ulong2, "Values are not equal: %ld != %ld",
-    std_ulong2, s21_ulong2);
+                std_ulong2, s21_ulong2);
   ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
@@ -857,8 +860,10 @@ START_TEST(test_sscanf_x_correct_width) {
   unsigned std_uint3, s21_uint3;
   unsigned std_uint4, s21_uint4;
   int std_count, s21_count;
-  std_count = sscanf(src, format, &std_uint1, &std_uint2, &std_uint3, &std_uint4);
-  s21_count = s21_sscanf(src, format, &s21_uint1, &s21_uint2, &s21_uint3, &s21_uint4);
+  std_count =
+      sscanf(src, format, &std_uint1, &std_uint2, &std_uint3, &std_uint4);
+  s21_count =
+      s21_sscanf(src, format, &s21_uint1, &s21_uint2, &s21_uint3, &s21_uint4);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert_uint_eq(std_uint1, s21_uint1);
   ck_assert_uint_eq(std_uint2, s21_uint2);
@@ -879,8 +884,6 @@ START_TEST(test_sscanf_x_incorrect_width) {
 }
 END_TEST
 
-
-
 // * - Тесты для спецификатора p (%p)
 // * - корректные значения
 // * - некоректные значения
@@ -890,8 +893,8 @@ END_TEST
 START_TEST(test_sscanf_p) {
   const char* src = "0xff6732 -fffff -0x124324   111111111111  ";
   const char* format = "%p %*p %*10p %100p";
-  void* std_ptr1 = NULL, *std_ptr2 = NULL;
-  void* s21_ptr1 = S21_NULL, *s21_ptr2 = S21_NULL;
+  void *std_ptr1 = NULL, *std_ptr2 = NULL;
+  void *s21_ptr1 = S21_NULL, *s21_ptr2 = S21_NULL;
   int std_count, s21_count;
   std_count = sscanf(src, format, &std_ptr1, &std_ptr2);
   s21_count = s21_sscanf(src, format, &s21_ptr1, &s21_ptr2);
@@ -1173,8 +1176,8 @@ START_TEST(test_sscanf_correct_inf) {
   int std_count, s21_count;
   std_count = sscanf(src, format, &std_float1, &std_double, &std_ldouble,
                      std_str, &std_float2);
-  s21_count = s21_sscanf(src, format, &s21_float1, &s21_double,
-                         &s21_ldouble, s21_str, &s21_float2);
+  s21_count = s21_sscanf(src, format, &s21_float1, &s21_double, &s21_ldouble,
+                         s21_str, &s21_float2);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert(isinf(std_float1) == isinf(s21_float1));
   ck_assert(isinf(std_double) == isinf(s21_double));

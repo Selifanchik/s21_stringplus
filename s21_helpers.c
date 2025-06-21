@@ -60,7 +60,8 @@ int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
   return flag_parse_error;
 }
 
-int parse_i(const char** ptr_str, DigitParser* parser, int* width, int* prefix) {
+int parse_i(const char** ptr_str, DigitParser* parser, int* width,
+            int* prefix) {
   int flag_error = 0;
   if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
     *prefix = is_prefix_base_hex(ptr_str, width);

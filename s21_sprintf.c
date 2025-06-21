@@ -60,7 +60,8 @@ char* specificator_gG(flags flag, long double number, char* mas_for_left,
                       char chr);
 int float_to_string(long double number, char* mas_for_left, flags* flag,
                     char chr, int* mantis);
-void NanAndInf(char chr, long double number, char* buf, flags flag, int flag_inf_valgd);
+void NanAndInf(char chr, long double number, char* buf, flags flag,
+               int flag_inf_valgd);
 char* rabota_mantisa(char* string, char chr, int mantis);
 int expanent(long double* number, int mantis);
 int remove_0(char* string);
@@ -70,7 +71,8 @@ void left_part_to_str(long double val, char* str, flags* flag);
 void right_part_to_str(long double frac, char* str, int precision);
 void g_and_round(int tmp_tochnost, char* mas_for_left);
 void net_toch_v_float(char* mas_for_left, flags flag);
-void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina, int* flag_round);
+void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina,
+                int* flag_round);
 
 int s21_sprintf(char* str, const char* format, ...) {
   flags flag = {0};
@@ -293,7 +295,8 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
   return error;
 }
 
-void NanAndInf(char chr, long double number, char* buf, flags flag, int flag_inf_valgd) {
+void NanAndInf(char chr, long double number, char* buf, flags flag,
+               int flag_inf_valgd) {
   int up = 0;
   if (chr == 'E' || chr == 'G') {
     up = 1;
@@ -360,7 +363,8 @@ void specificator_feEgG(flags flag, va_list* arg, char* buf, char chr) {
   }
 }
 
-char* specificator_gG(flags flag, long double number, char* mas_for_left, char chr) {
+char* specificator_gG(flags flag, long double number, char* mas_for_left,
+                      char chr) {
   long double number_copy = number;
   if (number < 0) {
     number = number * -1;
@@ -404,7 +408,8 @@ int remove_0(char* string) {
   return dlina;
 }
 
-char* specificator_feE(flags flag, long double number, char* mas_for_left, char chr) {
+char* specificator_feE(flags flag, long double number, char* mas_for_left,
+                       char chr) {
   int znak = 1;
   if (signbit(number)) {
     number = -number;
@@ -534,7 +539,7 @@ void round_my(char* tmp_mas_for_round, int dlina, int flag_bank) {
   }
 }
 
-void g_and_round(int tmp_tochnost, char* mas_for_left){
+void g_and_round(int tmp_tochnost, char* mas_for_left) {
   int k = 0;
   int kolvo = tmp_tochnost;
   while (kolvo > 0) {
@@ -548,7 +553,7 @@ void g_and_round(int tmp_tochnost, char* mas_for_left){
   mas_for_left[k] = '\0';
 }
 
-void net_toch_v_float(char* mas_for_left, flags flag){
+void net_toch_v_float(char* mas_for_left, flags flag) {
   int k = 0;
   while (mas_for_left[k] != '.') {
     k++;
@@ -560,7 +565,8 @@ void net_toch_v_float(char* mas_for_left, flags flag){
   }
 }
 
-void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina, int* flag_round){
+void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina,
+                int* flag_round) {
   if (tmp_mas_for_round[0] == '0') {
     s21_strncpy(mas_for_left, tmp_mas_for_round + 1, dlina - 1);
     mas_for_left[dlina - 2] = '\0';
@@ -571,7 +577,8 @@ void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina, int* fla
   }
 }
 
-int float_to_string(long double number, char* mas_for_left, flags* flag, char chr, int* mantis) {
+int float_to_string(long double number, char* mas_for_left, flags* flag,
+                    char chr, int* mantis) {
   long double intpart;
   int tmp_tochnost = flag->tochnost;
   int flag_round = 0;
@@ -686,7 +693,7 @@ void specificator_c(flags flag, va_list* arg, char* buf) {
   free(string);
 }
 
-char* s_null(char* string, int* flag_null){
+char* s_null(char* string, int* flag_null) {
   string = malloc(8);
   s21_strncpy(string, "(null)", 6);
   string[6] = '\0';
@@ -694,7 +701,7 @@ char* s_null(char* string, int* flag_null){
   return string;
 }
 
-char* s_width(char* string, int dlina, flags flag){
+char* s_width(char* string, int dlina, flags flag) {
   int raznica = flag.width - dlina;
   string = realloc(string, dlina + raznica + 2);
   if (string == S21_NULL) {
@@ -813,7 +820,8 @@ void specificator_uxXo(flags flag, va_list* arg, char* buf, char chr) {
   free(string);
 }
 
-char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr) {
+char* number_uxXo_to_string(unsigned long number, flags flag, int base,
+                            char chr) {
   char* mas_for_number = malloc(64);
   if (mas_for_number == S21_NULL) {
     exit(0);
@@ -863,7 +871,8 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr
   return result;
 }
 
-int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr, unsigned long number) {
+int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr,
+                    unsigned long number) {
   int flag_resh = 1;
   if (base == 8 && mas_for_number[0] == '0') {
     flag_resh = 0;
@@ -959,7 +968,8 @@ int long_to_string(char* mas_for_number, int* index, long number) {
   return dlina;
 }
 
-char* rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number, int index) {
+char* rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number,
+                      int index) {
   if (!flag.tochnost && zero) {
     s21_strncpy(mas_for_number, "\0", 1);
   } else if (dlina < flag.tochnost) {
@@ -982,7 +992,8 @@ char* rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number, int
   return mas_for_number;
 }
 
-char* zapolnenie_mas_result(int dlina, long number, flags flag, char* mas_for_number) {
+char* zapolnenie_mas_result(int dlina, long number, flags flag,
+                            char* mas_for_number) {
   char* result = malloc(dlina + 3);
   if (result == S21_NULL) {
     exit(0);

@@ -178,7 +178,8 @@ int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
   if (token->specifier == 'i')
     flag_error = parse_i(ptr_str, parser, &(token->width), &prefix);
   unsigned long value = 0;
-  if (!flag_error && (!base_to_dec(ptr_str, parser, &(token->width), &value) || prefix)) {
+  if (!flag_error &&
+      (!base_to_dec(ptr_str, parser, &(token->width), &value) || prefix)) {
     if (!token->suppress) {
       if (token->length == 'l') {
         long* dest = va_arg(*args, long*);
@@ -201,7 +202,8 @@ int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
   int flag_error = 0;
   int sign = s21_sign(ptr_str, &(token->width));
   int flag_prefix = 0;
-  if (s21_strchr("xX", token->specifier)) flag_prefix = is_prefix_base_hex(ptr_str, &(token->width));
+  if (s21_strchr("xX", token->specifier))
+    flag_prefix = is_prefix_base_hex(ptr_str, &(token->width));
   unsigned long value = 0;
   if (!base_to_dec(ptr_str, parser, &(token->width), &value) || flag_prefix) {
     if (!token->suppress) {
@@ -212,7 +214,6 @@ int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
         unsigned short* dest = va_arg(*args, unsigned short*);
         *dest = (unsigned short)value * sign;
       } else {
-
         unsigned* dest = va_arg(*args, unsigned*);
         *dest = (unsigned)value * sign;
       }
