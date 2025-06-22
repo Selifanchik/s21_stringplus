@@ -599,6 +599,18 @@ START_TEST(test_sscanf_e_long_double) {
 }
 END_TEST
 
+START_TEST(test_sscanf_float_exp_incorrect_width) {
+  const char* src = "-123.3e2";
+  const char* format = "%6E";
+  float std_float, s21_float;
+  int std_count, s21_count;
+  std_count = sscanf(src, format, &std_float);
+  s21_count = s21_sscanf(src, format, &s21_float);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_float_eq(std_float, s21_float);
+}
+END_TEST
+
 // Тест %E %f nan
 START_TEST(test_sscanf_float_nan_inf) {
   const char* src = "nan inf; .8[1.";
@@ -619,18 +631,43 @@ START_TEST(test_sscanf_float_nan_inf) {
 }
 END_TEST
 
+START_TEST(test_sscanf_correct_inf) {
+  const char* src = "-inf inf infi nan";
+  const char* format = "%f %lf %3Lf %s %f";
+  float std_float1, s21_float1;
+  double std_double, s21_double;
+  long double std_ldouble, s21_ldouble;
+  float std_float2, s21_float2;
+  char std_str[2], s21_str[2];
+  int std_count, s21_count;
+  std_count = sscanf(src, format, &std_float1, &std_double, &std_ldouble,
+                     std_str, &std_float2);
+  s21_count = s21_sscanf(src, format, &s21_float1, &s21_double, &s21_ldouble,
+                         s21_str, &s21_float2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert(isinf(std_float1) == isinf(s21_float1));
+  ck_assert(isinf(std_double) == isinf(s21_double));
+  ck_assert(isinf(std_ldouble) == isinf(s21_ldouble));
+  ck_assert_str_eq(std_str, s21_str);
+  ck_assert_float_nan(std_float2);
+  ck_assert_float_nan(s21_float2);
+}
+END_TEST
+
 START_TEST(test_sscanf_correct_inf2) {
-  const char* src = "-iNf infInity naN";
-  const char* format = "%Lf %Lf %Lf";
+  const char* src = "-iNf infInity InFiNity naN";
+  const char* format = "%5Lf %Lf %9lf %Lf";
   long double std_ldouble1, std_ldouble2, std_ldouble3;
   long double s21_ldouble1, s21_ldouble2, s21_ldouble3;
+  double std_double, s21_double;
   int std_count, s21_count;
-  std_count = sscanf(src, format, &std_ldouble1, &std_ldouble2, &std_ldouble3);
+  std_count = sscanf(src, format, &std_ldouble1, &std_ldouble2, &std_double, &std_ldouble3);
   s21_count =
-      s21_sscanf(src, format, &s21_ldouble1, &s21_ldouble2, &s21_ldouble3);
+      s21_sscanf(src, format, &s21_ldouble1, &s21_ldouble2, &s21_double, &s21_ldouble3);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert(isinf(std_ldouble1) == isinf(s21_ldouble1));
   ck_assert(isinf(std_ldouble2) == isinf(s21_ldouble2));
+  ck_assert(isinf(std_double) == isinf(s21_double));
   ck_assert_ldouble_nan(std_ldouble3);
   ck_assert_ldouble_nan(s21_ldouble3);
 }
@@ -872,9 +909,21 @@ START_TEST(test_sscanf_x_correct_width) {
 }
 END_TEST
 
-START_TEST(test_sscanf_x_incorrect_width) {
-  const char* src = ";g0x123";
+START_TEST(test_sscanf_x_incorrect_prefix) {
+  const char* src = ";0w123";
   const char* format = ";%x";
+  unsigned std_uint = 1, s21_uint = 1;
+  int std_count, s21_count;
+  std_count = sscanf(src, format, &std_uint);
+  s21_count = s21_sscanf(src, format, &s21_uint);
+  ck_assert_uint_eq(std_uint, s21_uint);
+  ck_assert_int_eq(std_count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_x_prefix_width) {
+  const char* src = ";0X123";
+  const char* format = ";%1x";
   unsigned std_uint = 1, s21_uint = 1;
   int std_count, s21_count;
   std_count = sscanf(src, format, &std_uint);
@@ -905,13 +954,15 @@ START_TEST(test_sscanf_p) {
 END_TEST
 
 START_TEST(test_sscanf_p_negative) {
-  const char* src = "-0xffff";
-  const char* format = "%p";
-  void *std_ptr = NULL, *s21_ptr = S21_NULL;
+  const char* src = "-0xffff k";
+  const char* format = "%p %p";
+  void *std_ptr1 = NULL, *s21_ptr1 = S21_NULL;
+  void *std_ptr2 = NULL, *s21_ptr2 = S21_NULL;
   int std_count, s21_count;
-  std_count = sscanf(src, format, &std_ptr);
-  s21_count = s21_sscanf(src, format, &s21_ptr);
-  ck_assert_ptr_eq(std_ptr, s21_ptr);
+  std_count = sscanf(src, format, &std_ptr1, &std_ptr2);
+  s21_count = s21_sscanf(src, format, &s21_ptr1, &s21_ptr2);
+  ck_assert_ptr_eq(std_ptr1, s21_ptr1);
+  ck_assert_ptr_eq(std_ptr2, s21_ptr2);
   ck_assert_int_eq(std_count, s21_count);
 }
 END_TEST
@@ -1165,29 +1216,6 @@ START_TEST(test_sscanf_percent2) {
 }
 END_TEST
 
-START_TEST(test_sscanf_correct_inf) {
-  const char* src = "-inf inf infi nan";
-  const char* format = "%f %lf %3Lf %s %f";
-  float std_float1, s21_float1;
-  double std_double, s21_double;
-  long double std_ldouble, s21_ldouble;
-  float std_float2, s21_float2;
-  char std_str[2], s21_str[2];
-  int std_count, s21_count;
-  std_count = sscanf(src, format, &std_float1, &std_double, &std_ldouble,
-                     std_str, &std_float2);
-  s21_count = s21_sscanf(src, format, &s21_float1, &s21_double, &s21_ldouble,
-                         s21_str, &s21_float2);
-  ck_assert_int_eq(std_count, s21_count);
-  ck_assert(isinf(std_float1) == isinf(s21_float1));
-  ck_assert(isinf(std_double) == isinf(s21_double));
-  ck_assert(isinf(std_ldouble) == isinf(s21_ldouble));
-  ck_assert_str_eq(std_str, s21_str);
-  ck_assert_float_nan(std_float2);
-  ck_assert_float_nan(s21_float2);
-}
-END_TEST
-
 START_TEST(test_sscanf_ret) {
   const char* src = "%1";
   const char* format = "%n%%%*d%d";
@@ -1240,8 +1268,10 @@ Suite* sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_g);
   tcase_add_test(tc_core, test_sscanf_G);
   tcase_add_test(tc_core, test_sscanf_float_nan_inf);
+  tcase_add_test(tc_core, test_sscanf_correct_inf);
   tcase_add_test(tc_core, test_sscanf_correct_inf2);
   tcase_add_test(tc_core, test_sscanf_incorrect_inf);
+  tcase_add_test(tc_core, test_sscanf_float_exp_incorrect_width);
 
   // Tests %o
   tcase_add_test(tc_core, test_sscanf_octal);
@@ -1263,7 +1293,8 @@ Suite* sscanf_suite(void) {
 
   // Tests %x %X
   tcase_add_test(tc_core, test_sscanf_x_correct_width);
-  tcase_add_test(tc_core, test_sscanf_x_incorrect_width);
+  tcase_add_test(tc_core, test_sscanf_x_incorrect_prefix);
+  tcase_add_test(tc_core, test_sscanf_x_prefix_width);
 
   // Tests %p
   tcase_add_test(tc_core, test_sscanf_p);
@@ -1288,7 +1319,6 @@ Suite* sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_short_variants);
   tcase_add_test(tc_core, test_sscanf_long_variants);
   tcase_add_test(tc_core, test_sscanf_percent2);
-  tcase_add_test(tc_core, test_sscanf_correct_inf);
   tcase_add_test(tc_core, test_sscanf_ret);
   suite_add_tcase(s, tc_core);
   return s;
