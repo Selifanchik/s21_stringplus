@@ -176,10 +176,9 @@ int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
   int prefix = 0;
   int sign = s21_sign(ptr_str, &(token->width));
   if (token->specifier == 'i')
-    flag_error = parse_i(ptr_str, parser, &(token->width), &prefix);
+    prefix = parse_i(ptr_str, parser, &(token->width));
   unsigned long value = 0;
-  if (!flag_error &&
-      (!base_to_dec(ptr_str, parser, &(token->width), &value) || prefix)) {
+  if (!base_to_dec(ptr_str, parser, &(token->width), &value) || prefix) {
     if (!token->suppress) {
       if (token->length == 'l') {
         long* dest = va_arg(*args, long*);

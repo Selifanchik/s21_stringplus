@@ -61,7 +61,7 @@ void base_hex(DigitParser* parser);
 
 int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
                 unsigned long* value);
-int parse_i(const char** ptr_str, DigitParser* parser, int* width, int* prefix);
+int parse_i(const char** ptr_str, DigitParser* parser, int* width);
 
 int parse_specifier(const char** ptr_format, FormatSpecifier* token);
 int parse_str_sep(const char** ptr_str, const char* ptr_separation);

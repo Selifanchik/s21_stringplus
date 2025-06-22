@@ -60,18 +60,17 @@ int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
   return flag_parse_error;
 }
 
-int parse_i(const char** ptr_str, DigitParser* parser, int* width,
-            int* prefix) {
-  int flag_error = 0;
+int parse_i(const char** ptr_str, DigitParser* parser, int* width) {
+  int prefix = 0;
   if (**ptr_str == '0' && (*(*ptr_str + 1) == 'x' || *(*ptr_str + 1) == 'X')) {
-    *prefix = is_prefix_base_hex(ptr_str, width);
+    prefix = is_prefix_base_hex(ptr_str, width);
     base_hex(parser);
   } else if (**ptr_str == '0') {
     base_oct(parser);
   } else {
     base_dec(parser);
   }
-  return flag_error;
+  return prefix;
 }
 
 int s21_isspace(int symbol) {
@@ -165,10 +164,9 @@ int parse_float(const char** ptr_str, FormatSpecifier* token,
   int flag_digit = 0;
   if (s21_is_dec_digit(*ptr_str)) {
     unsigned long temp_int_part = 0;
-    if (!base_to_dec(ptr_str, &parser, &(token->width), &temp_int_part)) {
-      float_value->int_part = temp_int_part;
-      flag_digit = 1;
-    }
+    base_to_dec(ptr_str, &parser, &(token->width), &temp_int_part);
+    float_value->int_part = temp_int_part;
+    flag_digit = 1;
   }
   if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) &&
       is_valid_width(&(token->width), 0)) {
@@ -177,11 +175,10 @@ int parse_float(const char** ptr_str, FormatSpecifier* token,
     const char* start_fract = *ptr_str;
     if (s21_is_dec_digit(*ptr_str)) {
       unsigned long temp_fract_part = 0;
-      if (!base_to_dec(ptr_str, &parser, &(token->width), &temp_fract_part)) {
-        float_value->fract_part = temp_fract_part;
-        float_value->order_fract = *ptr_str - start_fract;
-        flag_digit = 1;
-      }
+      base_to_dec(ptr_str, &parser, &(token->width), &temp_fract_part);
+      float_value->fract_part = temp_fract_part;
+      float_value->order_fract = *ptr_str - start_fract;
+      flag_digit = 1;
     }
   }
   if (flag_digit) {
@@ -262,7 +259,7 @@ int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
 void to_nan_inf(long double* value, ParseFloat float_value) {
   if (float_value.s21_nan) {
     *value = NAN;
-  } else if (float_value.s21_inf) {
+  } else {
     *value = INFINITY;
   }
   if (float_value.sign_float == -1) *value = -*value;
