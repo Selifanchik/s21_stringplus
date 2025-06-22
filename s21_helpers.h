@@ -64,7 +64,7 @@ int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
 int parse_i(const char** ptr_str, DigitParser* parser, int* width);
 
 int parse_specifier(const char** ptr_format, FormatSpecifier* token);
-int parse_str_sep(const char** ptr_str, const char* ptr_separation);
+int parse_str_sep(const char** ptr_str, const char* ptr_sep);
 char* parse_format_sep(const char* start_format, const char* ptr_specifier);
 int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
                 va_list* args);

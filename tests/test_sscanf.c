@@ -4,79 +4,8 @@
 
 #include "../s21_string.h"
 
-/*
- * + Тесты для спецификатора с (%c)
- * + корректные значения
- * + некоректные значения
- * + корректные и некорректные значения
- * - Тесты для спецификатора d (%d)
- * + корректные значения
- * + некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора i (%i)
- * + корректные значения
- * + некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора e (%e)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора E (%E)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора f (%f)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора g (%g)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора G (%G)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора o (%o)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора s (%s)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора u (%u)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора x (%x)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора X (%X)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора p (%p)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора n (%n)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- * - Тесты для спецификатора % (%%)
- * - корректные значения
- * - некоректные значения
- * - корректные и некорректные значения
- */
+// * + tests for %c
 
-// * + Тесты для спецификатора c (%c)
-// * + корректные значения
-// * + некоректные значения
-// * + корректные и некорректные значения
-
-// Тест %c
 START_TEST(test_sscanf_char) {
   const char* src = "1He llo, world!   ";
   const char* format = "%c %*c %2c %*2c";
@@ -91,7 +20,6 @@ START_TEST(test_sscanf_char) {
 }
 END_TEST
 
-// Тест %c
 START_TEST(test_sscanf_char_sep) {
   const char* src = "ab;cd MHello, 000world!   ";
   const char* format = "%c%*c ;%2c\t %cHello%*2c000%2c";
@@ -111,7 +39,6 @@ START_TEST(test_sscanf_char_sep) {
 }
 END_TEST
 
-// Тест %c пробелы впереди
 START_TEST(test_sscanf_char_with_spaces) {
   const char* src = "   1 He llo, world!   ";
   const char* format = " %c%c";
@@ -126,7 +53,6 @@ START_TEST(test_sscanf_char_with_spaces) {
 }
 END_TEST
 
-// что за тест?
 START_TEST(test_sscanf_all_ascii_chars) {
   const char* format = "%c";
   for (int i = 0; i < 128; ++i) {
@@ -148,7 +74,6 @@ START_TEST(test_sscanf_all_ascii_chars) {
 }
 END_TEST
 
-// Чтение пустой строки
 START_TEST(test_sscanf_char_end_of_string) {
   const char* src = "";
   const char* format = "%c%c";
@@ -163,7 +88,6 @@ START_TEST(test_sscanf_char_end_of_string) {
 }
 END_TEST
 
-// Чтение символа '\n'
 START_TEST(test_sscanf_char_newline) {
   const char* src = "123\n";
   const char* format = "%*3c%c %c";
@@ -178,7 +102,6 @@ START_TEST(test_sscanf_char_newline) {
 }
 END_TEST
 
-// Чтение символа '\n' c шириной
 START_TEST(test_sscanf_char_buf) {
   const char* src = "123\n";
   const char* format = "%5c";
@@ -191,12 +114,8 @@ START_TEST(test_sscanf_char_buf) {
 }
 END_TEST
 
-// * - Тесты для спецификатора d (%d)
-//   * + корректные значения
-//   * + некоректные значения
-//   * - корректные и некорректные значения
+// * - tests for %d
 
-// Тест %d
 START_TEST(test_sscanf_int) {
   const char* src = " 1 34 1456-23456 +14 +11 -23478";
   const char* format = "%d %*d %3d %hd %ld %*3d %3hd %4ld";
@@ -220,7 +139,6 @@ START_TEST(test_sscanf_int) {
 }
 END_TEST
 
-// Тест %d ведущие нули +-
 START_TEST(test_sscanf_int_zeros) {
   const char* src = "0001450 -0001450 +0001450";
   const char* format = "%d\r\v%d%d";
@@ -237,7 +155,6 @@ START_TEST(test_sscanf_int_zeros) {
 }
 END_TEST
 
-// Тест %d ноль
 START_TEST(test_sscanf_int_zero) {
   const char* src = "0 +0; -0f";
   const char* format = "%d\n%d;\t%d";
@@ -254,7 +171,6 @@ START_TEST(test_sscanf_int_zero) {
 }
 END_TEST
 
-// Тест %d некорректное +-
 START_TEST(test_sscanf_int_incorrect_signs) {
   const char* src = "+-23";
   const char* format = "%d";
@@ -267,7 +183,6 @@ START_TEST(test_sscanf_int_incorrect_signs) {
 }
 END_TEST
 
-// Тест %d некорректное пустая строка
 START_TEST(test_sscanf_int_empty_str) {
   const char* src = "";
   const char* format = "%d";
@@ -280,7 +195,6 @@ START_TEST(test_sscanf_int_empty_str) {
 }
 END_TEST
 
-// Тест %d некорректное символы
 START_TEST(test_sscanf_int_incorrect_chars) {
   const char* src = " Hello, world!   ";
   const char* format = "%d";
@@ -293,7 +207,6 @@ START_TEST(test_sscanf_int_incorrect_chars) {
 }
 END_TEST
 
-// Чтение int max и int min
 START_TEST(test_sscanf_int_limits) {
   const char* src1 = "2147483647";
   const char* format = "%d";
@@ -311,10 +224,7 @@ START_TEST(test_sscanf_int_limits) {
 }
 END_TEST
 
-// * - Тесты для спецификатора i (%i)
-// * + корректные значения
-// * + некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %i
 
 START_TEST(test_sscanf_i_dec) {
   const char* src = " 1 34 1456-23456 +14 +11 -23478";
@@ -385,7 +295,6 @@ START_TEST(test_sscanf_i_hex) {
 }
 END_TEST
 
-// Тест %i hex incorrect
 START_TEST(test_sscanf_i_hex_incorrect) {
   const char* src = "w0x1A3F 0XFF   ";
   const char* format = "%i %i";
@@ -414,7 +323,6 @@ START_TEST(test_sscanf_i_oct_incorrect) {
 }
 END_TEST
 
-// Тест %i oc incorrect
 START_TEST(test_sscanf_i_octal_incorrect) {
   const char* src = " y01647 0377   ";
   const char* format = "y%i %i";
@@ -429,12 +337,8 @@ START_TEST(test_sscanf_i_octal_incorrect) {
 }
 END_TEST
 
-// * - Тесты для спецификатора e E f g G (%e %E %f %g %G)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %e %E %f %g %G
 
-// Тест %e float
 START_TEST(test_sscanf_e) {
   const char* src = ".3e2 3e2 4e-3 1.234 .0 1.2 1.e-10 8.567";
   const char* format = "%e %*e %5e %le %Le %*3e %3le %3Le";
@@ -456,7 +360,6 @@ START_TEST(test_sscanf_e) {
 }
 END_TEST
 
-// Тест %E %f %g %G ?
 START_TEST(test_sscanf_E) {
   const char* src = ".3e2 3e2 4e-3 1.234 .0 1.2 1.e-10 8.567";
   const char* format = "%E %*E %5E %lE %LE %*3E %3lE %3LE";
@@ -541,7 +444,6 @@ START_TEST(test_sscanf_G) {
 }
 END_TEST
 
-// Тест %e float +- delim width incorrect
 START_TEST(test_sscanf_e_float_neg_pos_width_delim) {
   const char* src = "\t+.3e2 -3e2: 0.0e0 \n1.234s 0.ee2";
   const char* format = "%e %e: %e %5e %e";
@@ -561,7 +463,6 @@ START_TEST(test_sscanf_e_float_neg_pos_width_delim) {
 }
 END_TEST
 
-// Тест %e double
 START_TEST(test_sscanf_e_double) {
   const char* src = ".3e8 3e7 4e-5 455.2345653";
   const char* format = "%le %le %le %le";
@@ -580,7 +481,6 @@ START_TEST(test_sscanf_e_double) {
 }
 END_TEST
 
-// Тест %e double
 START_TEST(test_sscanf_e_long_double) {
   const char* src = ".3e10 3e11 4e-9 455.234565651";
   const char* format = "%Le %Le %Le %Le";
@@ -611,7 +511,6 @@ START_TEST(test_sscanf_float_exp_incorrect_width) {
 }
 END_TEST
 
-// Тест %E %f nan
 START_TEST(test_sscanf_float_nan_inf) {
   const char* src = "nan inf; .8[1.";
   const char* format = "%Lf %Lf; %Lf [ %Lf";
@@ -661,9 +560,10 @@ START_TEST(test_sscanf_correct_inf2) {
   long double s21_ldouble1, s21_ldouble2, s21_ldouble3;
   double std_double, s21_double;
   int std_count, s21_count;
-  std_count = sscanf(src, format, &std_ldouble1, &std_ldouble2, &std_double, &std_ldouble3);
-  s21_count =
-      s21_sscanf(src, format, &s21_ldouble1, &s21_ldouble2, &s21_double, &s21_ldouble3);
+  std_count = sscanf(src, format, &std_ldouble1, &std_ldouble2, &std_double,
+                     &std_ldouble3);
+  s21_count = s21_sscanf(src, format, &s21_ldouble1, &s21_ldouble2, &s21_double,
+                         &s21_ldouble3);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert(isinf(std_ldouble1) == isinf(s21_ldouble1));
   ck_assert(isinf(std_ldouble2) == isinf(s21_ldouble2));
@@ -687,12 +587,8 @@ START_TEST(test_sscanf_incorrect_inf) {
 }
 END_TEST
 
-// * - Тесты для спецификатора o (%o)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %o
 
-// Тест %o
 START_TEST(test_sscanf_octal) {
   const char* src = "0567 611 -235 -073 12745 023 -07 677777777777777777777";
   const char* format = "%o %*o %4o %ho %lo %*3o %6ho %5lo";
@@ -747,12 +643,8 @@ START_TEST(test_sscanf_o_incorrect_width) {
 }
 END_TEST
 
-// * - Тесты для спецификатора s (%s)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %s
 
-// Тест %s
 START_TEST(test_sscanf_str_width) {
   const char* src = "   1Hello, world! ";
   const char* format = "%19s";
@@ -816,7 +708,7 @@ END_TEST
 START_TEST(test_sscanf_string_width_1) {
   const char* src = "abc";
   const char* format = "%1s";
-  char std_str[10] = {'\0'}, s21_str[10] = {'\0'};
+  char std_str[2] = {'\0'}, s21_str[2] = {'\0'};
   int std_count, s21_count;
   std_count = sscanf(src, format, std_str);
   s21_count = s21_sscanf(src, format, s21_str);
@@ -833,16 +725,12 @@ START_TEST(test_sscanf_width_longer_than_string) {
   std_count = sscanf(src, format, std_str);
   s21_count = s21_sscanf(src, format, s21_str);
   ck_assert_int_eq(std_count, s21_count);
-  ck_assert_str_eq(std_str, s21_str);  // Ожидаем "short"
+  ck_assert_str_eq(std_str, s21_str);
 }
 END_TEST
 
-// * - Тесты для спецификатора u (%u)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %u
 
-// максимальное беззнаковое
 START_TEST(test_sscanf_uint_max) {
   const char* src = "0567 611 -235 -073 12745 023 -07 6777";
   const char* format = "%u %*u %4u %hu %lu %*3u %6hu %5lu";
@@ -880,14 +768,7 @@ START_TEST(test_sscanf_u_empty_str) {
   ck_assert_uint_eq(std_uint, s21_uint);
 }
 END_TEST
-// * - Тесты для спецификатора x (%x)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
-// * - Тесты для спецификатора X (%X)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %x %X
 
 START_TEST(test_sscanf_x_correct_width) {
   const char* src = ";54   0x123 0X6AFd 0X654";
@@ -933,12 +814,8 @@ START_TEST(test_sscanf_x_prefix_width) {
 }
 END_TEST
 
-// * - Тесты для спецификатора p (%p)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %p
 
-// Тест %p
 START_TEST(test_sscanf_p) {
   const char* src = "0xff6732 -fffff -0x124324   111111111111  ";
   const char* format = "%p %*p %*10p %100p";
@@ -995,10 +872,7 @@ START_TEST(test_sscanf_p_incorrect) {
 }
 END_TEST
 
-// * - Тесты для спецификатора n (%n)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %n
 
 START_TEST(test_sscanf_n) {
   const char* src = " ; 0xff6732";
@@ -1012,7 +886,6 @@ START_TEST(test_sscanf_n) {
 }
 END_TEST
 
-// тест для n
 START_TEST(test_sscanf_n_count) {
   const char* src = "12345";
   const char* format = "%d%n";
@@ -1038,10 +911,7 @@ START_TEST(test_sscanf_n_empty_string) {
 }
 END_TEST
 
-// * - Тесты для спецификатора % (%%)
-// * - корректные значения
-// * - некоректные значения
-// * - корректные и некорректные значения
+// * - tests for %%
 
 START_TEST(test_sscanf_percent) {
   const char* src = " %; 0xff6732";
@@ -1055,7 +925,7 @@ START_TEST(test_sscanf_percent) {
 }
 END_TEST
 
-// * - Микс тесты
+// * - mix tests
 
 START_TEST(test_sscanf_mix_type_length_width) {
   const char* src =
@@ -1066,7 +936,7 @@ START_TEST(test_sscanf_mix_type_length_width) {
       "%o\n %*E %hx |%*g %LG";
   short std_short, s21_short;
   char std_char, s21_char;
-  char std_str[100], s21_str[100];
+  char std_str[4], s21_str[4];
   unsigned long std_ulint, s21_ulint;
   unsigned std_uintx, s21_uintx;
   void *std_ptr, *s21_ptr;
@@ -1102,8 +972,8 @@ START_TEST(test_sscanf_mix_type_length_width) {
 END_TEST
 
 START_TEST(test_sscanf_length_int_and_incorrect_percent) {
-  const char* src = "123  643";
-  const char* format = "  %ld %% %ld ";
+  const char* src = "7777123  643";
+  const char* format = " 7777 %ld %% %ld ";
   long std_lint1, std_lint2 = 1, s21_lint1, s21_lint2 = 1;
   int std_count, s21_count;
   std_count = sscanf(src, format, &std_lint1, &std_lint2);
@@ -1116,10 +986,9 @@ START_TEST(test_sscanf_length_int_and_incorrect_percent) {
 }
 END_TEST
 
-// Тест склееное число
 START_TEST(test_sscanf_united_str) {
-  const char* src = "123456fhjk 1236756";
-  const char* format = "%3d%3d%s %2d%d";
+  const char* src = "123456fhjk 4;5  7 1236756";
+  const char* format = "%3d%3d%s 4;5  7 %2d%d";
   int std_int1, std_int2, std_int3, std_int4;
   int s21_int1, s21_int2, s21_int3, s21_int4;
   char std_str[10], s21_str[10];
@@ -1137,7 +1006,6 @@ START_TEST(test_sscanf_united_str) {
 }
 END_TEST
 
-// тест для %
 START_TEST(test_sscanf_percent_sign) {
   const char* src = "%%X";
   const char* format = "%%%c";
@@ -1150,10 +1018,9 @@ START_TEST(test_sscanf_percent_sign) {
 }
 END_TEST
 
-// Тест для short
 START_TEST(test_sscanf_short_variants) {
-  const char* src = "32767 -32768 377 65535 1a3f -1A3F";
-  const char* format = "%hd %hi %ho %hu %hx %hX";
+  const char* src = "32767, -32768, 377; 65535, 0X0X1a3f:  : -1A3F";
+  const char* format = "%hd, %hi, %ho; %hu, 0X%hx: : %hX";
   short std_short1 = 0, std_short2 = 0;
   short s21_short1 = 0, s21_short2 = 0;
   unsigned short std_ushorto = 0, std_ushort = 0, std_ushortx1 = 0,
@@ -1175,10 +1042,10 @@ START_TEST(test_sscanf_short_variants) {
 }
 END_TEST
 
-// Тест для long
 START_TEST(test_sscanf_long_variants) {
-  const char* src = "2147483647 -2147483648 377 4294967295 1a3f -1A3F";
-  const char* format = "%ld %li %lo %lu %lx %lX";
+  const char* src =
+      "2147483647nan -2147483648inf 377ku 4294967295: 1a3f       ^^ -1A3F";
+  const char* format = "%ld nan %liinf %loku %lu: %lx ^^ %lX";
   long std_lint1 = 0, std_lint2 = 0;
   long s21_lint1 = 0, s21_lint2 = 0;
   unsigned long std_ulinto = 0, std_ulint = 0, std_ulintx1 = 0, std_ulintx2 = 0;
