@@ -5,10 +5,6 @@
 
 #include "s21_string.h"
 
-// для lc, ls
-#include <locale.h>
-#include <wchar.h>
-
 typedef struct {
   int minus;
   int plus;
@@ -29,7 +25,7 @@ int pars_flags_dlina(char chr, flags* flag);
 int pars_width_tochnost(const char* format, int* i);
 int define_specificator(char chr, flags flag, va_list* arg, char* buf);
 
-void specificator_di(flags flag, va_list* arg, char* buf);
+int specificator_di(flags flag, va_list* arg, char* buf);
 char* number_di_to_string(long number, flags flag);
 int long_to_string(char* mas_for_number, int* index, long number);
 char* rabota_tochnost(flags flag, int number, int dlina, char* mas_for_number,
@@ -38,22 +34,21 @@ char* zapolnenie_mas_result(int dlina, long number, flags flag,
                             char* mas_for_number);
 char* rabota_width(flags flag, char* string, int dlina);
 
-void specificator_uxXo(flags flag, va_list* arg, char* buf, char chr);
+int specificator_uxXo(flags flag, va_list* arg, char* buf, char chr);
 char* number_uxXo_to_string(unsigned long number, flags flag, int base,
                             char chr);
 int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr,
                     unsigned long number);
 
-void specificator_c(flags flag, va_list* arg, char* buf);
-void specificator_s(flags flag, va_list* arg, char* buf);
+int specificator_c(flags flag, va_list* arg, char* buf);
+int specificator_s(flags flag, va_list* arg, char* buf);
 char* s_null(char* string, int* flag_null);
-int tochnost_ls(wchar_t* value, flags flag);
 char* s_width(char* string, int dlina, flags flag);
 
 void specificator_n(va_list* arg, char* buf);
-void specificator_p(va_list* arg, char* buf, flags flag);
+int specificator_p(va_list* arg, char* buf, flags flag);
 
-void specificator_feEgG(flags flag, va_list* arg, char* buf, char chr);
+int specificator_feEgG(flags flag, va_list* arg, char* buf, char chr);
 char* specificator_feE(flags flag, long double number, char* mas_for_left,
                        char chr);
 char* specificator_gG(flags flag, long double number, char* mas_for_left,
@@ -74,13 +69,14 @@ void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina, int* fla
 
 int s21_sprintf(char* str, const char* format, ...) {
   flags flag = {0};
-  setlocale(LC_ALL, "C.UTF-8");
   va_list arg;
   va_start(arg, format);
-
+  
+  int error = 0;
+  int result = -1;
   s21_strncpy(str, "\0", 1);
   int dlina = s21_strlen(format);
-  for (int i = 0; i < dlina; i++) {
+  for (int i = 0; i < dlina && error != 1; i++) {
     if (format[i] != '%') {
       char tmp[2] = {format[i], '\0'};
       s21_strncat(str, tmp, s21_strlen(tmp) + 1);
@@ -96,21 +92,24 @@ int s21_sprintf(char* str, const char* format, ...) {
     s21_memset(&flag, 0, sizeof(flags));
 
     if (parsing(format, &i, &flag, &arg)) {
-      exit(0);
+      error = 1;
     }
 
     if (flag.zero && flag.istochnost &&
         s21_strchr("feEgG", format[i]) == S21_NULL) {
-      exit(0);
+      error = 1;
     }
 
     if (define_specificator(format[i], flag, &arg, str)) {
-      exit(0);
+      error = 1;
     }
   }
   va_end(arg);
-
-  return s21_strlen(str);
+  
+  if(!error){
+    result = s21_strlen(str);
+  }
+  return result;
 }
 
 int parsing(const char* format, int* i, flags* flag, va_list* arg) {
@@ -226,14 +225,14 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
       if (flag.L || flag.reshetka) {
         error = 1;
       } else {
-        specificator_di(flag, arg, buf);
+        error = specificator_di(flag, arg, buf);
       }
       break;
     case 'u':
       if (flag.L || flag.reshetka || flag.plus || flag.space) {
         error = 1;
       } else {
-        specificator_uxXo(flag, arg, buf, chr);
+        error = specificator_uxXo(flag, arg, buf, chr);
       }
       break;
     case 'x':
@@ -242,7 +241,7 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
       if (flag.L || flag.plus || flag.space) {
         error = 1;
       } else {
-        specificator_uxXo(flag, arg, buf, chr);
+        error = specificator_uxXo(flag, arg, buf, chr);
       }
       break;
     case 's':
@@ -250,7 +249,7 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
           flag.space) {
         error = 1;
       } else {
-        specificator_s(flag, arg, buf);
+        error = specificator_s(flag, arg, buf);
       }
       break;
     case 'c':
@@ -258,7 +257,7 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
           flag.space || flag.istochnost) {
         error = 1;
       } else {
-        specificator_c(flag, arg, buf);
+        error = specificator_c(flag, arg, buf);
       }
       break;
     case 'f':
@@ -269,7 +268,7 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
       if (flag.l || flag.h) {
         error = 1;
       } else {
-        specificator_feEgG(flag, arg, buf, chr);
+        error = specificator_feEgG(flag, arg, buf, chr);
       }
       break;
     case 'n':
@@ -286,7 +285,7 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
           flag.reshetka || flag.space || flag.zero) {
         error = 1;
       } else {
-        specificator_p(arg, buf, flag);
+        error = specificator_p(arg, buf, flag);
       }
       break;
   }
@@ -319,7 +318,8 @@ void NanAndInf(char chr, long double number, char* buf, flags flag, int flag_inf
   }
 }
 
-void specificator_feEgG(flags flag, va_list* arg, char* buf, char chr) {
+int specificator_feEgG(flags flag, va_list* arg, char* buf, char chr) {
+  int error = 0;
   char mas_for_left[6100];
   long double number;
   if (flag.L) {
@@ -350,14 +350,25 @@ void specificator_feEgG(flags flag, va_list* arg, char* buf, char chr) {
     } else {
       string = specificator_gG(flag, number, mas_for_left, chr);
     }
+    if(string != S21_NULL){
+      int dlina = s21_strlen(string);
+      if (dlina < flag.width) {
+        string = rabota_width(flag, string, dlina);
+      }
 
-    int dlina = s21_strlen(string);
-    if (dlina < flag.width) {
-      string = rabota_width(flag, string, dlina);
+      if(string != S21_NULL){
+        s21_strncat(buf, string, s21_strlen(string) + 1);
+        free(string);
+      }
+      else{
+        error = 1;
+      }
     }
-    s21_strncat(buf, string, s21_strlen(string) + 1);
-    free(string);
+    else{
+      error = 1;
+    }
   }
+  return error;
 }
 
 char* specificator_gG(flags flag, long double number, char* mas_for_left, char chr) {
@@ -367,7 +378,7 @@ char* specificator_gG(flags flag, long double number, char* mas_for_left, char c
   }
   int mantis = 0;
   mantis = expanent(&number, mantis);
-  char* string;
+  char* string = S21_NULL;
   if (flag.tochnost == 0) {
     flag.tochnost++;
   }
@@ -405,6 +416,7 @@ int remove_0(char* string) {
 }
 
 char* specificator_feE(flags flag, long double number, char* mas_for_left, char chr) {
+  char* string = S21_NULL;
   int znak = 1;
   if (signbit(number)) {
     number = -number;
@@ -418,12 +430,16 @@ char* specificator_feE(flags flag, long double number, char* mas_for_left, char 
 
   int dlina = float_to_string(number, mas_for_left, &flag, chr, &mantis);
 
-  if (!flag.reshetka && flag.isg) {
-    dlina = remove_0(mas_for_left);
-  }
-  char* string = zapolnenie_mas_result(dlina, znak, flag, mas_for_left);
-  if (chr == 'e' || chr == 'E') {
-    string = rabota_mantisa(string, chr, mantis);
+  if(dlina != -1){
+    if (!flag.reshetka && flag.isg) {
+      dlina = remove_0(mas_for_left);
+    }
+    string = zapolnenie_mas_result(dlina, znak, flag, mas_for_left);
+    if(string != S21_NULL){
+      if (chr == 'e' || chr == 'E') {
+        string = rabota_mantisa(string, chr, mantis);
+      }
+    }
   }
   return string;
 }
@@ -439,23 +455,22 @@ int expanent(long double* number, int mantis) {
 char* rabota_mantisa(char* string, char chr, int mantis) {
   int dlina = s21_strlen(string);
   string = realloc(string, dlina + 7);
-  if (string == S21_NULL) {
-    exit(0);
-  }
-  string[dlina++] = chr == 'e' ? 'e' : 'E';
-  string[dlina++] = mantis < 0 ? '-' : '+';
-  if (mantis < 0) mantis = mantis * -1;
-  if (mantis < 10) {
-    string[dlina++] = '0';
-    string[dlina++] = '0' + mantis;
-    string[dlina] = '\0';
-  } else {
-    string[dlina] = '\0';
-    char mas_for_mantis[5];
-    int index_mantis = 0;
-    int dlina_mantis = long_to_string(mas_for_mantis, &index_mantis, mantis);
-    s21_strncat(string, mas_for_mantis, s21_strlen(mas_for_mantis));
-    string[dlina + dlina_mantis] = '\0';
+  if(string != S21_NULL){
+    string[dlina++] = chr == 'e' ? 'e' : 'E';
+    string[dlina++] = mantis < 0 ? '-' : '+';
+    if (mantis < 0) mantis = mantis * -1;
+    if (mantis < 10) {
+      string[dlina++] = '0';
+      string[dlina++] = '0' + mantis;
+      string[dlina] = '\0';
+    } else {
+      string[dlina] = '\0';
+      char mas_for_mantis[5];
+      int index_mantis = 0;
+      int dlina_mantis = long_to_string(mas_for_mantis, &index_mantis, mantis);
+      s21_strncat(string, mas_for_mantis, s21_strlen(mas_for_mantis));
+      string[dlina + dlina_mantis] = '\0';
+    }
   }
   return string;
 }
@@ -478,7 +493,7 @@ void left_part_to_str(long double number, char* str, flags* flag) {
   } else {
     char buf[5000] = {0};
     int i = 0;
-    while (number >= 1.0L && i < 5000) {
+    while (number >= 1.0L) {
       long digit = (long)fmodl(number, 10.0L);
       buf[i++] = '0' + digit;
       number = floorl(number / 10.0L);
@@ -573,6 +588,7 @@ void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina, int* fla
 
 int float_to_string(long double number, char* mas_for_left, flags* flag, char chr, int* mantis) {
   long double intpart;
+  int result;
   int tmp_tochnost = flag->tochnost;
   int flag_round = 0;
   int flag_bank = 0;
@@ -589,38 +605,45 @@ int float_to_string(long double number, char* mas_for_left, flags* flag, char ch
   char* tmp_mas_for_round =
       malloc(s21_strlen(int_str) + s21_strlen(frac_str) + 4);
 
-  s21_strncpy(tmp_mas_for_round, "0\0", 2);
-  s21_strncat(tmp_mas_for_round, int_str, s21_strlen(int_str) + 1);
-  s21_strncat(tmp_mas_for_round, ".\0", 2);
-  s21_strncat(tmp_mas_for_round, frac_str, s21_strlen(frac_str) + 1);
-  tmp_mas_for_round[s21_strlen(int_str) + s21_strlen(frac_str) + 3] = '\0';
-  int dlina = s21_strlen(tmp_mas_for_round);
+  if(tmp_mas_for_round != S21_NULL){
+    s21_strncpy(tmp_mas_for_round, "0\0", 2);
+    s21_strncat(tmp_mas_for_round, int_str, s21_strlen(int_str) + 1);
+    s21_strncat(tmp_mas_for_round, ".\0", 2);
+    s21_strncat(tmp_mas_for_round, frac_str, s21_strlen(frac_str) + 1);
+    tmp_mas_for_round[s21_strlen(int_str) + s21_strlen(frac_str) + 3] = '\0';
+    int dlina = s21_strlen(tmp_mas_for_round);
 
-  round_my(tmp_mas_for_round, dlina, flag_bank);
+    round_my(tmp_mas_for_round, dlina, flag_bank);
 
-  tmp_mas_for_round[dlina - 1] = '\0';
+    tmp_mas_for_round[dlina - 1] = '\0';
 
-  cpy_to_str(tmp_mas_for_round, mas_for_left, dlina, &flag_round);
+    cpy_to_str(tmp_mas_for_round, mas_for_left, dlina, &flag_round);
 
-  dlina = s21_strlen(mas_for_left);
+    dlina = s21_strlen(mas_for_left);
 
-  if (s21_strchr("eE", chr) && mas_for_left[2] == '.') {
-    *mantis += 1;
-    mas_for_left[2] = mas_for_left[1];
-    mas_for_left[1] = '.';
-    mas_for_left[dlina - 1] = '\0';
+    if (s21_strchr("eE", chr) && mas_for_left[2] == '.') {
+      *mantis += 1;
+      mas_for_left[2] = mas_for_left[1];
+      mas_for_left[1] = '.';
+      mas_for_left[dlina - 1] = '\0';
+    }
+
+    if (flag->isg && flag_round) {
+      g_and_round(tmp_tochnost, mas_for_left);
+    }
+
+    if (!tmp_tochnost) {
+      net_toch_v_float(mas_for_left, *flag);
+    }
+
+    result = s21_strlen(mas_for_left);
   }
-
-  if (flag->isg && flag_round) {
-    g_and_round(tmp_tochnost, mas_for_left);
-  }
-
-  if (!tmp_tochnost) {
-    net_toch_v_float(mas_for_left, *flag);
+  else{
+    result = -1;
   }
 
   free(tmp_mas_for_round);
-  return s21_strlen(mas_for_left);
+  return result;
 }
 
 void specificator_n(va_list* arg, char* buf) {
@@ -629,165 +652,158 @@ void specificator_n(va_list* arg, char* buf) {
   *ptr = dlina;
 }
 
-void specificator_p(va_list* arg, char* buf, flags flag) {
+int specificator_p(va_list* arg, char* buf, flags flag) {
   void* ptr = va_arg(*arg, void*);
+  int error = 0;
   unsigned long number = (unsigned long)ptr;
   flag.reshetka = 1;
   char* string = number_uxXo_to_string(number, flag, 16, 'x');
-  int dlina = s21_strlen(string);
-  if (dlina < flag.width) {
-    string = rabota_width(flag, string, dlina);
+  if(string != S21_NULL){
+    int dlina = s21_strlen(string);
+    if (dlina < flag.width) {
+      string = rabota_width(flag, string, dlina);
+    }
+    
+    if(string != S21_NULL){
+      s21_strncat(buf, string, s21_strlen(string) + 1);
+      free(string);
+    }
+    else{
+      error = 1;
+    }
   }
-  s21_strncat(buf, string, s21_strlen(string) + 1);
-  free(string);
+  else{
+    error = 1;
+  }
+  return error;
 }
 
-void specificator_c(flags flag, va_list* arg, char* buf) {
-  char* string = calloc(1, MB_CUR_MAX + 2);
-  if (string == S21_NULL) {
-    exit(0);
-  }
-  if (flag.l) {
-    wchar_t value = va_arg(*arg, wchar_t);
-    int len = wcrtomb(string, value, S21_NULL);
-    string[len] = '\0';
-  } else {
-    int value_int = va_arg(*arg, int);
-    string[0] = value_int;
-    string[1] = '\0';
-  }
+int specificator_c(flags flag, va_list* arg, char* buf) {
+  int error = 0;
+  char* string = calloc(2, sizeof(char));
+  if (string != S21_NULL) {
+
+  int value_int = va_arg(*arg, int);
+  string[0] = value_int;
+  string[1] = '\0';
 
   if (flag.width >= 2) {
     int dlina = s21_strlen(string);
     int raznica = flag.width - dlina;
     string = realloc(string, dlina + raznica + 2);
-    s21_memset(string + dlina, 0, raznica + 2);
-    if (string == S21_NULL) {
-      exit(0);
-    }
-    if (flag.minus) {
-      s21_memset(string + dlina, ' ', raznica);
-    } else {
-      char* tmp_mas = malloc(dlina + 1);
-      if (tmp_mas == S21_NULL) {
-        exit(0);
+    if (string != S21_NULL) {
+      s21_memset(string + dlina, 0, raznica + 2);
+      if (flag.minus) {
+        s21_memset(string + dlina, ' ', raznica);
+      } else {
+        char* tmp_mas = malloc(dlina + 1);
+        if (tmp_mas != S21_NULL) {
+          s21_strncpy(tmp_mas, string, dlina);
+          tmp_mas[dlina] = '\0';
+          s21_memset(string, ' ', raznica);
+          string[raznica] = '\0';
+          s21_strncat(string, tmp_mas, s21_strlen(tmp_mas));
+          string[dlina + raznica] = '\0';
+          free(tmp_mas);
+        }
+        else{
+          error = 1;
+        }
       }
-      s21_strncpy(tmp_mas, string, dlina);
-      tmp_mas[dlina] = '\0';
-      s21_memset(string, ' ', raznica);
-      string[raznica] = '\0';
-      s21_strncat(string, tmp_mas, s21_strlen(tmp_mas));
-      string[dlina + raznica] = '\0';
-      free(tmp_mas);
+
+      string[dlina + raznica + 1] = '\0';
     }
-    string[dlina + raznica + 1] = '\0';
+    else{
+      error = 1;
+    }
   }
   s21_strncat(buf, string, s21_strlen(string) + 1);
   free(string);
+  }
+  else{
+    error = 1;
+  }
+  return error;
 }
 
 char* s_null(char* string, int* flag_null){
   string = malloc(8);
-  s21_strncpy(string, "(null)", 6);
-  string[6] = '\0';
-  *flag_null = 1;
+  if(string != S21_NULL){
+    s21_strncpy(string, "(null)", 6);
+    string[6] = '\0';
+    *flag_null = 1;
+  }
   return string;
 }
 
 char* s_width(char* string, int dlina, flags flag){
   int raznica = flag.width - dlina;
   string = realloc(string, dlina + raznica + 2);
-  if (string == S21_NULL) {
-    exit(0);
-  }
-  if (flag.minus) {
-    s21_memset(string + dlina, ' ', raznica);  //
-  } else {
-    char* tmp_mas = malloc(dlina + 1);
-    if (tmp_mas == S21_NULL) {
-      exit(0);
+  if (string != S21_NULL) {
+    if (flag.minus) {
+      s21_memset(string + dlina, ' ', raznica);  //
+    } else {
+      char* tmp_mas = malloc(dlina + 1);
+      if (tmp_mas != S21_NULL) {
+        s21_strncpy(tmp_mas, string, dlina);
+        tmp_mas[dlina] = '\0';
+        s21_memset(string, ' ', raznica);
+        string[raznica] = '\0';
+        s21_strncat(string, tmp_mas, s21_strlen(tmp_mas));
+        free(tmp_mas);
+      }
     }
-    s21_strncpy(tmp_mas, string, dlina);
-    tmp_mas[dlina] = '\0';
-    s21_memset(string, ' ', raznica);
-    string[raznica] = '\0';
-    s21_strncat(string, tmp_mas, s21_strlen(tmp_mas));
-    free(tmp_mas);
+    string[dlina + raznica] = '\0';
   }
-  string[dlina + raznica] = '\0';
   return string;
 }
 
-void specificator_s(flags flag, va_list* arg, char* buf) {
+int specificator_s(flags flag, va_list* arg, char* buf) {
   char* string = S21_NULL;
   int flag_null = 0;
-  if (flag.l) {
-    wchar_t* value = va_arg(*arg, wchar_t*);
-    if (value == NULL) {
-      string = s_null(string, &flag_null);
-    } else {
-      int len = wcstombs(S21_NULL, value, 0);
-      if (flag.istochnost && flag.tochnost < len) {
-        len = tochnost_ls(value, flag);
-      }
-      string = malloc(len + 1);
-      if (string == S21_NULL) {
-        exit(0);
-      }
-      wcstombs(string, value, len);
-      string[len] = '\0';
-    }
+  int error = 0;
+  
+  const char* tmp = va_arg(*arg, const char*);
+  if (tmp == NULL) {
+    string = s_null(string, &flag_null);
   } else {
-    const char* tmp = va_arg(*arg, const char*);
-    if (tmp == NULL) {
-      string = s_null(string, &flag_null);
-    } else {
-      string = malloc(s21_strlen(tmp) + 1);
-      if (string == S21_NULL) {
-        exit(0);
-      }
+    string = malloc(s21_strlen(tmp) + 1);
+    if(string != S21_NULL){
       s21_strncpy(string, tmp, s21_strlen(tmp));
       string[s21_strlen(tmp)] = '\0';
     }
   }
+  
+  if(string != S21_NULL){
+    int dlina = s21_strlen(string);
+    if (flag_null && flag.tochnost < dlina) {
+      s21_strncpy(string, "\0", 1);
+    } else if (flag.istochnost && !flag.l) {
+      if (flag.tochnost < dlina) {
+        string[flag.tochnost] = '\0';
+      }
+    }
 
-  int dlina = s21_strlen(string);
-  if (flag_null && flag.tochnost < dlina) {
-    s21_strncpy(string, "\0", 1);
-  } else if (flag.istochnost && !flag.l) {
-    if (flag.tochnost < dlina) {
-      string[flag.tochnost] = '\0';
+    dlina = s21_strlen(string);
+    if (flag.width && dlina < flag.width) {
+      string = s_width(string, dlina, flag);
+    }
+    if(string != S21_NULL){
+      s21_strncat(buf, string, s21_strlen(string) + 1);
+      free(string);
+    }
+    else{
+      error = 1;
     }
   }
-
-  dlina = s21_strlen(string);
-  if (flag.width && dlina < flag.width) {
-    string = s_width(string, dlina, flag);
+  else{
+    error = 1;
   }
-  s21_strncat(buf, string, s21_strlen(string) + 1);
-  free(string);
+  return error;
 }
 
-int tochnost_ls(wchar_t* value, flags flag) {
-  char* string = malloc(MB_CUR_MAX + 1);
-  if (string == S21_NULL) {
-    exit(0);
-  }
-  int dlina = 0;
-  int i = 0;
-  while (1) {
-    int len = wcrtomb(string, value[i], S21_NULL);
-    if (dlina + len > flag.tochnost) {
-      break;
-    }
-    dlina += len;
-    i++;
-  }
-  free(string);
-  return dlina;
-}
-
-void specificator_uxXo(flags flag, va_list* arg, char* buf, char chr) {
+int specificator_uxXo(flags flag, va_list* arg, char* buf, char chr) {
+  int error = 0;
   unsigned long value;
   if (flag.h) {
     value = (unsigned short)va_arg(*arg, unsigned int);
@@ -804,62 +820,75 @@ void specificator_uxXo(flags flag, va_list* arg, char* buf, char chr) {
   } else {  // u
     string = number_uxXo_to_string(value, flag, 10, chr);
   }
+  if(string != S21_NULL){
+    int dlina = s21_strlen(string);
+    if (dlina < flag.width) {
+      string = rabota_width(flag, string, dlina);
+    }
 
-  int dlina = s21_strlen(string);
-  if (dlina < flag.width) {
-    string = rabota_width(flag, string, dlina);
+    if(string != S21_NULL){
+      s21_strncat(buf, string, s21_strlen(string) + 1);
+      free(string);
+    }
+    else{
+      error = 1;
+    }
   }
-  s21_strncat(buf, string, s21_strlen(string) + 1);
-  free(string);
+  else{
+    error = 1;
+  }
+  return error;
 }
 
 char* number_uxXo_to_string(unsigned long number, flags flag, int base, char chr) {
   char* mas_for_number = malloc(64);
-  if (mas_for_number == S21_NULL) {
-    exit(0);
-  }
-  int index = 0;
-  unsigned long number_copy = number;
-  do {
-    int number_tmp = number % base;
-    if (base == 16) {
-      mas_for_number[index] =
-          (char)((number_tmp < 10) ? number_tmp + '0'
-                                   : ((chr == 'x') ? number_tmp - 10 + 'a'
-                                                   : number_tmp - 10 + 'A'));
-    } else {
-      mas_for_number[index] = (char)(number_tmp + '0');
+  char* result = S21_NULL;
+  if (mas_for_number != S21_NULL) {
+    int index = 0;
+    unsigned long number_copy = number;
+    do {
+      int number_tmp = number % base;
+      if (base == 16) {
+        mas_for_number[index] =
+            (char)((number_tmp < 10) ? number_tmp + '0'
+                                    : ((chr == 'x') ? number_tmp - 10 + 'a'
+                                                    : number_tmp - 10 + 'A'));
+      } else {
+        mas_for_number[index] = (char)(number_tmp + '0');
+      }
+      number /= base;
+      index++;
+    } while (number != 0);
+
+    mas_for_number[index] = '\0';
+
+    reverse_str(mas_for_number);
+
+    int dlina = s21_strlen(mas_for_number);
+
+    if (flag.istochnost) {
+      mas_for_number =
+          rabota_tochnost(flag, number_copy == 0, dlina, mas_for_number, index);
     }
-    number /= base;
-    index++;
-  } while (number != 0);
 
-  mas_for_number[index] = '\0';
+    if(mas_for_number != S21_NULL){
+      dlina = s21_strlen(mas_for_number);
 
-  reverse_str(mas_for_number);
+      if (flag.reshetka) {
+        dlina = rabota_reshetka(dlina, base, mas_for_number, chr, number_copy);
+      }
 
-  int dlina = s21_strlen(mas_for_number);
+      result = malloc(dlina + 2);
+      if (result != S21_NULL) {
+        for (int i = 0; i < dlina; i++) {
+          result[i] = mas_for_number[i];
+        }
+        result[dlina] = '\0';
 
-  if (flag.istochnost) {
-    mas_for_number =
-        rabota_tochnost(flag, number_copy == 0, dlina, mas_for_number, index);
-    dlina = s21_strlen(mas_for_number);
+        free(mas_for_number);
+      }
+    }
   }
-
-  if (flag.reshetka) {
-    dlina = rabota_reshetka(dlina, base, mas_for_number, chr, number_copy);
-  }
-
-  char* result = malloc(dlina + 2);
-  if (result == S21_NULL) {
-    exit(0);
-  }
-  for (int i = 0; i < dlina; i++) {
-    result[i] = mas_for_number[i];
-  }
-  result[dlina] = '\0';
-
-  free(mas_for_number);
   return result;
 }
 
@@ -894,7 +923,8 @@ int rabota_reshetka(int dlina, int base, char* mas_for_number, char chr, unsigne
   return dlina;
 }
 
-void specificator_di(flags flag, va_list* arg, char* buf) {
+int specificator_di(flags flag, va_list* arg, char* buf) {
+  int error = 0;
   long value;
   if (flag.h) {
     value = (short)va_arg(*arg, int);
@@ -904,16 +934,29 @@ void specificator_di(flags flag, va_list* arg, char* buf) {
     value = va_arg(*arg, int);
   }
   char* string = number_di_to_string(value, flag);
-  int dlina = s21_strlen(string);
-  if (dlina < flag.width) {
-    string = rabota_width(flag, string, dlina);
+  if(string != S21_NULL){
+    int dlina = s21_strlen(string);
+    if (dlina < flag.width) {
+      string = rabota_width(flag, string, dlina);
+    }
+
+    if(string != S21_NULL){
+      s21_strncat(buf, string, s21_strlen(string) + 1);
+      free(string);
+    }
+    else{
+      error = 1;
+    }
   }
-  s21_strncat(buf, string, s21_strlen(string) + 1);
-  free(string);
+  else{
+    error = 1;
+  }
+  return error;
 }
 
 char* number_di_to_string(long number, flags flag) {
   long tmp_number = number;
+  char* result = S21_NULL;
   int flag_min = 0;
   if (number == (-9223372036854775807 - 1)) {
     flag_min = 1;
@@ -922,25 +965,26 @@ char* number_di_to_string(long number, flags flag) {
     tmp_number = (number < 0) ? -number : number;
   }
   char* mas_for_number = malloc(20);
-  if (mas_for_number == S21_NULL) {
-    exit(0);
+  if (mas_for_number != S21_NULL) {
+
+    int index = 0;
+
+    int dlina = long_to_string(mas_for_number, &index, tmp_number);
+
+    if (flag_min) {
+      mas_for_number[dlina - 1] = '8';
+    }
+
+    if (flag.istochnost) {
+      mas_for_number =
+          rabota_tochnost(flag, number == 0, dlina, mas_for_number, index);
+    }
+
+    if(mas_for_number != S21_NULL){
+      dlina = s21_strlen(mas_for_number);
+      result = zapolnenie_mas_result(dlina, number, flag, mas_for_number);
+    }
   }
-  int index = 0;
-
-  int dlina = long_to_string(mas_for_number, &index, tmp_number);
-
-  if (flag_min) {
-    mas_for_number[dlina - 1] = '8';
-  }
-
-  if (flag.istochnost) {
-    mas_for_number =
-        rabota_tochnost(flag, number == 0, dlina, mas_for_number, index);
-    dlina = s21_strlen(mas_for_number);
-  }
-
-  char* result = zapolnenie_mas_result(dlina, number, flag, mas_for_number);
-
   free(mas_for_number);
   return result;
 }
@@ -966,95 +1010,69 @@ char* rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number, int
     int count = dlina - 1;
     int raznica = flag.tochnost - dlina;
     mas_for_number = realloc(mas_for_number, dlina + raznica + 2);
-    if (mas_for_number == S21_NULL) {
-      exit(0);
-    }
-    while (count >= 0) {
-      mas_for_number[count + raznica] = mas_for_number[count];
-      count--;
-    }
-    for (int i = 0; i < raznica; i++) {
-      mas_for_number[i] = '0';
-    }
+    if (mas_for_number != S21_NULL) {
+      while (count >= 0) {
+        mas_for_number[count + raznica] = mas_for_number[count];
+        count--;
+      }
+      for (int i = 0; i < raznica; i++) {
+        mas_for_number[i] = '0';
+      }
 
-    mas_for_number[index + raznica] = '\0';
+      mas_for_number[index + raznica] = '\0';
+    }
   }
   return mas_for_number;
 }
 
 char* zapolnenie_mas_result(int dlina, long number, flags flag, char* mas_for_number) {
   char* result = malloc(dlina + 3);
-  if (result == S21_NULL) {
-    exit(0);
-  }
-  int flag_0 = 0;
-  if (number < 0) {
-    result[0] = '-';
-    flag_0++;
-  } else if (flag.plus) {
-    result[0] = '+';
-    flag_0++;
-  } else if (flag.space) {
-    result[0] = ' ';
-    flag_0++;
-  }
+  if (result != S21_NULL) {
+    int flag_0 = 0;
+    if (number < 0) {
+      result[0] = '-';
+      flag_0++;
+    } else if (flag.plus) {
+      result[0] = '+';
+      flag_0++;
+    } else if (flag.space) {
+      result[0] = ' ';
+      flag_0++;
+    }
 
-  for (int i = 0; i < dlina; i++) {
-    result[i + flag_0] = mas_for_number[i];
+    for (int i = 0; i < dlina; i++) {
+      result[i + flag_0] = mas_for_number[i];
+    }
+    result[dlina + flag_0] = '\0';
   }
-  result[dlina + flag_0] = '\0';
   return result;
 }
 
 char* rabota_width(flags flag, char* string, int dlina) {
   int raznica = flag.width - dlina;
   string = realloc(string, dlina + raznica + 3);
-  if (string == S21_NULL) {
-    exit(0);
-  }
-  if (flag.minus) {
-    s21_memset(string + dlina, ' ', raznica);
-    string[dlina + raznica] = '\0';
-  } else {
-    int znak = 0;
-    if (s21_strchr("+- ", string[0]) && flag.zero) {
-      znak++;
-    }
-    if (flag.reshetka && s21_strlen(string) > 1 &&
-        s21_strchr("xX", string[1]) && flag.zero) {
-      znak += 2;
-    }
+  if (string != S21_NULL) {
+    if (flag.minus) {
+      s21_memset(string + dlina, ' ', raznica);
+      string[dlina + raznica] = '\0';
+    } else {
+      int znak = 0;
+      if (s21_strchr("+- ", string[0]) && flag.zero) {
+        znak++;
+      }
+      if (flag.reshetka && s21_strlen(string) > 1 &&
+          s21_strchr("xX", string[1]) && flag.zero) {
+        znak += 2;
+      }
 
-    int count = dlina - 1;
-    while (count >= znak) {
-      string[count + raznica] = string[count];
-      count--;
+      int count = dlina - 1;
+      while (count >= znak) {
+        string[count + raznica] = string[count];
+        count--;
+      }
+      s21_memset(string + znak, flag.zero ? '0' : ' ', raznica);
+      string[dlina + raznica] = '\0';
     }
-    s21_memset(string + znak, flag.zero ? '0' : ' ', raznica);
-    string[dlina + raznica] = '\0';
   }
   return string;
 }
-
-// int main(){
-//     setlocale(LC_ALL, "C.UTF-8"); //для lc, ls
-//     char buf1[200000], buf2[200000];
-//     //не работает
-//     //"%.300e %+30.20e", 1e-308, 1.7976931348623157e+308
-
-//     //19 до точки
-//     //18 после точки
-
-//     int a = sprintf(buf1, "%e", 4.9e-315);
-//     int b = s21_sprintf(buf2, "%e", 4.9e-315);
-
-//     printf("%s\n", buf1);
-//     printf("%s\n", buf2);
-
-//     printf("%d\n", s21_strncmp(buf1, buf2, s21_strlen(buf1)));
-
-//     printf("%d\n", a);
-//     printf("%d\n", b);
-
-//     return 0;
-// }
