@@ -3,7 +3,6 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
-#include <wchar.h>
 
 typedef unsigned long s21_size_t;
 #define S21_NULL ((void *)0)
