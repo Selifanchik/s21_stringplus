@@ -16,12 +16,13 @@ char *s21_strtok(char *str, const char *delim) {
            s21_strchr(delim, *token_for_next) != S21_NULL) {
       token_for_next++;
     }
-  }
+  
   // теперь это начало нашего токена
-  if (token_for_next != S21_NULL && *token_for_next != '\0') {
+  if (*token_for_next != '\0') {
     token_start = token_for_next;
   }
-  // можно заменить разделитель(delim) на \0 и переставлять указатель на начало
+}
+  // заменить разделитель(delim) на \0 и переставлять указатель на начало
   // следующего токена или NULL если строка закончена
   if (token_start != S21_NULL) {
     token_for_next = s21_strpbrk(token_for_next, delim);

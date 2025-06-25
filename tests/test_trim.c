@@ -1,6 +1,5 @@
 #include <check.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "../s21_string.h"
 
@@ -67,7 +66,7 @@ END_TEST
 // trim_chars = null
 START_TEST(test_trim_null_trim_chars) {
   const char *src = "test";
-  char *res = (char *)s21_trim(src, NULL);
+  char *res = (char *)s21_trim(src, S21_NULL);
   ck_assert_ptr_null(res);
 }
 END_TEST
@@ -75,7 +74,7 @@ END_TEST
 // src = null
 START_TEST(test_trim_null_src) {
   const char *trim_chars = " ";
-  char *res = (char *)s21_trim(NULL, trim_chars);
+  char *res = (char *)s21_trim(S21_NULL, trim_chars);
   ck_assert_ptr_null(res);
 }
 END_TEST

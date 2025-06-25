@@ -44,6 +44,7 @@ START_TEST(test_strlen_long) {
 }
 END_TEST
 
+
 Suite *strlen_suite(void) {
   Suite *s = suite_create("s21_strlen");
   TCase *tc_core = tcase_create("Core");

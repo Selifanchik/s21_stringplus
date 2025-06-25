@@ -1,7 +1,5 @@
 #include <check.h>
-#include <stdio.h>
 #include <string.h>
-// #include <stdint.h>
 
 #include "../s21_string.h"
 
