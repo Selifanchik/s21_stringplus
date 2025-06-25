@@ -52,10 +52,14 @@ int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
   int flag_parse_error = 1;
   while (parser->is_digit(*ptr_str) && is_valid_width(width, 0)) {
     int digit = parser->to_digit(*ptr_str);
+    if (*value > (ULONG_MAX - (unsigned long)digit) / 10UL) {
+      *value = ULONG_MAX;
+    } else {
     *value = *value * parser->base + digit;
-    if (*width > 0) (*width)--;
-    (*ptr_str)++;
-    flag_parse_error = 0;
+    }
+      if (*width > 0) (*width)--;
+      (*ptr_str)++;
+      flag_parse_error = 0;
   }
   return flag_parse_error;
 }

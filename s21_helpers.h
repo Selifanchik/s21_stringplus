@@ -4,6 +4,8 @@
 #include "math.h"
 #include "s21_string.h"
 
+#define ULONG_MAX (unsigned long)-1
+
 typedef struct {
   int suppress;
   int width;
