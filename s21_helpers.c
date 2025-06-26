@@ -55,11 +55,11 @@ int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
     if (*value > (ULONG_MAX - (unsigned long)digit) / 10UL) {
       *value = ULONG_MAX;
     } else {
-    *value = *value * parser->base + digit;
+      *value = *value * parser->base + digit;
     }
-      if (*width > 0) (*width)--;
-      (*ptr_str)++;
-      flag_parse_error = 0;
+    if (*width > 0) (*width)--;
+    (*ptr_str)++;
+    flag_parse_error = 0;
   }
   return flag_parse_error;
 }

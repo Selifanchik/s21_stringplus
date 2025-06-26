@@ -225,7 +225,9 @@ START_TEST(test_sscanf_int_limits) {
 END_TEST
 
 START_TEST(test_sscanf_d_overflow) {
-  const char* src1 = "2147483647634784968787820972582959028525 -65726756275625727562757826528623523756347638196598538";
+  const char* src1 =
+      "2147483647634784968787820972582959028525 "
+      "-65726756275625727562757826528623523756347638196598538";
   const char* format = "%d %d";
   int std_int1, s21_int1, std_int2, s21_int2;
   int std_count, s21_count;
@@ -236,8 +238,6 @@ START_TEST(test_sscanf_d_overflow) {
   ck_assert_int_eq(std_int2, s21_int2);
 }
 END_TEST
-
-
 
 // * - tests for %i
 
@@ -353,13 +353,17 @@ START_TEST(test_sscanf_i_octal_incorrect) {
 END_TEST
 
 START_TEST(test_sscanf_i_overflow) {
-  const char* src1 = "214748364763478496878782 -657267562756257275627578 0465435425145314536417315 -0465435425145314536417315 0x78456af7f529ca4562f7b6bd -0x78456af7f529ca4562f7b6bd";
+  const char* src1 =
+      "214748364763478496878782 -657267562756257275627578 "
+      "0465435425145314536417315 -0465435425145314536417315 "
+      "0x78456af7f529ca4562f7b6bd -0x78456af7f529ca4562f7b6bd";
   const char* format = "%i %i %i %i";
   int std_int1, std_int2, std_int3, std_int4;
   int s21_int1, s21_int2, s21_int3, s21_int4;
   int std_count, s21_count;
   std_count = sscanf(src1, format, &std_int1, &std_int2, &std_int3, &std_int4);
-  s21_count = s21_sscanf(src1, format, &s21_int1, &s21_int2, &s21_int3, &s21_int4);
+  s21_count =
+      s21_sscanf(src1, format, &s21_int1, &s21_int2, &s21_int3, &s21_int4);
   ck_assert_int_eq(std_count, s21_count);
   ck_assert_int_eq(std_int1, s21_int1);
   ck_assert_int_eq(std_int2, s21_int2);

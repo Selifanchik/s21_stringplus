@@ -206,8 +206,7 @@ int handler_unsigned_int(const char** ptr_str, FormatSpecifier* token,
     flag_prefix = is_prefix_base_hex(ptr_str, &(token->width));
   unsigned long value = 0;
   if (!base_to_dec(ptr_str, parser, &(token->width), &value) || flag_prefix) {
-    if (sign == -1 && value == ULONG_MAX)
-      sign = 1;
+    if (sign == -1 && value == ULONG_MAX) sign = 1;
     if (!token->suppress) {
       if (token->length == 'l') {
         unsigned long* dest = va_arg(*args, unsigned long*);
