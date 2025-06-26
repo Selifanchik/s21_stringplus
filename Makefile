@@ -59,7 +59,7 @@ gcov_report: re coverage_build
 	lcov --capture --directory . --output-file coverage.info --rc branch_coverage=1
 	lcov --remove coverage.info '*/$(TEST_DIR)/*' --output-file coverage_filtered.info --rc branch_coverage=1
 	genhtml coverage_filtered.info --output-directory coverage --rc branch_coverage=1
-	$(OPEN_GCOV) ./coverage/src/index.html &
+#	$(OPEN_GCOV) ./coverage/src/index.html &
 
 # ===== Сборка тестового приложения =====
 $(TEST_BIN): $(TEST_OBJ) s21_string.a
