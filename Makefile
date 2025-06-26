@@ -1,28 +1,36 @@
-# Компилятор и флаги
+# ===== Компилятор и флаги =====
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -Werror -pedantic
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
-CHECK_LIBS = -lcheck -lm -lsubunit
+OS_NANE := $(shell uname -s)
+CHECK_LIBS = -lcheck -lm
+ifeq ($(OS_NANE), Darwin)
+	OPEN_GCOV = open
+endif
+ifeq ($(OS_NANE), Linux)
+	OPEN_GCOV = xdg-open
+	CHECK_LIBS += -lsubunit
+endif
 
-# Включение флагов покрытия при необходимости
+# ===== Включение флагов покрытия при необходимости =====
 GCOV ?= 0
 ifeq ($(GCOV), 1)
     CFLAGS += $(GCOV_FLAGS)
 endif
 
-# Файлы библиотеки
+# ===== Файлы библиотеки =====
 SRC = $(wildcard s21_*.c)
 OBJ = $(patsubst %.c, %.o, $(SRC))
 LIB_NAME = s21_string.a
 
-# Тестовые файлы
+# ===== Тестовые файлы =====
 TEST_DIR = tests
 TEST_SRC = $(wildcard $(TEST_DIR)/*.c)
 TEST_OBJ = $(patsubst %.c, %.o, $(TEST_SRC))
 TEST_BIN = test_app
 
 # ===== Цель: all (полная сборка, запуск и отчёт покрытия) =====
-all: re gcov_report
+all: s21_string.a
 
 # ===== Цель: полная пересборка без покрытия =====
 re: fclean s21_string.a test_build
@@ -46,11 +54,12 @@ coverage_build:
 	$(MAKE) GCOV=1 test_build
 
 # ===== Цель: генерация отчёта покрытия, зависит от сборки с покрытием и запуска тестов =====
-gcov_report: coverage_build
+gcov_report: re coverage_build
 	./$(TEST_BIN)
 	lcov --capture --directory . --output-file coverage.info --rc branch_coverage=1
 	lcov --remove coverage.info '*/$(TEST_DIR)/*' --output-file coverage_filtered.info --rc branch_coverage=1
 	genhtml coverage_filtered.info --output-directory coverage --rc branch_coverage=1
+	$(OPEN_GCOV) ./coverage/src/index.html &
 
 # ===== Сборка тестового приложения =====
 $(TEST_BIN): $(TEST_OBJ) s21_string.a
@@ -64,15 +73,19 @@ cppcheck:
 valgrind: test_build
 	valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)
 
-valgrind_suite: test_build
-	CK_RUN_SUITE=s21_strncmp valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)
+%_suite: test_build
+	CK_RUN_SUITE="$*" valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)
+
+%_test: test_build
+	CK_RUN_SUITE="$*" ./$(TEST_BIN)
 
 
-# Компиляция объектных файлов библиотеки
+
+# ===== Компиляция объектных файлов библиотеки =====
 %.o: %.c s21_string.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Компиляция объектных файлов тестов
+# ===== Компиляция объектных файлов тестов =====
 $(TEST_DIR)/%.o: $(TEST_DIR)/%.c s21_string.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
