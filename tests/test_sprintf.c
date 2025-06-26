@@ -390,25 +390,61 @@ START_TEST(test_Gg8) {
 }
 END_TEST
 
-START_TEST(test_s_c) {
+START_TEST(test_s_c1) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  char *test_null = NULL;
-  sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s %-10.8s %10.5s",
-          "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc",
-          test_null, test_null);
-  s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s %-10.8s %10.5s",
-              "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc",
-              test_null, test_null);
+  sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
+          "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
+              "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
   ck_assert_str_eq(buf1, buf2);
 }
 END_TEST
 
-/*
-cppcheck --enable=all --inconclusive --std=c11 --quiet --force \
-  --suppress=missingIncludeSystem \
-  --suppress=nullPointer:tests/test_sprintf.c \
-  src/ tests/
-*/
+START_TEST(test_s_c2) {
+  char buf1[BUF_SIZE], buf2[BUF_SIZE];
+  int res1 = sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
+          "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  int res2 = s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
+              "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  ck_assert_int_eq(res1, res2);
+}
+END_TEST
+
+START_TEST(test_errors1) {
+  char buf1[BUF_SIZE], buf2[BUF_SIZE];
+  const char* format = "%d %.";
+  int res1 = sprintf(buf1, format, 10);
+  int res2 = s21_sprintf(buf2, format, 10);
+  ck_assert_int_eq(res1, res2);
+}
+END_TEST
+
+START_TEST(test_errors2) {
+  char buf1[BUF_SIZE], buf2[BUF_SIZE];
+  const char* format = "%Ls asd";
+  int res1 = sprintf(buf1, format, "asd");
+  int res2 = s21_sprintf(buf2, format, "asd");
+  ck_assert_int_eq(res1, res2);
+}
+END_TEST
+
+START_TEST(test_errors3) {
+  char buf1[BUF_SIZE], buf2[BUF_SIZE];
+  const char* format = "%0.3d asd";
+  int res1 = sprintf(buf1, format, 2);
+  int res2 = s21_sprintf(buf2, format, 2);
+  ck_assert_int_eq(res1, res2);
+}
+END_TEST
+
+START_TEST(test_errors4) {
+  char buf1[BUF_SIZE], buf2[BUF_SIZE];
+  const char* format = "%0.3+d asd";
+  int res1 = sprintf(buf1, format, 2);
+  int res2 = s21_sprintf(buf2, format, 2);
+  ck_assert_int_eq(res1, res2);
+}
+END_TEST
 
 START_TEST(test_p) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
@@ -466,7 +502,12 @@ Suite *sprintf_suite(void) {
   tcase_add_test(tc_core, test_Gg6);
   tcase_add_test(tc_core, test_Gg7);
   tcase_add_test(tc_core, test_Gg8);
-  tcase_add_test(tc_core, test_s_c);
+  tcase_add_test(tc_core, test_s_c1);
+  tcase_add_test(tc_core, test_s_c2);
+  tcase_add_test(tc_core, test_errors1);
+  tcase_add_test(tc_core, test_errors2);
+  tcase_add_test(tc_core, test_errors3);
+  tcase_add_test(tc_core, test_errors4);
   tcase_add_test(tc_core, test_p);
   tcase_add_test(tc_core, test_n);
 

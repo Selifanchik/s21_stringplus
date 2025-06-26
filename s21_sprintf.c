@@ -8,6 +8,8 @@ int s21_sprintf(char* str, const char* format, ...) {
 
   int error = 0;
   int result = -1;
+  int pars = 0;
+  int count = 0;
   s21_strncpy(str, "\0", 1);
   int dlina = s21_strlen(format);
   for (int i = 0; i < dlina && error != 1; i++) {
@@ -25,13 +27,21 @@ int s21_sprintf(char* str, const char* format, ...) {
 
     s21_memset(&flag, 0, sizeof(flags));
 
-    if (parsing(format, &i, &flag, &arg)) {
+    count = i - 1;
+    pars = parsing(format, &i, &flag, &arg);
+    if(pars == 2){
+      s21_strncat(str, format + count, i - count);
+      i--;
+      continue;
+    }
+    else if(pars == 1){
       error = 1;
+      continue;
     }
 
     if (flag.zero && flag.istochnost &&
         s21_strchr("feEgG", format[i]) == S21_NULL) {
-      error = 1;
+      flag.zero = 0;
     }
 
     if (define_specificator(format[i], flag, &arg, str)) {
@@ -49,9 +59,9 @@ int s21_sprintf(char* str, const char* format, ...) {
 int parsing(const char* format, int* i, flags* flag, va_list* arg) {
   int error = 0, m_flags = 1, m_width = 1, m_toch = 1, m_dlina = 1;
   while (format[*i] != '\0' && !s21_strchr("cdieEfgGosuxXpn", format[*i]) &&
-         !error) {
+         error == 0) {
     if (s21_strchr("-+ #0", format[*i]) && m_flags) {
-      error = pars_flags_dlina(format[*i], flag);
+      pars_flags_dlina(format[*i], flag);
     }
 
     else if (s21_strchr("123456789*", format[*i]) && m_width) {
@@ -83,11 +93,11 @@ int parsing(const char* format, int* i, flags* flag, va_list* arg) {
       m_width = 0;
       m_toch = 0;
       m_dlina = 0;
-      error = pars_flags_dlina(format[*i], flag);
+      pars_flags_dlina(format[*i], flag);
     }
 
     else {
-      error = 1;
+      error = 2;
     }
 
     (*i)++;
@@ -98,35 +108,22 @@ int parsing(const char* format, int* i, flags* flag, va_list* arg) {
   return error;
 }
 
-int pars_flags_dlina(char chr, flags* flag) {
-  int error = 0;
+void pars_flags_dlina(char chr, flags* flag) {
   switch (chr) {
     case '-':
       flag->minus = 1;
-      if (flag->zero) {
-        error = 1;
-      }
       break;
     case '+':
       flag->plus = 1;
-      if (flag->space) {
-        error = 1;
-      }
       break;
     case ' ':
       flag->space = 1;
-      if (flag->plus) {
-        error = 1;
-      }
       break;
     case '#':
       flag->reshetka = 1;
       break;
     case '0':
       flag->zero = 1;
-      if (flag->minus) {
-        error = 1;
-      }
       break;
     case 'h':
       flag->h = 1;
@@ -139,7 +136,6 @@ int pars_flags_dlina(char chr, flags* flag) {
       flag->L = 1;
       break;
   }
-  return error;
 }
 
 int pars_width_tochnost(const char* format, int* i) {
@@ -156,71 +152,36 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf) {
   switch (chr) {
     case 'd':
     case 'i':
-      if (flag.L || flag.reshetka) {
-        error = 1;
-      } else {
-        error = specificator_di(flag, arg, buf);
-      }
+      error = specificator_di(flag, arg, buf);
       break;
     case 'u':
-      if (flag.L || flag.reshetka || flag.plus || flag.space) {
-        error = 1;
-      } else {
-        error = specificator_uxXo(flag, arg, buf, chr);
-      }
-      break;
     case 'x':
     case 'X':
     case 'o':
-      if (flag.L || flag.plus || flag.space) {
-        error = 1;
-      } else {
-        error = specificator_uxXo(flag, arg, buf, chr);
-      }
+      error = specificator_uxXo(flag, arg, buf, chr);
       break;
     case 's':
-      if (flag.h || flag.L || flag.zero || flag.reshetka || flag.plus ||
-          flag.space) {
+      if (flag.L) {
         error = 1;
       } else {
         error = specificator_s(flag, arg, buf);
       }
       break;
     case 'c':
-      if (flag.h || flag.L || flag.zero || flag.reshetka || flag.plus ||
-          flag.space || flag.istochnost) {
-        error = 1;
-      } else {
-        error = specificator_c(flag, arg, buf);
-      }
+      error = specificator_c(flag, arg, buf);
       break;
     case 'f':
     case 'e':
     case 'E':
     case 'g':
     case 'G':
-      if (flag.l || flag.h) {
-        error = 1;
-      } else {
-        error = specificator_feEgG(flag, arg, buf, chr);
-      }
+      error = specificator_feEgG(flag, arg, buf, chr);
       break;
     case 'n':
-      if (flag.istochnost || flag.L || flag.l || flag.h || flag.minus ||
-          flag.plus || flag.reshetka || flag.space || flag.width || flag.zero) {
-        error = 1;
-      } else {
-        specificator_n(arg, buf);
-      }
+      specificator_n(arg, buf);
       break;
-    // case 'p':
     default:
-      if (flag.istochnost || flag.L || flag.l || flag.h || flag.plus ||
-          flag.reshetka || flag.space || flag.zero) {
-        error = 1;
-      } else {
-        error = specificator_p(arg, buf, flag);
-      }
+      error = specificator_p(arg, buf, flag);
       break;
   }
   return error;
@@ -593,6 +554,7 @@ int specificator_p(va_list* arg, char* buf, flags flag) {
   int error = 0;
   unsigned long number = (unsigned long)ptr;
   flag.reshetka = 1;
+  flag.isp = 1;
   char* string = number_uxXo_to_string(number, flag, 16, 'x');
   if (string != S21_NULL) {
     int dlina = s21_strlen(string);
@@ -801,20 +763,24 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base,
     if (mas_for_number != S21_NULL) {
       dlina = s21_strlen(mas_for_number);
 
-      if (flag.reshetka) {
+      if (flag.reshetka && chr != 'u') {
         dlina = rabota_reshetka(dlina, base, mas_for_number, chr, number_copy);
       }
 
-      result = malloc(dlina + 2);
-      if (result != S21_NULL) {
-        for (int i = 0; i < dlina; i++) {
-          result[i] = mas_for_number[i];
+      if(flag.isp){
+        result = zapolnenie_mas_result(dlina, 1, flag, mas_for_number);
+      }
+      else{
+        result = malloc(dlina + 2);
+        if (result != S21_NULL) {
+          for (int i = 0; i < dlina; i++) {
+            result[i] = mas_for_number[i];
+          }
+          result[dlina] = '\0';
         }
-        result[dlina] = '\0';
-
-        free(mas_for_number);
       }
     }
+    free(mas_for_number);
   }
   return result;
 }
