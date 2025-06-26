@@ -224,6 +224,21 @@ START_TEST(test_sscanf_int_limits) {
 }
 END_TEST
 
+START_TEST(test_sscanf_d_overflow) {
+  const char* src1 = "2147483647634784968787820972582959028525 -65726756275625727562757826528623523756347638196598538";
+  const char* format = "%d %d";
+  int std_int1, s21_int1, std_int2, s21_int2;
+  int std_count, s21_count;
+  std_count = sscanf(src1, format, &std_int1, &std_int2);
+  s21_count = s21_sscanf(src1, format, &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_int1, s21_int1);
+  ck_assert_int_eq(std_int2, s21_int2);
+}
+END_TEST
+
+
+
 // * - tests for %i
 
 START_TEST(test_sscanf_i_dec) {
@@ -334,6 +349,22 @@ START_TEST(test_sscanf_i_octal_incorrect) {
   ck_assert_int_eq(std_int1, s21_int1);
   ck_assert_int_eq(std_int2, s21_int2);
   ck_assert_int_eq(std_count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_i_overflow) {
+  const char* src1 = "214748364763478496878782 -657267562756257275627578 0465435425145314536417315 -0465435425145314536417315 0x78456af7f529ca4562f7b6bd -0x78456af7f529ca4562f7b6bd";
+  const char* format = "%i %i %i %i";
+  int std_int1, std_int2, std_int3, std_int4;
+  int s21_int1, s21_int2, s21_int3, s21_int4;
+  int std_count, s21_count;
+  std_count = sscanf(src1, format, &std_int1, &std_int2, &std_int3, &std_int4);
+  s21_count = s21_sscanf(src1, format, &s21_int1, &s21_int2, &s21_int3, &s21_int4);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_int_eq(std_int1, s21_int1);
+  ck_assert_int_eq(std_int2, s21_int2);
+  ck_assert_int_eq(std_int3, s21_int3);
+  ck_assert_int_eq(std_int4, s21_int4);
 }
 END_TEST
 
@@ -532,7 +563,7 @@ END_TEST
 
 START_TEST(test_sscanf_correct_inf) {
   const char* src = "-inf inf infi nan";
-  const char* format = "%f %lf %3Lf %s %f";
+  const char* format = "%f %lf %3Lf %s %3f";
   float std_float1, s21_float1;
   double std_double, s21_double;
   long double std_ldouble, s21_ldouble;
@@ -640,6 +671,20 @@ START_TEST(test_sscanf_o_incorrect_width) {
   ck_assert_uint_eq(std_uint1, s21_uint1);
   ck_assert_uint_eq(std_uint2, s21_uint2);
   ck_assert_int_eq(std_count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_o_overflow) {
+  const char* src1 = "0465435425145314536417315 -0465435425145314536417315";
+  const char* format = "%o %o";
+  unsigned std_int1, std_int2;
+  unsigned s21_int1, s21_int2;
+  int std_count, s21_count;
+  std_count = sscanf(src1, format, &std_int1, &std_int2);
+  s21_count = s21_sscanf(src1, format, &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_uint_eq(std_int1, s21_int1);
+  ck_assert_uint_eq(std_int2, s21_int2);
 }
 END_TEST
 
@@ -768,6 +813,20 @@ START_TEST(test_sscanf_u_empty_str) {
   ck_assert_uint_eq(std_uint, s21_uint);
 }
 END_TEST
+
+START_TEST(test_sscanf_u_overflow) {
+  const char* src1 = "214748364763478496878782 -657267562756257275627578";
+  const char* format = "%u %u";
+  unsigned std_int1, std_int2;
+  unsigned s21_int1, s21_int2;
+  int std_count, s21_count;
+  std_count = sscanf(src1, format, &std_int1, &std_int2);
+  s21_count = s21_sscanf(src1, format, &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_uint_eq(std_int1, s21_int1);
+  ck_assert_uint_eq(std_int2, s21_int2);
+}
+END_TEST
 // * - tests for %x %X
 
 START_TEST(test_sscanf_x_correct_width) {
@@ -811,6 +870,20 @@ START_TEST(test_sscanf_x_prefix_width) {
   s21_count = s21_sscanf(src, format, &s21_uint);
   ck_assert_uint_eq(std_uint, s21_uint);
   ck_assert_int_eq(std_count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_x_overflow) {
+  const char* src1 = "0x78456af7f529ca4562f7b6bd -0x78456af7f529ca4562f7b6bd";
+  const char* format = "%x %X";
+  unsigned std_int1, std_int2;
+  unsigned s21_int1, s21_int2;
+  int std_count, s21_count;
+  std_count = sscanf(src1, format, &std_int1, &std_int2);
+  s21_count = s21_sscanf(src1, format, &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_uint_eq(std_int1, s21_int1);
+  ck_assert_uint_eq(std_int2, s21_int2);
 }
 END_TEST
 
@@ -869,6 +942,20 @@ START_TEST(test_sscanf_p_incorrect) {
   s21_count = s21_sscanf(src, format, &s21_ptr);
   ck_assert_ptr_eq(std_ptr, s21_ptr);
   ck_assert_int_eq(std_count, s21_count);
+}
+END_TEST
+
+START_TEST(test_sscanf_p_overflow) {
+  const char* src1 = "0x78456af7f529ca4562f7b6bd -0x78456af7f529ca4562f7b6bd";
+  const char* format = "%p %p";
+  void *std_int1, *std_int2;
+  void *s21_int1, *s21_int2;
+  int std_count, s21_count;
+  std_count = sscanf(src1, format, &std_int1, &std_int2);
+  s21_count = s21_sscanf(src1, format, &s21_int1, &s21_int2);
+  ck_assert_int_eq(std_count, s21_count);
+  ck_assert_ptr_eq(std_int1, s21_int1);
+  ck_assert_ptr_eq(std_int2, s21_int2);
 }
 END_TEST
 
@@ -1116,6 +1203,7 @@ Suite* sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_int_empty_str);
   tcase_add_test(tc_core, test_sscanf_int_incorrect_chars);
   tcase_add_test(tc_core, test_sscanf_int_limits);
+  tcase_add_test(tc_core, test_sscanf_d_overflow);
 
   // Tests %i
   tcase_add_test(tc_core, test_sscanf_i_dec);
@@ -1124,6 +1212,7 @@ Suite* sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_i_hex_incorrect);
   tcase_add_test(tc_core, test_sscanf_i_oct_incorrect);
   tcase_add_test(tc_core, test_sscanf_i_octal_incorrect);
+  tcase_add_test(tc_core, test_sscanf_i_overflow);
 
   // Tests %e %E %f %g %G
   tcase_add_test(tc_core, test_sscanf_e);
@@ -1144,6 +1233,7 @@ Suite* sscanf_suite(void) {
   tcase_add_test(tc_core, test_sscanf_octal);
   tcase_add_test(tc_core, test_sscanf_o_correct_width);
   tcase_add_test(tc_core, test_sscanf_o_incorrect_width);
+  tcase_add_test(tc_core, test_sscanf_o_overflow);
 
   // Tests %s
   tcase_add_test(tc_core, test_sscanf_str_width);
@@ -1157,17 +1247,20 @@ Suite* sscanf_suite(void) {
   // Tests %u
   tcase_add_test(tc_core, test_sscanf_uint_max);
   tcase_add_test(tc_core, test_sscanf_u_empty_str);
+  tcase_add_test(tc_core, test_sscanf_u_overflow);
 
   // Tests %x %X
   tcase_add_test(tc_core, test_sscanf_x_correct_width);
   tcase_add_test(tc_core, test_sscanf_x_incorrect_prefix);
   tcase_add_test(tc_core, test_sscanf_x_prefix_width);
+  tcase_add_test(tc_core, test_sscanf_x_overflow);
 
   // Tests %p
   tcase_add_test(tc_core, test_sscanf_p);
   tcase_add_test(tc_core, test_sscanf_p_incorrect);
   tcase_add_test(tc_core, test_sscanf_p_negative);
   tcase_add_test(tc_core, test_sscanf_p_neg_pos);
+  tcase_add_test(tc_core, test_sscanf_p_overflow);
 
   // Tests %n
   tcase_add_test(tc_core, test_sscanf_n);

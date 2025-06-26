@@ -288,6 +288,7 @@ int handler_p(const char** ptr_str, FormatSpecifier* token, va_list* args) {
   int prefix = is_prefix_base_hex(ptr_str, &(token->width));
   unsigned long value = 0;
   if (!base_to_dec(ptr_str, &parser, &(token->width), &value) || prefix) {
+    if (sign == -1 && value == ULONG_MAX) sign = 1;
     if (!token->suppress) {
       void** dest = va_arg(*args, void**);
       *dest = (void*)(value * sign);
