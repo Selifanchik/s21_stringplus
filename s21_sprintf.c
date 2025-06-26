@@ -29,12 +29,11 @@ int s21_sprintf(char* str, const char* format, ...) {
 
     count = i - 1;
     pars = parsing(format, &i, &flag, &arg);
-    if(pars == 2){
+    if (pars == 2) {
       s21_strncat(str, format + count, i - count);
       i--;
       continue;
-    }
-    else if(pars == 1){
+    } else if (pars == 1) {
       error = 1;
       continue;
     }
@@ -767,10 +766,9 @@ char* number_uxXo_to_string(unsigned long number, flags flag, int base,
         dlina = rabota_reshetka(dlina, base, mas_for_number, chr, number_copy);
       }
 
-      if(flag.isp){
+      if (flag.isp) {
         result = zapolnenie_mas_result(dlina, 1, flag, mas_for_number);
-      }
-      else{
+      } else {
         result = malloc(dlina + 2);
         if (result != S21_NULL) {
           for (int i = 0; i < dlina; i++) {

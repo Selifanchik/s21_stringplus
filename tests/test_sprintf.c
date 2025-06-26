@@ -75,8 +75,8 @@ END_TEST
 
 START_TEST(test_u_x_X_o1) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  sprintf(buf1, "%.0u %10.6hu %#10.5lo %-#10x %-#10X %#.5o", (unsigned int)0, (unsigned short)123,
-          1234567890L, 48879, 48879, 1);
+  sprintf(buf1, "%.0u %10.6hu %#10.5lo %-#10x %-#10X %#.5o", (unsigned int)0,
+          (unsigned short)123, 1234567890L, 48879, 48879, 1);
   s21_sprintf(buf2, "%.0u %10.6hu %#10.5lo %-#10x %-#10X %#.5o", 0, (short)123,
               1234567890L, 48879, 48879, 1);
   ck_assert_str_eq(buf1, buf2);
@@ -178,11 +178,10 @@ END_TEST
 
 START_TEST(test_f6) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  sprintf(buf1, "%f %f %f %f %f %f %f %f %f %f", 1.0 / 0.0, -1.0 / 0.0,
-          NAN, INFINITY, -INFINITY, NAN, -0.0, 0.0, 123.456, -987.654);
-  s21_sprintf(buf2, "%f %f %f %f %f %f %f %f %f %f", 1.0 / 0.0, -1.0 / 0.0,
-              NAN, INFINITY, -INFINITY, NAN, -0.0, 0.0, 123.456,
-              -987.654);
+  sprintf(buf1, "%f %f %f %f %f %f %f %f %f %f", 1.0 / 0.0, -1.0 / 0.0, NAN,
+          INFINITY, -INFINITY, NAN, -0.0, 0.0, 123.456, -987.654);
+  s21_sprintf(buf2, "%f %f %f %f %f %f %f %f %f %f", 1.0 / 0.0, -1.0 / 0.0, NAN,
+              INFINITY, -INFINITY, NAN, -0.0, 0.0, 123.456, -987.654);
   ck_assert_str_eq(buf1, buf2);
 }
 END_TEST
@@ -274,8 +273,8 @@ END_TEST
 START_TEST(test_eE5) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
   sprintf(buf1, "%e %e %E %e %E %+e %+E %e %E %e %E %+e %+E", -0.0, 1.0 / 0.0,
-          1.0 / 0.0, -1.0 / 0.0, -1.0 / 0.0, 1.0 / 0.0, 1.0 / 0.0, -NAN,
-          -NAN, NAN, NAN, NAN, NAN);
+          1.0 / 0.0, -1.0 / 0.0, -1.0 / 0.0, 1.0 / 0.0, 1.0 / 0.0, -NAN, -NAN,
+          NAN, NAN, NAN, NAN);
   s21_sprintf(buf2, "%e %e %E %e %E %+e %+E %e %E %e %E %+e %+E", -0.0,
               1.0 / 0.0, 1.0 / 0.0, -1.0 / 0.0, -1.0 / 0.0, 1.0 / 0.0,
               1.0 / 0.0, -NAN, -NAN, NAN, NAN, NAN, NAN);
@@ -392,27 +391,29 @@ END_TEST
 
 START_TEST(test_s_c1) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
-          "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
-  s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
-              "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s", "hello", "hi",
+          "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s", "hello", "hi",
+              "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
   ck_assert_str_eq(buf1, buf2);
 }
 END_TEST
 
 START_TEST(test_s_c2) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  int res1 = sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
-          "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
-  int res2 = s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s",
-              "hello", "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  int res1 =
+      sprintf(buf1, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s", "hello", "hi",
+              "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
+  int res2 =
+      s21_sprintf(buf2, "%s %10s %.3s %-10.4s %c %5c %-5c %.10s %1s", "hello",
+                  "hi", "abcdef", "testing", 'A', 'f', 'B', "abc", "abc");
   ck_assert_int_eq(res1, res2);
 }
 END_TEST
 
 START_TEST(test_errors1) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  const char* format = "%d %.";
+  const char *format = "%d %.";
   int res1 = sprintf(buf1, format, 10);
   int res2 = s21_sprintf(buf2, format, 10);
   ck_assert_int_eq(res1, res2);
@@ -421,7 +422,7 @@ END_TEST
 
 START_TEST(test_errors2) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  const char* format = "%Ls asd";
+  const char *format = "%Ls asd";
   int res1 = sprintf(buf1, format, "asd");
   int res2 = s21_sprintf(buf2, format, "asd");
   ck_assert_int_eq(res1, res2);
@@ -430,7 +431,7 @@ END_TEST
 
 START_TEST(test_errors3) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  const char* format = "%0.3d asd";
+  const char *format = "%0.3d asd";
   int res1 = sprintf(buf1, format, 2);
   int res2 = s21_sprintf(buf2, format, 2);
   ck_assert_int_eq(res1, res2);
@@ -439,7 +440,7 @@ END_TEST
 
 START_TEST(test_errors4) {
   char buf1[BUF_SIZE], buf2[BUF_SIZE];
-  const char* format = "%0.3+d asd";
+  const char *format = "%0.3+d asd";
   int res1 = sprintf(buf1, format, 2);
   int res2 = s21_sprintf(buf2, format, 2);
   ck_assert_int_eq(res1, res2);
