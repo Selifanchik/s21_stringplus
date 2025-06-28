@@ -49,6 +49,7 @@ typedef struct {
   int l;
   int L;
   int isg;
+  int isp;
 } flags;
 
 typedef int (*ValidatorFunc)(const char*, FormatSpecifier*);
@@ -113,7 +114,7 @@ int valid_s(const char* ptr_str, FormatSpecifier* token);
 
 // sprintf
 int parsing(const char* format, int* i, flags* flag, va_list* arg);
-int pars_flags_dlina(char chr, flags* flag);
+void pars_flags_dlina(char chr, flags* flag);
 int pars_width_tochnost(const char* format, int* i);
 int define_specificator(char chr, flags flag, va_list* arg, char* buf);
 
