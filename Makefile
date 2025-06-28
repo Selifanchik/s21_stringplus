@@ -25,10 +25,10 @@ TEST_BIN = test_app
 all: s21_string.a
 
 # ===== Цель: полная пересборка без покрытия =====
-re: fclean s21_string.a test_build
+re: clean $(LIB_NAME) test_build
 
 # ===== Цель: сборка библиотеки без покрытия =====
-s21_string.a: $(OBJ)
+$(LIB_NAME): $(OBJ)
 	ar rcs $(LIB_NAME) $(OBJ)
 	ranlib $(LIB_NAME)
 
@@ -42,7 +42,7 @@ test: test_build
 # ===== Цель: сборка с покрытием (пересборка библиотеки и тестов с флагами покрытия) =====
 coverage_build:
 	$(MAKE) clean
-	$(MAKE) GCOV=1 s21_string.a
+	$(MAKE) GCOV=1 $(LIB_NAME)
 	$(MAKE) GCOV=1 test_build
 
 # ===== Цель: генерация отчёта покрытия, зависит от сборки с покрытием и запуска тестов =====
@@ -53,7 +53,7 @@ gcov_report: re coverage_build
 	genhtml coverage_filtered.info --output-directory coverage --rc branch_coverage=1
 
 # ===== Сборка тестового приложения =====
-$(TEST_BIN): $(TEST_OBJ) s21_string.a
+$(TEST_BIN): $(TEST_OBJ) $(LIB_NAME)
 	$(CC) $(CFLAGS) -I. $(TEST_OBJ) $(LIB_NAME) -o $(TEST_BIN) $(CHECK_LIBS)
 
 cppcheck:
@@ -70,8 +70,6 @@ valgrind: test_build
 %_test: test_build
 	CK_RUN_SUITE="$*" ./$(TEST_BIN)
 
-
-
 # ===== Компиляция объектных файлов библиотеки =====
 %.o: %.c s21_string.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -83,11 +81,8 @@ $(TEST_DIR)/%.o: $(TEST_DIR)/%.c s21_string.h
 # ===== Очистка =====
 clean:
 	find . \( -name "*.o" -o -name "*.gcno" -o -name "*.gcda" \) -delete
-	rm -f *.info $(TEST_BIN)
+	rm -f *.info $(TEST_BIN) $(LIB_NAME)
 	rm -rf coverage
-
-fclean: clean
-	rm -f $(LIB_NAME)
 
 format:
 	clang-format -i *.c *.h tests/*.c

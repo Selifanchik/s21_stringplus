@@ -1,5 +1,5 @@
-#include "s21_helpers.h"
 #include "s21_string.h"
+#include "s21_sprintf.h"
 
 int s21_sprintf(char* str, const char* format, ...) {
   flags flag = {0};
