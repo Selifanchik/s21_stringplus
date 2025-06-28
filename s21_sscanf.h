@@ -86,7 +86,7 @@ int parse_float(const char** ptr_str, FormatSpecifier* token,
                 ParseFloat* float_value);
 long double to_float(ParseFloat float_value);
 long double s21_pow10(int order);
-int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* parse_float);
+int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value);
 void to_nan_inf(long double* value, ParseFloat float_value);
 
 int is_valid_width(const int* width, short valid_width);
