@@ -13,7 +13,6 @@ int s21_strncmp(const char *str1, const char *str2, s21_size_t n) {
     if (!to_exit && str1[i] == '\0') {
       to_exit = 1;
     }
-
   }
 
   return result;

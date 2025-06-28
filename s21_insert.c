@@ -12,7 +12,7 @@ void *s21_insert(const char *src, const char *str, s21_size_t start_index) {
 
   s21_size_t new_len = src_len + str_len;
 
-  char *new_str = (char*)calloc(new_len + 1, sizeof(char));
+  char *new_str = (char *)calloc(new_len + 1, sizeof(char));
 
   if (new_str != S21_NULL) {
     s21_memcpy(new_str, src, start_index);

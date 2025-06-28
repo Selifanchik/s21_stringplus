@@ -51,8 +51,8 @@ END_TEST
 // Копируемая строка пустая
 START_TEST(test_strncpy_zero_src) {
   const char *src = "";
-  char dest1[10]="helloworl";
-  char dest2[10]="helloworl";
+  char dest1[10] = "helloworl";
+  char dest2[10] = "helloworl";
   s21_strncpy(dest1, src, 5);
   strncpy(dest2, src, 5);
   ck_assert_mem_eq(dest1, dest2, 5);

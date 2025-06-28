@@ -47,7 +47,7 @@ START_TEST(test_strstr_null_char) {
   char *res1 = s21_strstr(haystack, needle);
   char *res2 = strstr(haystack, needle);
 
-  ck_assert_ptr_eq(res1, res2);//на начало haystack 
+  ck_assert_ptr_eq(res1, res2);  //на начало haystack
 }
 END_TEST
 
@@ -59,7 +59,7 @@ START_TEST(test_strstr_in_empty_str) {
   char *res1 = s21_strstr(haystack, needle);
   char *res2 = strstr(haystack, needle);
 
-  ck_assert_ptr_eq(res1, res2);//NULL
+  ck_assert_ptr_eq(res1, res2);  // NULL
 }
 END_TEST
 
@@ -71,7 +71,7 @@ START_TEST(test_strstr_found_empty_str) {
   char *res1 = s21_strstr(haystack, needle);
   char *res2 = strstr(haystack, needle);
 
-  ck_assert_ptr_eq(res1, res2);//на начало haystack 
+  ck_assert_ptr_eq(res1, res2);  //на начало haystack
 }
 END_TEST
 
@@ -83,7 +83,7 @@ START_TEST(test_strstr_empty_all) {
   char *res1 = s21_strstr(haystack, needle);
   char *res2 = strstr(haystack, needle);
 
-  ck_assert_ptr_eq(res1, res2);//на начало haystack 
+  ck_assert_ptr_eq(res1, res2);  //на начало haystack
 }
 END_TEST
 

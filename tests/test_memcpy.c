@@ -77,7 +77,7 @@ START_TEST(test_memcpy_empty_str) {
   memcpy(expected, src, 1);
   s21_memcpy(dest, src, 1);
 
-  ck_assert_mem_eq(dest, expected,7);
+  ck_assert_mem_eq(dest, expected, 7);
 }
 END_TEST
 
@@ -90,7 +90,7 @@ START_TEST(test_memcpy_empty_strs) {
   memcpy(expected, src, 1);
   s21_memcpy(dest, src, 1);
 
-  ck_assert_mem_eq(dest, expected,1);
+  ck_assert_mem_eq(dest, expected, 1);
 }
 END_TEST
 

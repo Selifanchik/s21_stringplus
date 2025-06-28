@@ -23,14 +23,14 @@ void *s21_trim(const char *src, const char *trim_chars) {
   const char *start = s21_ltrim(src, trim_chars);
   char *result;
   if (*start == '\0') {
-    result = (char*)malloc(1 * sizeof(char));
+    result = (char *)malloc(1 * sizeof(char));
     if (result) {
       result[0] = '\0';
     }
   } else {
     const char *end = s21_rtrim(start, trim_chars);
     size_t len = end - start + 1;
-    result = (char*)malloc(sizeof(char)*(len + 1));
+    result = (char *)malloc(sizeof(char) * (len + 1));
     if (result) {
       s21_strncpy(result, start, len);
       result[len] = '\0';
