@@ -51,7 +51,7 @@ START_TEST(test_strpbrk_null_str) {
   char *res1 = s21_strpbrk(str1, str2);
   char *res2 = strpbrk(str1, str2);
 
-  ck_assert_ptr_eq(res1, res2);
+  ck_assert_ptr_eq(res1, res2);//NULL
 }
 END_TEST
 
@@ -63,7 +63,7 @@ START_TEST(test_strpbrk_empty_str1) {
   char *res1 = s21_strpbrk(str1, str2);
   char *res2 = strpbrk(str1, str2);
 
-  ck_assert_ptr_eq(res1, res2);
+  ck_assert_ptr_eq(res1, res2);//NULL
 }
 END_TEST
 
@@ -75,7 +75,7 @@ START_TEST(test_strpbrk_empty_str2) {
   char *res1 = s21_strpbrk(str1, str2);
   char *res2 = strpbrk(str1, str2);
 
-  ck_assert_ptr_eq(res1, res2);
+  ck_assert_ptr_eq(res1, res2);//NULL
 }
 END_TEST
 
