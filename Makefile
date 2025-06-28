@@ -58,7 +58,7 @@ $(TEST_BIN): $(TEST_OBJ) $(LIB_NAME)
 
 cppcheck:
 	cppcheck --enable=all --inconclusive --std=c11 --quiet --force \
-  --suppress=missingIncludeSystem src/ $(TEST_DIR)/
+  --suppress=missingIncludeSystem $(SRC) $(TEST_DIR)/
 
 # ===== Цель: проверка на утечки памяти с помощью valgrind =====
 valgrind: test_build
