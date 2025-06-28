@@ -2,15 +2,7 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -Werror -pedantic
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
-OS_NANE := $(shell uname -s)
-CHECK_LIBS = -lcheck -lm
-ifeq ($(OS_NANE), Darwin)
-	OPEN_GCOV = open
-endif
-ifeq ($(OS_NANE), Linux)
-	OPEN_GCOV = xdg-open
-	CHECK_LIBS += -lsubunit
-endif
+CHECK_LIBS = -lcheck -lm -lsubunit
 
 # ===== Включение флагов покрытия при необходимости =====
 GCOV ?= 0
@@ -59,7 +51,6 @@ gcov_report: re coverage_build
 	lcov --capture --directory . --output-file coverage.info --rc branch_coverage=1
 	lcov --remove coverage.info '*/$(TEST_DIR)/*' --output-file coverage_filtered.info --rc branch_coverage=1
 	genhtml coverage_filtered.info --output-directory coverage --rc branch_coverage=1
-#	$(OPEN_GCOV) ./coverage/src/index.html &
 
 # ===== Сборка тестового приложения =====
 $(TEST_BIN): $(TEST_OBJ) s21_string.a
