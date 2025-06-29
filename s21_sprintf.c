@@ -1,5 +1,6 @@
-#include "s21_string.h"
 #include "s21_sprintf.h"
+
+#include "s21_string.h"
 
 int s21_sprintf(char* str, const char* format, ...) {
   flags flag = {0};
@@ -215,7 +216,6 @@ void NanAndInf(char chr, long double number, char* buf, flags flag,
 
 int specificator_feEgG(flags flag, va_list* arg, char* buf, char chr) {
   int error = 0;
-  char mas_for_left[6100];
   long double number;
   if (flag.L) {
     number = va_arg(*arg, long double);
@@ -237,6 +237,7 @@ int specificator_feEgG(flags flag, va_list* arg, char* buf, char chr) {
   }
 
   if (!flag_nan_inf) {
+    char mas_for_left[6100];
     char* string;
     if (chr == 'f') {
       string = specificator_feE(flag, number, mas_for_left, chr);
@@ -584,8 +585,10 @@ int specificator_c(flags flag, va_list* arg, char* buf) {
     if (flag.width >= 2) {
       int dlina = s21_strlen(string);
       int raznica = flag.width - dlina;
-      string = realloc(string, dlina + raznica + 2);
-      if (string != S21_NULL) {
+      char* tmp = S21_NULL;
+      tmp = realloc(string, dlina + raznica + 2);
+      if (tmp != S21_NULL) {
+        string = tmp;
         s21_memset(string + dlina, 0, raznica + 2);
         if (flag.minus) {
           s21_memset(string + dlina, ' ', raznica);
@@ -845,7 +848,7 @@ int specificator_di(flags flag, va_list* arg, char* buf) {
 }
 
 char* number_di_to_string(long number, flags flag) {
-  long tmp_number = number;
+  long tmp_number;
   char* result = S21_NULL;
   int flag_min = 0;
   if (number == (-9223372036854775807 - 1)) {
@@ -916,7 +919,7 @@ char* rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number,
 }
 
 char* zapolnenie_mas_result(int dlina, long number, flags flag,
-                            char* mas_for_number) {
+                            const char* mas_for_number) {
   char* result = malloc(dlina + 3);
   if (result != S21_NULL) {
     int flag_0 = 0;

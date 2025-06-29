@@ -60,6 +60,10 @@ cppcheck:
 	cppcheck --enable=all --inconclusive --std=c11 --quiet --force \
   --suppress=missingIncludeSystem $(SRC) $(TEST_DIR)/
 
+%_cpp:
+	cppcheck --enable=all --inconclusive --std=c11 --quiet --force \
+  --suppress=missingIncludeSystem "s21_$*.c"
+
 # ===== Цель: проверка на утечки памяти с помощью valgrind =====
 valgrind: test_build
 	valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)

@@ -27,10 +27,10 @@ int define_specificator(char chr, flags flag, va_list* arg, char* buf);
 int specificator_di(flags flag, va_list* arg, char* buf);
 char* number_di_to_string(long number, flags flag);
 int long_to_string(char* mas_for_number, int* index, long number);
-char* rabota_tochnost(flags flag, int number, int dlina, char* mas_for_number,
+char* rabota_tochnost(flags flag, int zero, int dlina, char* mas_for_number,
                       int index);
 char* zapolnenie_mas_result(int dlina, long number, flags flag,
-                            char* mas_for_number);
+                            const char* mas_for_number);
 char* rabota_width(flags flag, char* string, int dlina);
 
 int specificator_uxXo(flags flag, va_list* arg, char* buf, char chr);
@@ -61,8 +61,8 @@ int expanent(long double* number, int mantis);
 int remove_0(char* string);
 void round_my(char* tmp_mas_for_round, int dlina, int flag_bank);
 void reverse_str(char* str);
-void left_part_to_str(long double val, char* str, flags* flag);
-void right_part_to_str(long double frac, char* str, int precision);
+void left_part_to_str(long double number, char* str, flags* flag);
+void right_part_to_str(long double right_part, char* str, int toch);
 void g_and_round(int tmp_tochnost, char* mas_for_left);
 void net_toch_v_float(char* mas_for_left, flags flag);
 void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina,
