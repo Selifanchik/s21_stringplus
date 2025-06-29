@@ -30,9 +30,9 @@ int s21_sscanf(const char* str, const char* format, ...) {
           flag_end = 1;
       } else
         flag_end = 1;
-      free(separation);
       init_token(&token);
     }
+    if (separation) free(separation);
   }
   va_end(arg);
   return read_count;
@@ -568,11 +568,14 @@ void to_nan_inf(long double* value, ParseFloat float_value) {
 }
 
 int s21_strncmp_icase(const char* str1, const char* str2, int width) {
+  int result = 1;
   char temp_compare[9] = {'\0'};
   s21_strncat(temp_compare, str1, width);
   char* temp = (char*)s21_to_lower(temp_compare);
-  int result = s21_strncmp(temp, str2, width);
-  free(temp);
+  if (temp) {
+    result = s21_strncmp(temp, str2, width);
+    free(temp);
+  }
   return result;
 }
 
