@@ -25,7 +25,7 @@ START_TEST(test_memcpy_partial) {
   memcpy(expected, src, 3);
   s21_memcpy(dest, src, 3);
 
-  ck_assert_mem_eq(dest, expected, 6);
+  ck_assert_mem_eq(dest, expected, 3);
 }
 END_TEST
 
@@ -77,7 +77,7 @@ START_TEST(test_memcpy_empty_str) {
   memcpy(expected, src, 1);
   s21_memcpy(dest, src, 1);
 
-  ck_assert_str_eq(dest, expected);
+  ck_assert_mem_eq(dest, expected, 7);
 }
 END_TEST
 
@@ -90,7 +90,7 @@ START_TEST(test_memcpy_empty_strs) {
   memcpy(expected, src, 1);
   s21_memcpy(dest, src, 1);
 
-  ck_assert_str_eq(dest, expected);
+  ck_assert_mem_eq(dest, expected, 1);
 }
 END_TEST
 

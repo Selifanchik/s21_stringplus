@@ -1,6 +1,7 @@
 #ifndef S21_STRING_H
 #define S21_STRING_H
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 

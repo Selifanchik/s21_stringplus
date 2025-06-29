@@ -67,11 +67,11 @@ START_TEST(test_strtok_delim_no_match) {
   char *token2 = strtok(str2, delim);
 
   while (token1 != S21_NULL && token2 != NULL) {
-    ck_assert_str_eq(token1, token2);
+    ck_assert_str_eq(token1, token2);  // вся строка
     token1 = s21_strtok(S21_NULL, delim);
     token2 = strtok(NULL, delim);
   }
-  ck_assert_ptr_eq(token1, token2);  // вся строка
+  ck_assert_ptr_eq(token1, token2);
 }
 END_TEST
 
@@ -121,11 +121,11 @@ START_TEST(test_strtok_null_delim) {
   char *token2 = strtok(str2, delim);
 
   while (token1 != S21_NULL && token2 != NULL) {
-    ck_assert_str_eq(token1, token2);
+    ck_assert_str_eq(token1, token2);  // вся строка
     token1 = s21_strtok(S21_NULL, delim);
     token2 = strtok(NULL, delim);
   }
-  ck_assert_ptr_eq(token1, token2);  // вся строка
+  ck_assert_ptr_eq(token1, token2);
 }
 END_TEST
 
@@ -146,42 +146,6 @@ START_TEST(test_strtok_empty_str) {
   ck_assert_ptr_eq(token1, token2);  // NULL
 }
 END_TEST
-
-// // Пустой делитель (убираю, поведение не определено стандартом)
-// START_TEST(test_strtok_empty_delim) {
-//    char str1[] = "Hello s21";
-//    char str2[] = "Hello s21";
-//    const char *delim = "";
-
-//   char *token1 = s21_strtok(str1, delim);
-//   char *token2 = strtok(str2, delim);
-
-//   while(token1!=S21_NULL && token2!=NULL){
-//   ck_assert_str_eq(token1, token2);
-//   token1 = s21_strtok(S21_NULL, delim);
-//   token2 = strtok(NULL, delim);
-//   }
-//   ck_assert_ptr_eq(token1, token2);
-// }
-// END_TEST
-
-// // Пустая строка и пустой делитель (убираю, поведение не определено
-// стандартом) START_TEST(test_strtok_empty_str_and_delim) {
-//    char str1[] = "";
-//    char str2[] = "";
-//    const char *delim = "";
-
-//   char *token1 = s21_strtok(str1, delim);
-//   char *token2 = strtok(str2, delim);
-
-//   while(token1!=S21_NULL && token2!=NULL){
-//   ck_assert_str_eq(token1, token2);
-//   token1 = s21_strtok(S21_NULL, delim);
-//   token2 = strtok(NULL, delim);
-//   }
-//   ck_assert_ptr_eq(token1, token2);
-// }
-// END_TEST
 
 START_TEST(test_strtok_multiple_strings) {
   char str1[] = "one,two";
@@ -235,8 +199,6 @@ Suite *strtok_suite(void) {
   tcase_add_test(tc_core, test_strtok_spaces_and_tabs_delims);
   tcase_add_test(tc_core, test_strtok_null_delim);
   tcase_add_test(tc_core, test_strtok_empty_str);
-  // tcase_add_test(tc_core, test_strtok_empty_delim);
-  // tcase_add_test(tc_core, test_strtok_empty_str_and_delim);
   tcase_add_test(tc_core, test_strtok_multiple_strings);
   tcase_add_test(tc_core, test_strtok_diff_delim);
 

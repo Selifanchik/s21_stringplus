@@ -1,6 +1,5 @@
 #include <check.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "../s21_string.h"
 
@@ -103,6 +102,19 @@ START_TEST(test_insert_src_null) {
 }
 END_TEST
 
+// Вставка в пустую пустой
+START_TEST(test_insert_empty_empty) {
+  const char *src = "";
+  const char *str = "";
+  const char *expected = "";
+
+  char *res = (char *)s21_insert(src, str, 0);
+  ck_assert_ptr_nonnull(res);
+  ck_assert_str_eq(res, expected);
+  free(res);
+}
+END_TEST
+
 Suite *insert_suite(void) {
   Suite *s = suite_create("s21_insert");
   TCase *tc_core = tcase_create("Core");
@@ -115,6 +127,7 @@ Suite *insert_suite(void) {
   tcase_add_test(tc_core, test_insert_index_too_large);
   tcase_add_test(tc_core, test_insert_str_null);
   tcase_add_test(tc_core, test_insert_src_null);
+  tcase_add_test(tc_core, test_insert_empty_empty);
 
   suite_add_tcase(s, tc_core);
   return s;
