@@ -28,7 +28,7 @@ all: s21_string.a
 re: clean $(LIB_NAME) test_build
 
 # ===== Цель: сборка библиотеки без покрытия =====
-$(LIB_NAME): $(OBJ)
+s21_string.a: $(OBJ)
 	ar rcs $(LIB_NAME) $(OBJ)
 	ranlib $(LIB_NAME)
 
@@ -89,4 +89,4 @@ clean:
 	rm -rf coverage
 
 format:
-	clang-format -i *.c *.h tests/*.c
+	clang-format -i -style=Google *.c *.h tests/*.c
