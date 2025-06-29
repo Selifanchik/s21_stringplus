@@ -392,7 +392,7 @@ void skip_space(const char** ptr_str) {
   while (**ptr_str && s21_isspace(**ptr_str)) (*ptr_str)++;
 }
 
-int is_write_specifier(FormatSpecifier* token) {
+int is_write_specifier(const FormatSpecifier* token) {
   return !token->suppress && token->specifier != '%' && token->specifier != 'n';
 }
 
@@ -576,11 +576,11 @@ int s21_strncmp_icase(const char* str1, const char* str2, int width) {
   return result;
 }
 
-int valid_c(const char* ptr_str, FormatSpecifier* token) {
+int valid_c(const char* ptr_str, const FormatSpecifier* token) {
   return *ptr_str && token->width > 0;
 }
 
-int valid_s(const char* ptr_str, FormatSpecifier* token) {
+int valid_s(const char* ptr_str, const FormatSpecifier* token) {
   return *ptr_str && !s21_isspace(*ptr_str) &&
          is_valid_width(&(token->width), 0);
 }

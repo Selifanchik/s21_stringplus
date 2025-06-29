@@ -1,6 +1,8 @@
 #ifndef S21_SPRINTF_H
 #define S21_SPRINTF_H
 
+#include <float.h>
+
 #include "s21_string.h"
 
 typedef struct {
@@ -44,7 +46,7 @@ int specificator_s(flags flag, va_list* arg, char* buf);
 char* s_null(char* string, int* flag_null);
 char* s_width(char* string, int dlina, flags flag);
 
-void specificator_n(va_list* arg, char* buf);
+void specificator_n(va_list* arg, const char* buf);
 int specificator_p(va_list* arg, char* buf, flags flag);
 
 int specificator_feEgG(flags flag, va_list* arg, char* buf, char chr);
@@ -65,6 +67,6 @@ void left_part_to_str(long double number, char* str, flags* flag);
 void right_part_to_str(long double right_part, char* str, int toch);
 void g_and_round(int tmp_tochnost, char* mas_for_left);
 void net_toch_v_float(char* mas_for_left, flags flag);
-void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina,
+void cpy_to_str(const char* tmp_mas_for_round, char* mas_for_left, int dlina,
                 int* flag_round);
 #endif

@@ -15,13 +15,13 @@ int s21_sprintf(char* str, const char* format, ...) {
   int dlina = s21_strlen(format);
   for (int i = 0; i < dlina && error != 1; i++) {
     if (format[i] != '%') {
-      char tmp[2] = {format[i], '\0'};
+      const char tmp[2] = {format[i], '\0'};
       s21_strncat(str, tmp, s21_strlen(tmp) + 1);
       continue;
     }
     i++;
     if (format[i] == '%') {
-      char tmp[2] = {format[i], '\0'};
+      const char tmp[2] = {format[i], '\0'};
       s21_strncat(str, tmp, s21_strlen(tmp) + 1);
       continue;
     }
@@ -224,7 +224,7 @@ int specificator_feEgG(flags flag, va_list* arg, char* buf, char chr) {
   }
   int flag_nan_inf = 0;
   int flag_inf_valgd = 0;
-  if (number >= 1.189731e+4932L || number <= -1.189731e+4932L) {
+  if (number >= LDBL_MAX || number <= -LDBL_MAX) {
     flag_inf_valgd = 1;
   }
   if (isinf(number) || isnan(number) || flag_inf_valgd) {
@@ -471,7 +471,7 @@ void net_toch_v_float(char* mas_for_left, flags flag) {
   }
 }
 
-void cpy_to_str(char* tmp_mas_for_round, char* mas_for_left, int dlina,
+void cpy_to_str(const char* tmp_mas_for_round, char* mas_for_left, int dlina,
                 int* flag_round) {
   if (tmp_mas_for_round[0] == '0') {
     s21_strncpy(mas_for_left, tmp_mas_for_round + 1, dlina - 1);
@@ -543,7 +543,7 @@ int float_to_string(long double number, char* mas_for_left, flags* flag,
   return result;
 }
 
-void specificator_n(va_list* arg, char* buf) {
+void specificator_n(va_list* arg, const char* buf) {
   int dlina = s21_strlen(buf);
   int* ptr = va_arg(*arg, int*);
   *ptr = dlina;

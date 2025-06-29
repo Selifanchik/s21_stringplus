@@ -35,7 +35,7 @@ typedef struct {
   const char* specifiers;
 } FormatSpecGroup;
 
-typedef int (*ValidatorFunc)(const char*, FormatSpecifier*);
+typedef int (*ValidatorFunc)(const char*, const FormatSpecifier*);
 
 int handler_int(const char** ptr_str, FormatSpecifier* token, va_list* args,
                 DigitParser* parser);
@@ -72,7 +72,7 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
 
 int s21_isspace(int symbol);
 void skip_space(const char** ptr_str);
-int is_write_specifier(FormatSpecifier* token);
+int is_write_specifier(const FormatSpecifier* token);
 
 void init_token(FormatSpecifier* token);
 void init_parse_float(ParseFloat* number);
@@ -92,7 +92,7 @@ void to_nan_inf(long double* value, ParseFloat float_value);
 int is_valid_width(const int* width, short valid_width);
 int s21_strncmp_icase(const char* str1, const char* str2, int width);
 
-int valid_c(const char* ptr_str, FormatSpecifier* token);
-int valid_s(const char* ptr_str, FormatSpecifier* token);
+int valid_c(const char* ptr_str, const FormatSpecifier* token);
+int valid_s(const char* ptr_str, const FormatSpecifier* token);
 
 #endif
