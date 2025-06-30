@@ -53,7 +53,7 @@ START_TEST(test_strtok_only_delims) {
     token1 = s21_strtok(S21_NULL, delim);
     token2 = strtok(NULL, delim);
   }
-  //NULL
+  // NULL
   ck_assert_ptr_eq(token1, token2);
 }
 END_TEST
@@ -68,8 +68,8 @@ START_TEST(test_strtok_delim_no_match) {
   char *token2 = strtok(str2, delim);
 
   while (token1 != S21_NULL && token2 != NULL) {
-    //вся строка
-    ck_assert_str_eq(token1, token2);  
+    // вся строка
+    ck_assert_str_eq(token1, token2);
     token1 = s21_strtok(S21_NULL, delim);
     token2 = strtok(NULL, delim);
   }
@@ -145,7 +145,7 @@ START_TEST(test_strtok_empty_str) {
     token1 = s21_strtok(S21_NULL, delim);
     token2 = strtok(NULL, delim);
   }
-// NULL
+  // NULL
   ck_assert_ptr_eq(token1, token2);
 }
 END_TEST
