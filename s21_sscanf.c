@@ -65,10 +65,10 @@ int parse_value(const char* str, const char** ptr_str, FormatSpecifier* token,
       if (handler_unsigned_int(ptr_str, token, args, &parser)) flag_error = 1;
       break;
     case 'c':
-      if (handler_cs(ptr_str, token, args, valid_c)) flag_error = 1;
+      if (handler_cs(ptr_str, token, args, is_valid_c)) flag_error = 1;
       break;
     case 's':
-      if (handler_cs(ptr_str, token, args, valid_s)) flag_error = 1;
+      if (handler_cs(ptr_str, token, args, is_valid_s)) flag_error = 1;
       break;
     case 'u':
       base_dec(&parser);
