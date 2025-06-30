@@ -35,7 +35,7 @@ START_TEST(test_strpbrk_first_char_match) {
 }
 END_TEST
 
-// Совпадение в последнем сивволе
+// Совпадение в последнем символе
 START_TEST(test_strpbrk_last_char_match) {
   const char str1[10] = "xyz";
   const char str2[10] = "z";
@@ -43,7 +43,7 @@ START_TEST(test_strpbrk_last_char_match) {
 }
 END_TEST
 
-// Ищем нулевую строку
+// Ищем нулевую строку (null)
 START_TEST(test_strpbrk_null_str) {
   const char *str1 = "hello world";
   const char *str2 = "\0";
@@ -51,11 +51,11 @@ START_TEST(test_strpbrk_null_str) {
   char *res1 = s21_strpbrk(str1, str2);
   char *res2 = strpbrk(str1, str2);
 
-  ck_assert_ptr_eq(res1, res2);  // NULL
+  ck_assert_ptr_eq(res1, res2);
 }
 END_TEST
 
-// Ищем в пустой строке
+// Ищем в пустой строке (null)
 START_TEST(test_strpbrk_empty_str1) {
   const char *str1 = "";
   const char *str2 = "cf";
@@ -63,11 +63,11 @@ START_TEST(test_strpbrk_empty_str1) {
   char *res1 = s21_strpbrk(str1, str2);
   char *res2 = strpbrk(str1, str2);
 
-  ck_assert_ptr_eq(res1, res2);  // NULL
+  ck_assert_ptr_eq(res1, res2);
 }
 END_TEST
 
-// Ищем в пустой строке пустую строку
+// Ищем в пустой строке пустую строку (null)
 START_TEST(test_strpbrk_empty_str2) {
   const char *str1 = "";
   const char *str2 = "\0";
@@ -75,7 +75,7 @@ START_TEST(test_strpbrk_empty_str2) {
   char *res1 = s21_strpbrk(str1, str2);
   char *res2 = strpbrk(str1, str2);
 
-  ck_assert_ptr_eq(res1, res2);  // NULL
+  ck_assert_ptr_eq(res1, res2);
 }
 END_TEST
 
