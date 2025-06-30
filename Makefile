@@ -24,10 +24,10 @@ TEST_BIN = test_app
 # ===== Цель: all (полная сборка, запуск и отчёт покрытия) =====
 all: s21_string.a
 
-# ===== Цель: полная пересборка без покрытия =====
-re: clean $(LIB_NAME) test_build
+# ===== Полная пересборка без покрытия =====
+rebuild: clean $(LIB_NAME) test_build
 
-# ===== Цель: сборка библиотеки без покрытия =====
+# ===== Сборка библиотеки без покрытия =====
 s21_string.a: $(OBJ)
 	ar rcs $(LIB_NAME) $(OBJ)
 	ranlib $(LIB_NAME)
@@ -35,18 +35,18 @@ s21_string.a: $(OBJ)
 # ===== Цель: сборка тестового приложения без покрытия =====
 test_build: $(TEST_BIN)
 
-# ===== Цель: запуск тестов (предполагается, что собраны) =====
+# ===== Запуск тестов =====
 test: test_build
 	./$(TEST_BIN)
 
-# ===== Цель: сборка с покрытием (пересборка библиотеки и тестов с флагами покрытия) =====
+# ===== Сборка с покрытием (пересборка библиотеки и тестов с флагами покрытия) =====
 coverage_build:
 	$(MAKE) clean
 	$(MAKE) GCOV=1 $(LIB_NAME)
 	$(MAKE) GCOV=1 test_build
 
-# ===== Цель: генерация отчёта покрытия, зависит от сборки с покрытием и запуска тестов =====
-gcov_report: re coverage_build
+# ===== Генерация отчёта покрытия, зависит от сборки с покрытием и запуска тестов =====
+gcov_report: rebuild coverage_build
 	./$(TEST_BIN)
 	lcov --capture --directory . --output-file coverage.info --rc branch_coverage=1
 	lcov --remove coverage.info '*/$(TEST_DIR)/*' --output-file coverage_filtered.info --rc branch_coverage=1
@@ -56,21 +56,20 @@ gcov_report: re coverage_build
 $(TEST_BIN): $(TEST_OBJ) $(LIB_NAME)
 	$(CC) $(CFLAGS) -I. $(TEST_OBJ) $(LIB_NAME) -o $(TEST_BIN) $(CHECK_LIBS)
 
+# ===== Проверка на cppcheck =====
 cppcheck:
 	cppcheck --enable=all --inconclusive --std=c11 --quiet --force \
   --suppress=missingIncludeSystem $(SRC) $(TEST_DIR)/
 
-%_cpp:
-	cppcheck --enable=all --inconclusive --std=c11 --quiet --force \
-  --suppress=missingIncludeSystem "s21_$*.c"
-
-# ===== Цель: проверка на утечки памяти с помощью valgrind =====
+# ===== Проверка на утечки памяти с помощью valgrind =====
 valgrind: test_build
 	valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)
 
+# ===== Проверка на утечки памяти с помощью valgrind одной функции =====
 %_suite: test_build
 	CK_RUN_SUITE="$*" valgrind --tool=memcheck --leak-check=yes ./$(TEST_BIN)
 
+# ===== Запуск тестов для одной функции =====
 %_test: test_build
 	CK_RUN_SUITE="$*" ./$(TEST_BIN)
 
