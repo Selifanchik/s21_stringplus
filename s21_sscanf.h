@@ -19,10 +19,8 @@ typedef struct {
 } DigitParser;
 
 typedef struct {
+  long double value;
   int sign_float;
-  unsigned long int_part;
-  unsigned long fract_part;
-  int order_fract;
   int exp_part;
   int sign_exp;
   int order_exp;
@@ -84,7 +82,10 @@ int is_valid_exponent(const char* ptr_str, int width);
 
 int parse_float(const char** ptr_str, FormatSpecifier* token,
                 ParseFloat* float_value);
-long double to_float(ParseFloat float_value);
+int parse_mantissa(const char** ptr_str, int* width, long double* value);
+void base_to_real(const char** ptr_str, int* width, long double* value,
+                  int* flag_digit);
+long double to_float(const ParseFloat* float_value);
 long double s21_pow10(int order);
 int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value);
 void to_nan_inf(long double* value, ParseFloat float_value);
@@ -92,7 +93,7 @@ void to_nan_inf(long double* value, ParseFloat float_value);
 int is_valid_width(const int* width, short valid_width);
 int s21_strncmp_icase(const char* str1, const char* str2, int width);
 
-int valid_c(const char* ptr_str, const FormatSpecifier* token);
-int valid_s(const char* ptr_str, const FormatSpecifier* token);
+int is_valid_c(const char* ptr_str, const FormatSpecifier* token);
+int is_valid_s(const char* ptr_str, const FormatSpecifier* token);
 
 #endif

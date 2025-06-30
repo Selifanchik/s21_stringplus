@@ -1,5 +1,7 @@
 #include "s21_sscanf.h"
 
+#include <stdio.h>
+
 #include "s21_string.h"
 
 int s21_sscanf(const char* str, const char* format, ...) {
@@ -268,7 +270,7 @@ int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
     flag_error = 1;
   if (!flag_error && !token->suppress) {
     long double value = 0.0;
-    value = to_float(float_value);
+    value = to_float(&float_value);
     if (token->length == 'l') {
       double* dest = va_arg(*args, double*);
       *dest = (double)value;
@@ -347,7 +349,6 @@ void base_hex(DigitParser* parser) {
   parser->base = 16;
 }
 
-// rename struct DigitParser
 int base_to_dec(const char** ptr_str, const DigitParser* parser, int* width,
                 unsigned long* value) {
   int flag_parse_error = 1;
@@ -387,6 +388,15 @@ int s21_isspace(int symbol) {
   return result;
 }
 
+int is_valid_c(const char* ptr_str, const FormatSpecifier* token) {
+  return *ptr_str && token->width > 0;
+}
+
+int is_valid_s(const char* ptr_str, const FormatSpecifier* token) {
+  return *ptr_str && !s21_isspace(*ptr_str) &&
+         is_valid_width(&(token->width), 0);
+}
+
 int is_valid_width(const int* width, short valid_width) {
   return (*width == -1 || *width > valid_width);
 }
@@ -408,9 +418,7 @@ void init_token(FormatSpecifier* token) {
 
 void init_parse_float(ParseFloat* number) {
   number->sign_float = 1;
-  number->int_part = 0;
-  number->fract_part = 0;
-  number->order_fract = 0;
+  number->value = 0.0;
   number->exp_part = 0;
   number->sign_exp = 1;
   number->order_exp = 0;
@@ -467,25 +475,7 @@ int parse_float(const char** ptr_str, FormatSpecifier* token,
   DigitParser parser;
   base_dec(&parser);
   int flag_digit = 0;
-  if (s21_is_dec_digit(*ptr_str)) {
-    unsigned long temp_int_part = 0;
-    base_to_dec(ptr_str, &parser, &(token->width), &temp_int_part);
-    float_value->int_part = temp_int_part;
-    flag_digit = 1;
-  }
-  if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) &&
-      is_valid_width(&(token->width), 0)) {
-    (*ptr_str)++;
-    if (token->width > 0) token->width--;
-    const char* start_fract = *ptr_str;
-    if (s21_is_dec_digit(*ptr_str)) {
-      unsigned long temp_fract_part = 0;
-      base_to_dec(ptr_str, &parser, &(token->width), &temp_fract_part);
-      float_value->fract_part = temp_fract_part;
-      float_value->order_fract = *ptr_str - start_fract;
-      flag_digit = 1;
-    }
-  }
+  flag_digit = parse_mantissa(ptr_str, &(token->width), &(float_value->value));
   if (flag_digit) {
     if (is_valid_exponent(*ptr_str, token->width)) {
       float_value->exp_part = 1;
@@ -502,21 +492,42 @@ int parse_float(const char** ptr_str, FormatSpecifier* token,
   return flag_error;
 }
 
-long double to_float(ParseFloat float_value) {
+int parse_mantissa(const char** ptr_str, int* width, long double* value) {
+  long double number = 0.0;
+  int flag_digit = 0;
+  long double fraction = 1.0;
+  base_to_real(ptr_str, width, &number, &flag_digit);
+  if (**ptr_str == '.' && (flag_digit || s21_is_dec_digit(*ptr_str + 1)) &&
+      is_valid_width(width, 0)) {
+    (*ptr_str)++;
+    if (*width > 0) (*width)--;
+    const char* start_fract = *ptr_str;
+    base_to_real(ptr_str, width, &number, &flag_digit);
+    fraction = s21_pow10(*ptr_str - start_fract);
+  }
+  if (flag_digit) *value = number / fraction;
+  return flag_digit;
+}
+
+void base_to_real(const char** ptr_str, int* width, long double* value,
+                  int* flag_digit) {
+  while (s21_is_dec_digit(*ptr_str) && is_valid_width(width, 0)) {
+    *value = *value * 10.0 + (**ptr_str - '0');
+    (*ptr_str)++;
+    if (*width > 0) (*width)--;
+    *flag_digit = 1;
+  }
+}
+
+long double to_float(const ParseFloat* float_value) {
   long double value = 0.0;
-  if (float_value.s21_nan || float_value.s21_inf) {
-    to_nan_inf(&value, float_value);
+  if (float_value->s21_nan || float_value->s21_inf) {
+    to_nan_inf(&value, *float_value);
   } else {
-    long double fraction = 1.0;
-    for (int i = 0; i < float_value.order_fract; i++) {
-      fraction = s21_pow10(float_value.order_fract);
-    }
-    value = (long double)((float_value.int_part +
-                           ((long double)float_value.fract_part / fraction)) *
-                          float_value.sign_float);
-    if (float_value.exp_part) {
-      long double exp = s21_pow10(float_value.order_exp);
-      if (float_value.sign_exp > 0) {
+    value = float_value->value * float_value->sign_float;
+    if (float_value->exp_part) {
+      long double exp = s21_pow10(float_value->order_exp);
+      if (float_value->sign_exp > 0) {
         value *= exp;
       } else
         value /= exp;
@@ -578,19 +589,10 @@ int s21_strncmp_icase(const char* str1, const char* str2, int width) {
   int result = 2;
   char temp_compare[9] = {'\0'};
   s21_strncat(temp_compare, str1, width);
-  char* temp = (char*)s21_to_lower(temp_compare);
+  char* temp = s21_to_lower(temp_compare);
   if (temp) {
     result = s21_strncmp(temp, str2, width);
     free(temp);
   }
   return result;
-}
-
-int valid_c(const char* ptr_str, const FormatSpecifier* token) {
-  return *ptr_str && token->width > 0;
-}
-
-int valid_s(const char* ptr_str, const FormatSpecifier* token) {
-  return *ptr_str && !s21_isspace(*ptr_str) &&
-         is_valid_width(&(token->width), 0);
 }
