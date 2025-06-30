@@ -1,5 +1,5 @@
-#ifndef S21_STRERROR_C
-#define S21_STRERROR_C
+#ifndef S21_STRERROR_H
+#define S21_STRERROR_H
 
 #ifdef __linux__
 #define ERR_N 134

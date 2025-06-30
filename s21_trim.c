@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "s21_string.h"
 
 const char *s21_ltrim(const char *src, const char *trim_chars) {
@@ -43,7 +41,7 @@ void *s21_trim(const char *src, const char *trim_chars) {
       end = s21_rtrim(start, trim_chars);
     }
 
-    size_t len = end - start + 1;
+    s21_size_t len = end - start + 1;
     result = (char *)malloc(sizeof(char) * (len + 1));
     if (result) {
       s21_strncpy(result, start, len);

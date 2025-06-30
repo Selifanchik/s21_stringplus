@@ -667,7 +667,7 @@ int specificator_s(flags flag, va_list* arg, char* buf) {
   int error = 0;
 
   const char* tmp = va_arg(*arg, const char*);
-  if (tmp == NULL) {
+  if (tmp == S21_NULL) {
     string = s_null(string, &flag_null);
   } else {
     string = malloc(s21_strlen(tmp) + 1);
