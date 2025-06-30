@@ -80,15 +80,19 @@ START_TEST(test_insert_index_too_large) {
 }
 END_TEST
 
-// Строка srt NULL
+// Строка str NULL
 START_TEST(test_insert_str_null) {
   const char *src = "Hello";
   const char *str = S21_NULL;
+  const char *expected = "Hello";
 
-  char *res = (char *)s21_insert(src, str, 0);
+  char *res = (char *)s21_insert(src, str, 4);
 
-  ck_assert_ptr_null(res);
+  ck_assert_ptr_nonnull(res);
+  ck_assert_str_eq(res, expected);
+  free(res);
 }
+
 END_TEST
 
 // Строка src NULL
