@@ -65,9 +65,13 @@ END_TEST
 
 // trim_chars = null
 START_TEST(test_trim_null_trim_chars) {
-  const char *src = "test";
+  const char *src = " \r\ttest  \v ";
+  const char *expected = "test";
   char *res = (char *)s21_trim(src, S21_NULL);
-  ck_assert_ptr_null(res);
+
+  ck_assert_ptr_nonnull(res);
+  ck_assert_str_eq(res, expected);
+  free(res);
 }
 END_TEST
 
