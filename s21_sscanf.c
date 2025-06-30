@@ -260,9 +260,12 @@ int handler_cs(const char** ptr_str, FormatSpecifier* token, va_list* args,
 int handler_fegEG(const char** ptr_str, FormatSpecifier* token, va_list* args) {
   int flag_error = 0;
   ParseFloat float_value;
-  if (!s21_is_nan_inf(ptr_str, &(token->width), &float_value)) {
+  int flag_end = 0;
+  if ((flag_end = s21_is_nan_inf(ptr_str, &(token->width), &float_value)) ==
+      0) {
     flag_error = parse_float(ptr_str, token, &float_value);
-  }
+  } else if (flag_end == 2)
+    flag_error = 1;
   if (!flag_error && !token->suppress) {
     long double value = 0.0;
     value = to_float(float_value);
@@ -535,24 +538,28 @@ int s21_is_nan_inf(const char** ptr_str, int* width, ParseFloat* float_value) {
   init_parse_float(float_value);
   float_value->sign_float = s21_sign(ptr_str, width);
   if (is_valid_width(width, 2)) {
-    if (s21_strncmp_icase(*ptr_str, "nan", 3) == 0) {
+    int flag_err1 = 0, flag_err2 = 0, flag_err3 = 0;
+    if ((flag_err1 = s21_strncmp_icase(*ptr_str, "nan", 3)) == 0) {
       float_value->s21_nan = 1;
       if (*width > 2) *width -= 3;
       (*ptr_str) += 3;
       flag_nan_inf = 1;
     } else if ((*width == 3 ||
                 (*(*ptr_str + 3) != 'i' && *(*ptr_str + 3) != 'I')) &&
-               s21_strncmp_icase(*ptr_str, "inf", 3) == 0) {
+               (flag_err2 = s21_strncmp_icase(*ptr_str, "inf", 3)) == 0) {
       float_value->s21_inf = 1;
       if (*width > 2) *width -= 3;
       flag_nan_inf = 1;
       (*ptr_str) += 3;
     } else if (is_valid_width(width, 7) &&
-               s21_strncmp_icase(*ptr_str, "infinity", 8) == 0) {
+               (flag_err3 = s21_strncmp_icase(*ptr_str, "infinity", 8)) == 0) {
       float_value->s21_inf = 1;
       if (*width > 7) *width -= 8;
       flag_nan_inf = 1;
       (*ptr_str) += 8;
+    }
+    if (flag_err1 == 2 || flag_err2 == 2 || flag_err3 == 2) {
+      flag_nan_inf = 2;
     }
   }
   return flag_nan_inf;
@@ -568,7 +575,7 @@ void to_nan_inf(long double* value, ParseFloat float_value) {
 }
 
 int s21_strncmp_icase(const char* str1, const char* str2, int width) {
-  int result = 1;
+  int result = 2;
   char temp_compare[9] = {'\0'};
   s21_strncat(temp_compare, str1, width);
   char* temp = (char*)s21_to_lower(temp_compare);
