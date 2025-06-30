@@ -18,14 +18,14 @@ const char *s21_rtrim(const char *src, const char *trim_chars) {
 }
 
 void *s21_trim(const char *src, const char *trim_chars) {
-  if (src==S21_NULL) return S21_NULL;
+  if (src == S21_NULL) return S21_NULL;
 
   const char *trim_chars_for_null = " \t\n\r\v\f";
 
   const char *start;
-  if(trim_chars==S21_NULL){
+  if (trim_chars == S21_NULL) {
     start = s21_ltrim(src, trim_chars_for_null);
-  }else{
+  } else {
     start = s21_ltrim(src, trim_chars);
   }
 
@@ -37,11 +37,11 @@ void *s21_trim(const char *src, const char *trim_chars) {
     }
   } else {
     const char *end;
-    if(trim_chars==S21_NULL){
-    end = s21_rtrim(start, trim_chars_for_null);
-  }else{
-    end = s21_rtrim(start, trim_chars);
-  }
+    if (trim_chars == S21_NULL) {
+      end = s21_rtrim(start, trim_chars_for_null);
+    } else {
+      end = s21_rtrim(start, trim_chars);
+    }
 
     size_t len = end - start + 1;
     result = (char *)malloc(sizeof(char) * (len + 1));
